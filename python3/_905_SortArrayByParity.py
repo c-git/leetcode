@@ -3,11 +3,22 @@ from typing import List
 
 class Solution:
     def sortArrayByParity(self, nums: List[int]) -> List[int]:
-        even = []
-        odd = []
-        for num in nums:
-            if num % 2 == 0:
-                even.append(num)
-            else:
-                odd.append(num)
-        return even + odd
+        front = 0
+        back = len(nums) - 1
+        while front < back:
+            # LI: indices below front are correct and indices above
+            # back are correct
+
+            # Find next out of place num at front
+            while front < back and nums[front] % 2 == 0:
+                front += 1
+
+            # Find next out of place num at back
+            while front < back and nums[back] % 2 != 0:
+                back -= 1
+
+            # Swap
+            nums[front], nums[back] = nums[back], nums[front]
+            front += 1
+            back -= 1
+        return nums
