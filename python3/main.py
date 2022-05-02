@@ -8,9 +8,13 @@ def main():
     ]
     solution = Solution()
     for example in examples:
-        input_, output_ = example
-        assert solution.sortArrayByParity(input_) == output_, \
-            f'in: {input_}\nout:{output_}'
+        input_, exp = example
+        output_ = solution.sortArrayByParity(input_)
+        assert exp == output_, \
+            f'\n' \
+            f'inp: {input_}\n' \
+            f'exp: {exp}\n' \
+            f'out: {output_}'
 
 
 if __name__ == '__main__':
