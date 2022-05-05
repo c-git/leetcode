@@ -1,4 +1,4 @@
-from typing import Optional, Tuple
+from typing import List, Optional, Tuple
 
 
 # Definition for singly-linked list.
@@ -14,6 +14,16 @@ class ListNode:
 
     def __repr__(self):
         return f'{self.val} -> {self.next}'
+
+
+def convertToListNodes(l_in: List[int]) -> ListNode:
+    head = ListNode(l_in[0])
+    last = head
+    for i in range(1, len(l_in)):
+        next_ = ListNode(l_in[i])
+        last.next = next_
+        last = next_
+    return head
 
 
 class Solution:

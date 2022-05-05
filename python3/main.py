@@ -1,16 +1,4 @@
-from typing import List
-
-from python3._2_AddTwoNumbers import ListNode, Solution
-
-
-def convertToListNodes(l_in: List[int]) -> ListNode:
-    head = ListNode(l_in[0])
-    last = head
-    for i in range(1, len(l_in)):
-        next_ = ListNode(l_in[i])
-        last.next = next_
-        last = next_
-    return head
+from python3._2_AddTwoNumbers import Solution, convertToListNodes
 
 
 def main():
