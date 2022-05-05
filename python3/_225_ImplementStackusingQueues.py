@@ -1,11 +1,10 @@
 class MyStack:
 
     def __init__(self):
-        self.queue1 = MyQueue()
-        self.queue2 = MyQueue()
+        self.queue = MyQueue()
 
     def push(self, x: int) -> None:
-        self.queue1.push(x)
+        self.queue.push(x)
 
     def _get_top(self, keep: bool) -> int:
         """
@@ -14,13 +13,13 @@ class MyStack:
         stack
         :return: the top value on the stack
         """
-        last = self.queue1.pop()
-        while not self.queue1.is_empty():
-            self.queue2.push(last)
-            last = self.queue1.pop()
+        size = self.queue.size()
+        last = self.queue.pop()
+        for i in range(size - 1):
+            self.queue.push(last)
+            last = self.queue.pop()
         if keep:
-            self.queue2.push(last)
-        self.queue1, self.queue2 = self.queue2, self.queue1
+            self.queue.push(last)
         return last
 
     def pop(self) -> int:
@@ -30,7 +29,7 @@ class MyStack:
         return self._get_top(True)
 
     def empty(self) -> bool:
-        return self.queue1.is_empty()
+        return self.queue.is_empty()
 
 
 # Your MyStack object will be instantiated and called as such:
