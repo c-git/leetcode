@@ -22,3 +22,21 @@ class Solution:
         elif len(odd) > len(even):
             result.append(odd[-1])
         return result
+
+
+def tester():
+    print("2164 start")
+    examples = [
+        ([4, 1, 2, 3], [2, 3, 4, 1]),
+        ([2, 1], [2, 1]),
+    ]
+    solution = Solution()
+    for example in examples:
+        input_, exp = example
+        output_ = solution.sortEvenOdd(input_)
+        assert exp == output_, \
+            f'\n' \
+            f'inp: {input_}\n' \
+            f'exp: {exp}\n' \
+            f'out: {output_}'
+    print("2164 complete")

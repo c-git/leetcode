@@ -51,3 +51,26 @@ class Solution:
             if l2 is not None:
                 l2 = l2.next
         return head
+
+
+def tester():
+    print("2 start")
+    examples = [
+        (([2, 4, 3], [5, 6, 4]), [7, 0, 8]),
+        (([0], [0]), [0]),
+        (([9, 9, 9, 9, 9, 9, 9], [9, 9, 9, 9]), [8, 9, 9, 9, 0, 0, 0, 1]),
+    ]
+    solution = Solution()
+    for example in examples:
+        input_, exp = example
+        l1, l2 = input_
+        l1 = convertToListNodes(l1)
+        l2 = convertToListNodes(l2)
+        exp = convertToListNodes(exp)
+        output_ = solution.addTwoNumbers(l1, l2)
+        assert exp == output_, \
+            f'\n' \
+            f'inp: {input_}\n' \
+            f'exp: {exp}\n' \
+            f'out: {output_}'
+    print("2 complete")

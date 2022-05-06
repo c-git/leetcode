@@ -22,3 +22,38 @@ class Solution:
             front += 1
             back -= 1
         return nums
+
+
+def tester():
+    print("905 start")
+    examples = [
+        ([3, 1, 2, 4], [2, 4, 3, 1]),
+        ([0], [0]),
+    ]
+    solution = Solution()
+    for example in examples:
+        input_, exp = example
+        output_ = solution.sortArrayByParity(input_)
+        assert validator(output_), \
+            f'\n' \
+            f'inp: {input_}\n' \
+            f'exp: {exp}\n' \
+            f'out: {output_}'
+    print("905 complete")
+
+
+def validator(in_l: List[int]) -> bool:
+    """
+    Check that no even numbers follow odd numbers
+    :param in_l: input list
+    :return: True if in_l meets problem constraints
+    """
+    is_last_even = True
+    for val in in_l:
+        if val % 2 == 0:
+            if not is_last_even:
+                return False
+        else:
+            if is_last_even:
+                is_last_even = False
+    return True

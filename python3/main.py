@@ -1,8 +1,6 @@
-from python3._225_ImplementStackusingQueues import tester
-
-
 def main():
-    tester()
+    # tester()
+    pass
 
 
 if __name__ == '__main__':
