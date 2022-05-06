@@ -1,4 +1,9 @@
 class Solution:
+    def __init__(self):
+        import math
+        self.min_val = -math.pow(2, 31)
+        self.max_val = math.pow(2, 31) - 1
+
     def reverse(self, x: int) -> int:
         is_negative = x < 0
         if is_negative:
@@ -10,7 +15,10 @@ class Solution:
             x = x // 10
         if is_negative:
             result *= -1
-        return result
+        if self.min_val <= result <= self.max_val:
+            return result
+        else:
+            return 0
 
 
 def tester():
@@ -19,6 +27,7 @@ def tester():
         (123, 321),
         (-123, -321),
         (120, 21),
+        (1534236469, 0)
     ]
     solution = Solution()
     for example in examples:
