@@ -60,7 +60,8 @@ class NestedInteger:
 class NestedIterator:
     def __init__(self, nestedList: List[NestedInteger]):
         self.next_iter = self.next_gen(nestedList)
-        self.next_val: Optional[int] = next(self.next_iter)
+        self.next_val: Optional[int] = None
+        self.update_next_val()
 
     def next_gen(self, nestedList: List[NestedInteger]):
         if isinstance(nestedList, NestedInteger):
@@ -79,14 +80,17 @@ class NestedIterator:
     def next(self) -> int:
         assert self.next_val is not None
         result = self.next_val
-        try:
-            self.next_val = next(self.next_iter)
-        except StopIteration:
-            self.next_val = None
+        self.update_next_val()
         return result
 
     def hasNext(self) -> bool:
         return self.next_val is not None
+
+    def update_next_val(self):
+        try:
+            self.next_val = next(self.next_iter)
+        except StopIteration:
+            self.next_val = None
 
 
 # Your NestedIterator object will be instantiated and called as such:
@@ -106,6 +110,7 @@ def tester():
     examples = [
         ([[1, 1], 2, [1, 1]], [1, 1, 2, 1, 1]),
         ([1, [4, [6]]], [1, 4, 6]),
+        ([[]], []),
     ]
     for example in examples:
         input_, exp = example
