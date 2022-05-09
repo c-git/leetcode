@@ -1,5 +1,7 @@
 from typing import List
 
+from python3.helper import Eg, tester_helper
+
 
 class Solution:
     def twoSum(self, nums: List[int], target: int) -> List[int]:
@@ -14,15 +16,9 @@ class Solution:
 
 
 def tester():
-    print("1 start")
     examples = [
-        (([2, 7, 11, 15], 9), [0, 1]),
-        (([3, 2, 4], 6), [1, 2]),
-        (([3, 3], 6), [0, 1]),
+        Eg(([2, 7, 11, 15], 9), [0, 1]),
+        Eg(([3, 2, 4], 6), [1, 2]),
+        Eg(([3, 3], 6), [0, 1]),
     ]
-    solution = Solution()
-    for example in examples:
-        input_, exp = example
-        output_ = solution.twoSum(*input_)
-        assert exp == output_, f'\ninp: {input_}\nexp: {exp}\nout: {output_}'
-    print("1 complete")
+    tester_helper(1, examples, Solution().twoSum)

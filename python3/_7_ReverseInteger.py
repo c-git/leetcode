@@ -1,3 +1,6 @@
+from python3.helper import Eg, tester_helper
+
+
 class Solution:
     def __init__(self):
         import math
@@ -22,16 +25,10 @@ class Solution:
 
 
 def tester():
-    print("7 start")
     examples = [
-        (123, 321),
-        (-123, -321),
-        (120, 21),
-        (1534236469, 0)
+        Eg(123, 321),
+        Eg(-123, -321),
+        Eg(120, 21),
+        Eg(1534236469, 0)
     ]
-    solution = Solution()
-    for example in examples:
-        input_, exp = example
-        output_ = solution.reverse(input_)
-        assert exp == output_, f'\ninp: {input_}\nexp: {exp}\nout: {output_}'
-    print("7 complete")
+    tester_helper(7, examples, Solution().reverse)

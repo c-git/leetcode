@@ -1,5 +1,7 @@
 from typing import List
 
+from python3.helper import Eg, tester_helper
+
 
 class Solution:
     def sortArrayByParity(self, nums: List[int]) -> List[int]:
@@ -27,29 +29,21 @@ class Solution:
 def tester():
     print("905 start")
     examples = [
-        ([3, 1, 2, 4], [2, 4, 3, 1]),
-        ([0], [0]),
+        Eg([3, 1, 2, 4], [2, 4, 3, 1], validator),
+        Eg([0], [0], validator),
     ]
-    solution = Solution()
-    for example in examples:
-        input_, exp = example
-        output_ = solution.sortArrayByParity(input_)
-        assert validator(output_), \
-            f'\n' \
-            f'inp: {input_}\n' \
-            f'exp: {exp}\n' \
-            f'out: {output_}'
-    print("905 complete")
+    tester_helper(905, examples, Solution().sortArrayByParity)
 
 
-def validator(in_l: List[int]) -> bool:
+def validator(_, out_: List[int]) -> bool:
     """
     Check that no even numbers follow odd numbers
-    :param in_l: input list
+    :param _: Input to example but not needed for validation
+    :param out_: Output to ve validated
     :return: True if in_l meets problem constraints
     """
     is_last_even = True
-    for val in in_l:
+    for val in out_:
         if val % 2 == 0:
             if not is_last_even:
                 return False

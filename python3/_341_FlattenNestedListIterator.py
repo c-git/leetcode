@@ -1,5 +1,7 @@
 from typing import List, Optional, Union
 
+from python3.helper import Eg, tester_helper
+
 """
 This is the interface that allows for creating nested lists.
 You should not implement it, or speculate about its implementation
@@ -106,14 +108,9 @@ def flatten(nestedList):
 
 
 def tester():
-    print("341 start")
     examples = [
-        ([[1, 1], 2, [1, 1]], [1, 1, 2, 1, 1]),
-        ([1, [4, [6]]], [1, 4, 6]),
-        ([[]], []),
+        Eg([[1, 1], 2, [1, 1]], [1, 1, 2, 1, 1]),
+        Eg([1, [4, [6]]], [1, 4, 6]),
+        Eg([[]], []),
     ]
-    for example in examples:
-        input_, exp = example
-        output_ = flatten(input_)
-        assert exp == output_, f'\ninp: {input_}\nexp: {exp}\nout: {output_}'
-    print("341 complete")
+    tester_helper(341, examples, flatten)

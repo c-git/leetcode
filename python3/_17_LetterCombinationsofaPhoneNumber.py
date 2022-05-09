@@ -1,6 +1,8 @@
 from collections.abc import Iterable
 from typing import List, Tuple
 
+from python3.helper import Eg, tester_helper
+
 
 class Solution:
     _mapping = None
@@ -43,20 +45,14 @@ class Solution:
 
 
 def tester():
-    print("17 start")
     examples = [
-        ("23", ["ad", "ae", "af", "bd", "be", "bf", "cd", "ce", "cf"]),
-        ("234",
-         ["adg", "adh", "adi", "aeg", "aeh", "aei", "afg", "afh", "afi", "bdg",
-          "bdh", "bdi", "beg", "beh", "bei", "bfg", "bfh", "bfi", "cdg", "cdh",
-          "cdi", "ceg", "ceh", "cei", "cfg", "cfh", "cfi", ]),
-        ("", []),
-        ("2", ["a", "b", "c"]),
-        ("7", ["p", "q", "r", "s"]),
+        Eg("23", ["ad", "ae", "af", "bd", "be", "bf", "cd", "ce", "cf"]),
+        Eg("234",
+           ["adg", "adh", "adi", "aeg", "aeh", "aei", "afg", "afh", "afi",
+            "bdg", "bdh", "bdi", "beg", "beh", "bei", "bfg", "bfh", "bfi",
+            "cdg", "cdh", "cdi", "ceg", "ceh", "cei", "cfg", "cfh", "cfi", ]),
+        Eg("", []),
+        Eg("2", ["a", "b", "c"]),
+        Eg("7", ["p", "q", "r", "s"]),
     ]
-    solution = Solution()
-    for example in examples:
-        input_, exp = example
-        output_ = solution.letterCombinations(input_)
-        assert exp == output_, f'\ninp: {input_}\nexp: {exp}\nout: {output_}'
-    print("17 complete")
+    tester_helper(17, examples, Solution().letterCombinations)
