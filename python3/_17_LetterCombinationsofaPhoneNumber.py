@@ -14,10 +14,11 @@ class Solution:
             for digit in range(2, 10):
                 chars = []
                 cls._mapping[digit] = chars
-                for i in range(3):
+                char_count = 4 if digit == 7 or digit == 9 else 3
+                for _ in range(char_count):
                     chars.append(chr(char_ord))
                     char_ord += 1
-            cls._mapping[9].append(chr(char_ord))  # z
+            assert char_ord == 123  # after z
         return cls._mapping
 
     def letterCombinations(self, digits: str) -> List[str]:
@@ -51,6 +52,7 @@ def tester():
           "cdi", "ceg", "ceh", "cei", "cfg", "cfh", "cfi", ]),
         ("", []),
         ("2", ["a", "b", "c"]),
+        ("7", ["p", "q", "r", "s"]),
     ]
     solution = Solution()
     for example in examples:
