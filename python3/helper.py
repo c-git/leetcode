@@ -1,3 +1,4 @@
+from timeit import timeit
 from typing import Any, Callable, List, Tuple, Union
 
 from opylib.log import setup_log
@@ -27,12 +28,22 @@ class Eg:  # Example
         return self.input_, self.expected, self.evaluator
 
 
-def tester_helper(prob_num: int, examples: List[Eg], func: Callable):
-    setup_log(only_std_out=True, fmt_std_out='%(message)s')
-    sw = StopWatch(f'Problem {prob_num}')
+def tester_helper(prob_num: int, examples: List[Eg], func: Callable,
+                  should_test_timing: bool = False):
+    if should_test_timing:
+        test_vars = {
+            'examples': examples, 'func': func, 'test_func': _tester_body}
+        print(timeit('test_func(examples, func)', globals=test_vars))
+    else:
+        setup_log(only_std_out=True, fmt_std_out='%(message)s')
+        sw = StopWatch(f'Problem {prob_num}')
+        _tester_body(examples, func)
+        sw.end()
+
+
+def _tester_body(examples: List[Eg], func: Callable):
     for example in examples:
         in_, exp, evaluator = example.as_tuple
         out_ = func(*in_)
         result = exp == out_ if evaluator is None else evaluator(in_, out_)
         assert result, f'\ninp: {in_}\nexp: {exp}\nout: {out_}'
-    sw.end()
