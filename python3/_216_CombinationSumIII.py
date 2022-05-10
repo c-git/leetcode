@@ -1,32 +1,57 @@
-from typing import List
+from typing import List, Tuple
 
 from python3.helper import Eg, tester_helper
 
 
 class Solution:
-    def solve(self, k, n, low_num) -> List[List[int]]:
-        if n <= 0:
-            return []
-        if low_num > 9:
-            return []
+    def solve(self, k, n, low_num) -> Tuple[List[List[int]], bool]:
+        """
+        Solves the instance passed recursively
+        :param k: the number of digits to be added to the solution
+        :param n: the target number to solve for
+        :param low_num: smallest number that can be used as part of the solution
+        :return: (Solution, should_keep_trying) - The possible solutions and
+          if no solutions were found should_keep_trying says if it was
+          because the target was too small, this allows the caller to know
+          that they should continue to look for solutions with bigger
+          starting values (meaning a smaller n passed to later instances)
+        """
         if k == 1:
-            if low_num <= n <= 9:
-                return [[n]]
+            # Base case, return trivial solution
+            if low_num <= n < 10:
+                return [[n]], False
+            elif n > 9:
+                # Target above possible range, but might be possible with for n
+                return [], True
             else:
-                return []
+                # n - less than low_num, smaller n would also not be possible
+                return [], False
+        if n <= 0:
+            # Target was too small we over shot the target
+            return [], False
+        if low_num > 9:
+            # The digit that would have gone in this position has gotten too big
+            return [], False
+        if sum(range(9 - k, 10, )) < n:
+            # Max value achievable is too small no solution possible,
+            # but might be possible with for n
+            return [], True
+        if sum(range(low_num, low_num + k)) > n:
+            # Min value achievable is already larger than n
+            return [], False
         result = []
         for num in range(low_num, 10):
             candidate = [num]
-            friend_solutions = self.solve(k - 1, n - num, num + 1)
-            if len(friend_solutions) == 0:
+            friend_sol, should_keep_try = self.solve(k - 1, n - num, num + 1)
+            if len(friend_sol) == 0 and not should_keep_try:
                 break  # Already no solutions left no point for more iterations
-            for sol in friend_solutions:
+            for sol in friend_sol:
                 solution = candidate + sol
                 result.append(solution)
-        return result
+        return result, False
 
     def combinationSum3(self, k: int, n: int) -> List[List[int]]:
-        return self.solve(k, n, 1)
+        return self.solve(k, n, 1)[0]
 
 
 def tester():
