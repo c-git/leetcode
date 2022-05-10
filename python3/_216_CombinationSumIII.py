@@ -32,7 +32,7 @@ class Solution:
         if low_num > 9:
             # The digit that would have gone in this position has gotten too big
             return [], False
-        if sum(range(9 - k, 10, )) < n:
+        if sum(range(9 - k, 10)) < n:
             # Max value achievable is too small no solution possible,
             # but might be possible with for n
             return [], True
@@ -48,7 +48,7 @@ class Solution:
             for sol in friend_sol:
                 solution = candidate + sol
                 result.append(solution)
-        return result, False
+        return result, True
 
     def combinationSum3(self, k: int, n: int) -> List[List[int]]:
         return self.solve(k, n, 1)[0]
@@ -62,5 +62,8 @@ def tester():
         Eg((3, 15),
            [[1, 5, 9], [1, 6, 8], [2, 4, 9], [2, 5, 8], [2, 6, 7], [3, 4, 8],
             [3, 5, 7], [4, 5, 6]]),
+        Eg((4, 24),
+           [[1, 6, 8, 9], [2, 5, 8, 9], [2, 6, 7, 9], [3, 4, 8, 9],
+            [3, 5, 7, 9], [3, 6, 7, 8], [4, 5, 6, 9], [4, 5, 7, 8]]),
     ]
     tester_helper(216, examples, Solution().combinationSum3, True)
