@@ -2,20 +2,17 @@ from python3.helper import Eg, tester_helper
 
 
 class Solution:
+    def solve(self, n, letters) -> int:
+        result = 0
+        if n == 1:
+            return len(letters)
+        for i in range(len(letters)):
+            result += self.solve(n - 1, letters[i:])
+        return result
+
     def countVowelStrings(self, n: int) -> int:
         vowels = 'aeiou'
-        result = 0
-        stack = ['']
-        while len(stack) > 0:
-            prefix = stack.pop()
-            for c in vowels:
-                if len(prefix) == 0 or prefix[-1] <= c:
-                    word = prefix + c
-                    if len(word) == n:
-                        result += 1
-                    else:
-                        stack.append(word)
-        return result
+        return self.solve(n, vowels)
 
 
 def tester():
