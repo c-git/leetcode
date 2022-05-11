@@ -2,17 +2,17 @@ from python3.helper import Eg, tester_helper
 
 
 class Solution:
-    def solve(self, n, letters) -> int:
+    def solve(self, n, letter_count) -> int:
         result = 0
         if n == 1:
-            return len(letters)
-        for i in range(len(letters)):
-            result += self.solve(n - 1, letters[i:])
+            return letter_count
+        for i in range(letter_count):
+            result += self.solve(n - 1, letter_count - i)
         return result
 
     def countVowelStrings(self, n: int) -> int:
-        vowels = 'aeiou'
-        return self.solve(n, vowels)
+        vowels = 5
+        return self.solve(n, 5)
 
 
 def tester():
