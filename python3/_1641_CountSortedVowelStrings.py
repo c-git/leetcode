@@ -1,18 +1,24 @@
+import numpy as np
+
 from python3.helper import Eg, tester_helper
 
 
 class Solution:
     def countVowelStrings(self, n: int) -> int:
-        stack = [(n, 5)]
-        result = 0
-        while len(stack) > 0:
-            size, letter_count = stack.pop()
-            if size == 1:
-                result += letter_count
-            else:
-                for i in range(letter_count):
-                    stack.append((size - 1, letter_count - i))
-        return result
+        table = np.zeros((n + 1, 6))
+
+        # Base Case
+        for i in range(6):
+            table[1, i] = i
+
+        # General Case
+        for size in range(2, n + 1):
+            for letter_count in range(1, 5 + 1):
+                first_char_fixed_as_curr = table[size - 1, letter_count]
+                without_curr_char = table[size, letter_count - 1]
+                table[size, letter_count] = (first_char_fixed_as_curr +
+                                             without_curr_char)
+        return int(table[n, 5])
 
 
 def tester():
