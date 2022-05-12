@@ -45,6 +45,24 @@ def tester_helper(prob_num: int, examples: List[Eg], func: Callable,
         sw.end()
 
 
+def evaluator_any_order_list(_, out_: List[Any], exp: List[Any]) -> bool:
+    if len(out_) != len(exp):
+        return False
+    out_ = copy(out_)
+
+    for i in range(len(exp)):
+        target = exp[i]
+        for j, val in enumerate(out_):
+            if val == target:
+                out_.pop(j)
+                break
+        else:
+            # Not found in out_
+            return False
+    assert len(out_) == 0
+    return True
+
+
 def _tester_body(examples: List[Eg], func: Callable):
     for example in examples:
         in_, exp, evaluator = example.as_tuple
