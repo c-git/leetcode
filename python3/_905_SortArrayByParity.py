@@ -27,7 +27,6 @@ class Solution:
 
 
 def tester():
-    print("905 start")
     examples = [
         Eg([3, 1, 2, 4], [2, 4, 3, 1], validator),
         Eg([0], [0], validator),
@@ -35,12 +34,13 @@ def tester():
     tester_helper(905, examples, Solution().sortArrayByParity)
 
 
-def validator(_, out_: List[int]) -> bool:
+def validator(_, out_: List[int], __) -> bool:
     """
     Check that no even numbers follow odd numbers
     :param _: Input to example but not needed for validation
     :param out_: Output to ve validated
-    :return: True if in_l meets problem constraints
+    :param __: Expected output but not needed for validation
+    :return: True if out_ meets problem constraints
     """
     is_last_even = True
     for val in out_:

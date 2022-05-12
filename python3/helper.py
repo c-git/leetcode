@@ -1,3 +1,4 @@
+from copy import copy
 from timeit import timeit
 from typing import Any, Callable, List, Tuple, Union
 
@@ -15,9 +16,12 @@ class Eg:  # Example
         :param expected: Expected answer for test case
         :param evaluator: If not None then it is used to test the output
           instead of comparing it to "expected" but expected is still displayed
-          as in the error  message as an example solution NOTE: Should take 2
-          arguments the input as a tuple and the output
-          and should return a boolean
+          as in the error  message as an example solution
+          NOTE: signature evaluator(in_:Tuple[Any], out_, exp) -> bool
+          where
+           in_ is the original input in a tuple (unless it was already a tuple
+           out_ is the result from running your solution
+           exp is the provided solution from LeetCode
         """
         self.input_ = input_ if isinstance(input_, Tuple) else (input_,)
         self.expected = expected
@@ -45,5 +49,5 @@ def _tester_body(examples: List[Eg], func: Callable):
     for example in examples:
         in_, exp, evaluator = example.as_tuple
         out_ = func(*in_)
-        result = exp == out_ if evaluator is None else evaluator(in_, out_)
+        result = exp == out_ if evaluator is None else evaluator(in_, out_, exp)
         assert result, f'\ninp: {in_}\nexp: {exp}\nout: {out_}'
