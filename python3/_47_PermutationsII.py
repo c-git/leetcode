@@ -8,8 +8,8 @@ class Solution:
     def permuteUnique(self, nums: List[int]) -> List[List[int]]:
         result = set()
         for x in permutations(nums):
-            result.add(''.join([str(i) for i in x]))
-        return [[int(i) for i in x] for x in result]
+            result.add(','.join([str(i) for i in x]))
+        return [[int(i) for i in x.split(',')] for x in result]
 
 
 def tester():
