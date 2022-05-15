@@ -79,19 +79,21 @@ def int_list_to_tree(lst: List[Optional[int]], node_cls: Callable):
             return node_cls(val)
 
     root = None if len(lst) == 0 else int_to_node(lst.pop(0))
-    queue: List[Optional[node_cls]] = [root]
+    if root is None:
+        return None
+    queue: List[node_cls] = [root]
     while len(queue) > 0 and len(lst) > 0:
         node = queue.pop(0)
-        if node is None:
-            # None's children must also be None
-            assert lst.pop(0) is None
-            assert lst.pop(0) is None
-            queue += [None] * 2
-        else:
-            child = int_to_node(lst.pop(0))
+
+        # Get left child
+        child = int_to_node(lst.pop(0))
+        if child is not None:
             node.left = child
             queue.append(child)
-            child = int_to_node(lst.pop(0))
+
+        # Get right child
+        child = int_to_node(lst.pop(0))
+        if child is not None:
             node.right = child
             queue.append(child)
     return root
