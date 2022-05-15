@@ -39,4 +39,4 @@ def tester():
         Eg(([[1, 2, 1]], 2, 1), 1),
         Eg(([[1, 2, 1]], 2, 2), -1),
     ]
-    tester_helper(1641, examples, Solution().networkDelayTime)
+    tester_helper(743, examples, Solution().networkDelayTime)
