@@ -1,5 +1,5 @@
 # Definition for a Node.
-from typing import List, Union
+from typing import List
 
 from python3.helper import Eg, int_list_to_tree, tester_helper
 
@@ -41,30 +41,30 @@ class Solution:
         return root
 
 
-def convertOut(root: Node) -> List[Union[int, str]]:
-    root = Solution().connect(root)
-    result = []
+def convertOut(_, out_, exp) -> bool:
+    root = out_
+    conv_out = []
     while root is not None:
         # Navigate down
         leftmost_child = None
         while True:
             # Navigate across
             if root is None:
-                result.append('#')
+                conv_out.append('#')
                 break
             if leftmost_child is None:
                 leftmost_child = root.left if root.left is not None else \
                     root.right
-            result.append(root.val)
+            conv_out.append(root.val)
             root = root.next
         root = leftmost_child
-    return result
+    return conv_out == exp
 
 
 def tester():
     examples = [
         Eg(int_list_to_tree([1, 2, 3, 4, 5, None, 7], Node),
-           [1, '#', 2, 3, '#', 4, 5, 7, '#']),
-        Eg(int_list_to_tree([], Node), []),
+           [1, '#', 2, 3, '#', 4, 5, 7, '#'], convertOut),
+        Eg(int_list_to_tree([], Node), [], convertOut),
     ]
-    tester_helper(117, examples, convertOut)
+    tester_helper(117, examples, Solution().connect)
