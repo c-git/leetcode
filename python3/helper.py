@@ -1,6 +1,6 @@
 from copy import copy
 from timeit import timeit
-from typing import Any, Callable, List, Tuple, Union
+from typing import Any, Callable, List, Optional, Tuple, Union
 
 from opylib.log import setup_log
 from opylib.stopwatch import StopWatch
@@ -61,6 +61,40 @@ def evaluator_any_order_list(_, out_: List[Any], exp: List[Any]) -> bool:
             return False
     assert len(out_) == 0
     return True
+
+
+def int_list_to_tree(lst: List[Optional[int]], node_cls: Callable):
+    """
+    Takes a list of integers (or None) and returns a tree (or None if None rec)
+    :param lst: List of integers to be converted to a tree
+    :param node_cls: The class to use to construct the nodes
+    :return: Tree representation of the list passed with nodes created using
+      node_cls
+    """
+
+    def int_to_node(val: Optional[int]) -> Optional[node_cls]:
+        if val is None:
+            return None
+        else:
+            return node_cls(val)
+
+    root = None if len(lst) == 0 else int_to_node(lst.pop(0))
+    queue: List[Optional[node_cls]] = [root]
+    while len(queue) > 0 and len(lst) > 0:
+        node = queue.pop(0)
+        if node is None:
+            # None's children must also be None
+            assert lst.pop(0) is None
+            assert lst.pop(0) is None
+            queue += [None] * 2
+        else:
+            child = int_to_node(lst.pop(0))
+            node.left = child
+            queue.append(child)
+            child = int_to_node(lst.pop(0))
+            node.right = child
+            queue.append(child)
+    return root
 
 
 def _tester_body(examples: List[Eg], func: Callable):

@@ -1,7 +1,7 @@
 # Definition for a Node.
-from typing import List, Optional, Union
+from typing import List, Union
 
-from python3.helper import Eg, tester_helper
+from python3.helper import Eg, int_list_to_tree, tester_helper
 
 
 class Node:
@@ -41,32 +41,6 @@ class Solution:
         return root
 
 
-def convertIn(lst: List[Optional[int]]) -> Optional[Node]:
-    def int_to_node(val: Optional[int]) -> Optional[Node]:
-        if val is None:
-            return None
-        else:
-            return Node(val)
-
-    root = None if len(lst) == 0 else int_to_node(lst.pop(0))
-    queue: List[Optional[Node]] = [root]
-    while len(queue) > 0 and len(lst) > 0:
-        node = queue.pop(0)
-        if node is None:
-            # None's children must also be None
-            assert lst.pop(0) is None
-            assert lst.pop(0) is None
-            queue += [None] * 2
-        else:
-            child = int_to_node(lst.pop(0))
-            node.left = child
-            queue.append(child)
-            child = int_to_node(lst.pop(0))
-            node.right = child
-            queue.append(child)
-    return root
-
-
 def convertOut(root: Node) -> List[Union[int, str]]:
     root = Solution().connect(root)
     result = []
@@ -89,8 +63,8 @@ def convertOut(root: Node) -> List[Union[int, str]]:
 
 def tester():
     examples = [
-        Eg(convertIn([1, 2, 3, 4, 5, None, 7]),
+        Eg(int_list_to_tree([1, 2, 3, 4, 5, None, 7], Node),
            [1, '#', 2, 3, '#', 4, 5, 7, '#']),
-        Eg(convertIn([]), []),
+        Eg(int_list_to_tree([], Node), []),
     ]
     tester_helper(117, examples, convertOut)
