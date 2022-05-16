@@ -19,8 +19,8 @@ class Solution:
             a_max = min(n - 1, x + 1)
             b_min = max(0, y - 1)
             b_max = min(n - 1, y + 1)
-            for a in (a_min, a_max):
-                for b in (b_min, b_max):
+            for a in range(a_min, a_max + 1):
+                for b in range(b_min, b_max + 1):
                     if not grid[a][b] and my_grid[a][b] == -1:
                         my_grid[a][b] = my_grid[x][y] + 1
                         my_list.append((a, b))
@@ -32,5 +32,7 @@ def tester():
         Eg([[0, 1], [1, 0]], 2),
         Eg([[0, 0, 0], [1, 1, 0], [1, 1, 0]], 4),
         Eg([[1, 0, 0], [1, 1, 0], [1, 1, 0]], -1),
+        Eg([[0, 1, 1, 0, 0, 0], [0, 1, 0, 1, 1, 0], [0, 1, 1, 0, 1, 0],
+            [0, 0, 0, 1, 1, 0], [1, 1, 1, 1, 1, 0], [1, 1, 1, 1, 1, 0]], 14)
     ]
     tester_helper(1091, examples, Solution().shortestPathBinaryMatrix, True)
