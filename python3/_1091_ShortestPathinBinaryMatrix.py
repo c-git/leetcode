@@ -14,6 +14,8 @@ class Solution:
             return -1
 
         n = len(grid) - 1  # Last index value (Assumes square input)
+        if n == 0:
+            return 1  # Rest of code assumes at min 2x2 grid
         reached = [(1, 0, 0)]  # (dist, x, y)
         while len(reached):
             dist, x, y = reached.pop(0)
@@ -40,6 +42,7 @@ def tester():
         Eg([[0, 0, 0], [1, 1, 0], [1, 1, 0]], 4),
         Eg([[1, 0, 0], [1, 1, 0], [1, 1, 0]], -1),
         Eg([[0, 1, 1, 0, 0, 0], [0, 1, 0, 1, 1, 0], [0, 1, 1, 0, 1, 0],
-            [0, 0, 0, 1, 1, 0], [1, 1, 1, 1, 1, 0], [1, 1, 1, 1, 1, 0]], 14)
+            [0, 0, 0, 1, 1, 0], [1, 1, 1, 1, 1, 0], [1, 1, 1, 1, 1, 0]], 14),
+        Eg([[0]], 1),
     ]
     tester_helper(1091, examples, Solution().shortestPathBinaryMatrix, True)
