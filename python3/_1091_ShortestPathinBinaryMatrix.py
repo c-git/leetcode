@@ -1,3 +1,4 @@
+from copy import deepcopy
 from typing import List
 
 from python3.helper import Eg, tester_helper
@@ -5,26 +6,32 @@ from python3.helper import Eg, tester_helper
 
 class Solution:
     def shortestPathBinaryMatrix(self, grid: List[List[int]]) -> int:
+        # Needed for timing as input cannot be changed. Remove before submission
+        grid = deepcopy(grid)
+
         # Src: Modified from Beixuan's solution
         if grid[0][0] or grid[-1][-1]:
             return -1
 
-        n = len(grid)
-        my_grid = [[-1] * n for _ in range(n)]
-        my_grid[0][0] = 1
-        my_list = [(0, 0)]
-        while len(my_list):
-            x, y = my_list.pop(0)
-            a_min = max(0, x - 1)
-            a_max = min(n - 1, x + 1)
-            b_min = max(0, y - 1)
-            b_max = min(n - 1, y + 1)
-            for a in range(a_min, a_max + 1):
-                for b in range(b_min, b_max + 1):
-                    if not grid[a][b] and my_grid[a][b] == -1:
-                        my_grid[a][b] = my_grid[x][y] + 1
-                        my_list.append((a, b))
-        return my_grid[-1][-1]
+        n = len(grid) - 1  # Last index value (Assumes square input)
+        reached = [(1, 0, 0)]  # (dist, x, y)
+        while len(reached):
+            dist, x, y = reached.pop(0)
+            hor_min = max(0, x - 1)
+            hor_max = min(n, x + 1)
+            ver_min = max(0, y - 1)
+            ver_max = min(n, y + 1)
+            for hor in range(hor_min, hor_max + 1):
+                for ver in range(ver_min, ver_max + 1):
+                    if hor == n and ver == n:
+                        return dist + 1
+                    if hor != x or ver != y:
+                        # On a neighbour
+                        if grid[hor][ver] == 0:
+                            grid[hor][ver] = 1  # Reached in fastest way already
+                            reached.append((dist + 1, hor, ver))
+            reached.sort()
+        return -1
 
 
 def tester():
