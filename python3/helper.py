@@ -33,11 +33,12 @@ class Eg:  # Example
 
 
 def tester_helper(prob_num: int, examples: List[Eg], func: Callable,
-                  should_test_timing: bool = False):
+                  should_test_timing: bool = False, timeit_count=1000000):
     if should_test_timing:
         test_vars = {
             'examples': examples, 'func': func, 'test_func': _tester_body}
-        print(timeit('test_func(examples, func)', globals=test_vars))
+        print(timeit('test_func(examples, func)', globals=test_vars,
+                     number=timeit_count))
     else:
         setup_log(only_std_out=True, fmt_std_out='%(message)s')
         sw = StopWatch(f'Problem {prob_num}')
