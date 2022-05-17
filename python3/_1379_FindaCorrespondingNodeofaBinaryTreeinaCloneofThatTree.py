@@ -19,17 +19,20 @@ class Solution:
     def getTargetCopy(self, original: TreeNode, cloned: TreeNode,
                       target: TreeNode) -> TreeNode:
         # ASSUMPTION original and cloned are value equal
-        if original is None:
-            return None
+        # ASSUMPTION starting trees are non-empty
         if target == original:
             return cloned
 
-        left = self.getTargetCopy(original.left, cloned.left, target)
-        if left is not None:
-            return left
+        if original.left is not None:
+            left = self.getTargetCopy(original.left, cloned.left, target)
+            if left is not None:
+                return left
 
-        right = self.getTargetCopy(original.right, cloned.right, target)
-        return right  # If None still what I would have had to return
+        if original.right is not None:
+            # If None still what I would have had to return
+            return self.getTargetCopy(original.right, cloned.right, target)
+        
+        return None
 
 
 def tester():
