@@ -5,6 +5,8 @@ from typing import Any, Callable, List, Optional, Tuple, Union
 from opylib.log import log, setup_log
 from opylib.stopwatch import StopWatch
 
+from python3.log.helper_classes import TreeNode
+
 
 class Eg:  # Example
     def __init__(self, input_: Union[Tuple, Any], expected: Any,
@@ -69,7 +71,7 @@ def evaluator_any_order_list(_, out_: List[Any], exp: List[Any]) -> bool:
     return True
 
 
-def int_list_to_tree(lst: List[Optional[int]], node_cls: Callable):
+def int_list_to_tree(lst: List[Optional[int]], node_cls: Callable = TreeNode):
     """
     Takes a list of integers (or None) and returns a tree (or None if None rec)
     :param lst: List of integers to be converted to a tree

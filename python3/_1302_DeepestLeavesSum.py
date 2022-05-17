@@ -2,16 +2,12 @@
 from typing import List, Optional, Tuple
 
 from python3.helper import Eg, int_list_to_tree, tester_helper
-
-
-class TreeNode:
-    def __init__(self, val=0, left=None, right=None):
-        self.val = val
-        self.left = left
-        self.right = right
-
-    def __repr__(self):
-        return f'({self.val} L:{self.left} R:{self.right})'
+# class TreeNode:
+#     def __init__(self, val=0, left=None, right=None):
+#         self.val = val
+#         self.left = left
+#         self.right = right
+from python3.log.helper_classes import TreeNode
 
 
 class Solution:
