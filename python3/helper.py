@@ -5,7 +5,7 @@ from typing import Any, Callable, List, Optional, Tuple, Union
 from opylib.log import log, setup_log
 from opylib.stopwatch import StopWatch
 
-from python3.log.helper_classes import TreeNode
+from python3.helper_classes import TreeNode
 
 
 class Eg:  # Example

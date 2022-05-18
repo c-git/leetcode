@@ -7,7 +7,7 @@ from python3.helper import Eg, int_list_to_tree, tester_helper
 #         self.val = val
 #         self.left = left
 #         self.right = right
-from python3.log.helper_classes import TreeNode
+from python3.helper_classes import TreeNode
 
 
 class Solution:
