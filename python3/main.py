@@ -3,6 +3,9 @@ def main():
     pass
 
 
+if __name__ == '__main__':
+    main()
+
 """
 def tester():
     examples = [
@@ -10,5 +13,3 @@ def tester():
     ]
     tester_helper(, examples, Solution().)
 """
-if __name__ == '__main__':
-    main()
