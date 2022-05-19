@@ -1,66 +1,67 @@
+# Src: https://rosettacode.org/wiki/Tarjan#Python
+
+# Src: https://leetcode.com/problems/critical-connections-in-a-network
+# /discuss/2050090/Python3-oror-Trajan-algorithm-%2B-Vidoe-Description
 from collections import defaultdict
-from typing import List
+from typing import Dict, List, Optional
 
 from python3.helper import Eg, tester_helper
 
 
 class Node:
     def __init__(self):
-        # root is one of:
-        #   None: not yet visited
-        #   -1: already processed
-        #   non-negative integer: what Wikipedia pseudo code calls 'lowlink'
-        self.root = None
+        self.rank = None
         self.succ = []
+        self.id = None  # to uniquely identify a node (from input values)
+
+    def __repr__(self):
+        return f'{self.id} - (R: {self.rank}, S:{[x.id for x in self.succ]})'
 
 
 class Solution:
-    # Src: https://rosettacode.org/wiki/Tarjan#Python
     @staticmethod
-    def from_edges(edges):
+    def from_edges(edges: List[List[int]]):
         """translate list of edges to list of nodes"""
-        nodes = defaultdict(Node)
+        result = defaultdict(Node)
         for v, w in edges:
-            nodes[v].succ.append(nodes[w])
+            result[v].succ.append(result[w])
+            result[w].succ.append(result[v])
 
-        for i, v in nodes.items():  # name the nodes for final output
+        for i, v in result.items():
             v.id = i
 
-        return nodes.values()
+        return result
 
-    @staticmethod
-    def trajan(V):
-        def strongconnect(v, S):
-            v.root = pos = len(S)
-            S.append(v)
+    def dfs(self, node: Node, rank: int, parent: Optional[Node] = None):
+        if node.rank is not None:
+            return  # Exit without yielding any values
 
-            for w in v.succ:
-                if w.root is None:  # not yet visited
-                    yield from strongconnect(w, S)
+        node.rank = rank
+        for adj in node.succ:
+            if adj == parent:
+                continue  # Skip this node, this is where we just came from
 
-                if w.root >= 0:  # still on stack
-                    v.root = min(v.root, w.root)
+            if adj.rank is None:
+                # Use deque to consume iterator
+                yield from self.dfs(adj, rank + 1, node)
 
-            if v.root == pos:  # v is the root, return everything above
-                res, S[pos:] = S[pos:], []
-                for w in res:
-                    w.root = -1
-                yield [r.id for r in res]
+            node.rank = min(node.rank, adj.rank)
 
-        for v in V:
-            if v.root is None:
-                yield from strongconnect(v, [])
+            if adj.rank > rank:
+                # We found a critical edge
+                yield [node.id, adj.id]
 
     def criticalConnections(self, n: int, connections: List[List[int]]) \
             -> List[List[int]]:
-        for g in self.trajan(self.from_edges(connections)):
-            print(g)
-        print()
+        graph: Dict[int, Node] = self.from_edges(connections)
+        return list(self.dfs(graph[0], 0))
 
 
 def tester():
     examples = [
+        Eg((2, [[0, 1], [1, 2], [2, 0]]), []),
+        Eg((4, [[4, 1], [0, 1], [1, 2], [2, 0], [1, 3]]), [[1, 4], [1, 3]]),
         Eg((4, [[0, 1], [1, 2], [2, 0], [1, 3]]), [[1, 3]]),
-        Eg((2, [[0, 1]]), [[0, 1]])
+        Eg((2, [[0, 1]]), [[0, 1]]),
     ]
     tester_helper(1192, examples, Solution().criticalConnections)

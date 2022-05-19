@@ -1,8 +1,5 @@
-from python3._1192_CriticalConnectionsinaNetwork import tester
-
-
 def main():
-    tester()
+    # tester()
     pass
 
 
