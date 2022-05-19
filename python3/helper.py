@@ -1,3 +1,4 @@
+from collections import deque
 from copy import copy
 from timeit import timeit
 from typing import Any, Callable, List, Optional, Tuple, Union
@@ -89,9 +90,10 @@ def int_list_to_tree(lst: List[Optional[int]], node_cls: Callable = TreeNode):
     root = None if len(lst) == 0 else int_to_node(lst.pop(0))
     if root is None:
         return None
-    queue: List[node_cls] = [root]
+    queue: deque[node_cls] = deque()
+    queue.append(root)
     while len(queue) > 0 and len(lst) > 0:
-        node = queue.pop(0)
+        node = queue.popleft()
 
         # Get left child
         child = int_to_node(lst.pop(0))
