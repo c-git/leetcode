@@ -25,7 +25,8 @@ class Solution:
                             if matrix[r][c] < matrix[r - 1][c] else
                             dec
                         )
-                        track[r][c][d] = track[r - 1][c][d] + 1
+                        nd = (d + 1) % 2  # not same direction
+                        track[r][c][d] = track[r - 1][c][d] + track[r][c][nd]
 
                 # Left
                 if c > 0:
@@ -35,8 +36,10 @@ class Solution:
                             if matrix[r][c] < matrix[r][c - 1] else
                             dec
                         )
-                        track[r][c][d] = max(track[r][c][d],
-                                             track[r][c - 1][d] + 1)
+                        nd = (d + 1) % 2  # not same direction
+                        val = track[r][c - 1][d] + track[r][c][nd]
+                        nd = d + 1 % 2  # not same direction
+                        track[r][c][d] = max(val, track[r][c][d])
                 longest = max(max(track[r][c]), longest)
         return longest
 
@@ -45,5 +48,6 @@ def tester():
     examples = [
         Eg([[9, 9, 4], [6, 6, 8], [2, 1, 1]], 4),
         Eg([[3, 4, 5], [3, 2, 6], [2, 2, 1]], 4),
+        Eg([[7, 8, 9], [9, 7, 6], [7, 2, 3]], 6)
     ]
     tester_helper(329, examples, Solution().longestIncreasingPath)
