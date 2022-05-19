@@ -114,4 +114,4 @@ def _tester_body(examples: List[Eg], func: Callable):
         in_, exp, evaluator = example.as_tuple
         out_ = func(*in_)
         result = exp == out_ if evaluator is None else evaluator(in_, out_, exp)
-        assert result, f'\ninp: {in_}\nexp: {exp}\nout: {out_}'
+        assert result, f'\ninp: {in_}\nout: {out_}\nexp: {exp}'
