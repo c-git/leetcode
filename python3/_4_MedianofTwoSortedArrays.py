@@ -18,7 +18,7 @@ class Solution:
         half = total // 2
 
         # make sure nums1 is always smaller array
-        if len(nums2) < len(nums2):
+        if len(nums2) < len(nums1):
             nums1, nums2 = nums2, nums1
 
         left = 0
@@ -62,14 +62,14 @@ class Solution:
 
 def tester():
     examples = [
-        # Eg(([1, 3], [2]), 2.0),
-        # Eg(([1, 2], [3, 4]), 2.5),
-        # Eg(([1], [2, 3]), 2.0),
-        # Eg(([1, 2, 3], []), 2.0),
+        Eg(([1, 3], [2]), 2.0),
+        Eg(([1, 2], [3, 4]), 2.5),
+        Eg(([1], [2, 3]), 2.0),
+        Eg(([1, 2, 3], []), 2.0),
         Eg(([], [1, 2, 3]), 2.0),
-        # Eg(([], [1]), 1.0),
-        # Eg(([1], []), 1.0),
-        # Eg(([1], [2]), 1.5),
-        # Eg(([], []), 0),
+        Eg(([], [1]), 1.0),
+        Eg(([1], []), 1.0),
+        Eg(([1], [2]), 1.5),
+        Eg(([], []), 0),
     ]
     tester_helper(4, examples, Solution().findMedianSortedArrays)
