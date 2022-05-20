@@ -15,7 +15,7 @@ class Solution:
         # Base cases
         for i in range(len(obstacleGrid)):
             obstacleGrid[i][0] = 0 if obstacleGrid[i][0] == 1 else 1
-        for i in range(len(obstacleGrid[0])):
+        for i in range(1, len(obstacleGrid[0])):
             obstacleGrid[0][i] = 0 if obstacleGrid[0][i] == 1 else 1
 
         # General Case
@@ -33,6 +33,7 @@ class Solution:
 def tester():
     examples = [
         Eg([[0, 0, 0], [0, 1, 0], [0, 0, 0]], 2),
-        Eg([[0, 1], [0, 0]], 1)
+        Eg([[0, 1], [0, 0]], 1),
+        Eg([[0]], 1)
     ]
     tester_helper(63, examples, Solution().uniquePathsWithObstacles)
