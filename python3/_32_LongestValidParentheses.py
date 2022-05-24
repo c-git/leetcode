@@ -9,26 +9,28 @@ from python3.helper import Eg, tester_helper
 
 class Solution:
     def longestValidParentheses(self, s: str) -> int:
-        stack = []
-        max_ = 0
+        stack = deque()  # Stores indices of open brackets
+        max_ = 0  # Longest set of matches found
 
         # (Matching index, Match Stack Level)
         matches: Deque[Tuple[int, int]] = deque()
 
         for i, c in enumerate(s):
             if c == '(':
-                stack.append(i)
+                stack.append(i)  # Store open bracket index
             else:
                 # c == ')'
                 if len(stack) > 0:
-                    curr = stack.pop()
+                    curr = stack.pop()  # Get current matching index
                     while len(matches) > 0 and curr < matches[-1][0]:
+                        # Get rid of matches that are not better
                         matches.pop()
                     if len(matches) == 0 or len(stack) > matches[-1][1]:
+                        # No better match stored, add this one
                         matches.append((curr, len(stack)))
                     max_ = max(max_, i - matches[-1][0] + 1)
                 else:
-                    matches.clear()
+                    matches.clear()  # All invalid just discard
         return max_
 
 
