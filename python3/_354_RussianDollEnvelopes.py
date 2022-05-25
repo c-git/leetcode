@@ -1,42 +1,25 @@
+from bisect import bisect_left
 from typing import List
 
 from python3.helper import Eg, tester_helper
 
 
 class Solution:
-    @staticmethod
-    def can_fit(inner: List[int], outer: List[int]) -> bool:
-        return inner[0] < outer[0] and inner[1] < outer[1]
-
+    # src: https://leetcode.com/problems/russian-doll-envelopes/discuss
+    # /2071640/100-or-0-MS-or-WITH-ANIMATION-or-EPIC-MEME
     def maxEnvelopes(self, envelopes: List[List[int]]) -> int:
-        # sort by perimeter
-        envelopes.sort(key=lambda x: x[0] + x[1])
+        # width is increasing, but if two widths are the same, the height is 
+        # decreasing
+        envelopes.sort(key=lambda x: (x[0], -x[1]))
 
-        table = [1] * len(envelopes)  # Create table to store best values
-
-        for outer_ind in range(1, len(envelopes)):
-            outer_env = envelopes[outer_ind]
-
-            # Try faster method first
-            best_val = max(table[:outer_ind])
-            ind = table.index(best_val)
-            if self.can_fit(envelopes[ind], outer_env):
-                table[outer_ind] = best_val + 1
-                continue
-
-            # Fall back on slower method
-            best = 0
-
-            for i in range(1, outer_ind + 1):
-                inner = outer_ind - i
-                # search through smaller to see the one that can fit that
-                # holds the most
-                if self.can_fit(envelopes[inner], outer_env) and \
-                        table[inner] > best:
-                    best = table[inner]
-            table[outer_ind] = best + 1
-
-        return max(table)
+        dp = []
+        for _, height in envelopes:
+            left = bisect_left(dp, height)
+            if left == len(dp):
+                dp.append(height)
+            else:
+                dp[left] = height
+        return len(dp)
 
 
 def tester():
