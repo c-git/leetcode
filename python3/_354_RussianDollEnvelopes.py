@@ -14,16 +14,27 @@ class Solution:
 
         table = [1] * len(envelopes)  # Create table to store best values
 
-        for outer in range(1, len(envelopes)):
-            best = 0  # init to nothing can fit
-            for i in range(1, outer + 1):
-                inner = outer - i
+        for outer_ind in range(1, len(envelopes)):
+            outer_env = envelopes[outer_ind]
+
+            # Try faster method first
+            best_val = max(table[:outer_ind])
+            ind = table.index(best_val)
+            if self.can_fit(envelopes[ind], outer_env):
+                table[outer_ind] = best_val + 1
+                continue
+
+            # Fall back on slower method
+            best = 0
+
+            for i in range(1, outer_ind + 1):
+                inner = outer_ind - i
                 # search through smaller to see the one that can fit that
                 # holds the most
-                if self.can_fit(envelopes[inner], envelopes[outer]) and \
+                if self.can_fit(envelopes[inner], outer_env) and \
                         table[inner] > best:
                     best = table[inner]
-            table[outer] = best + 1
+            table[outer_ind] = best + 1
 
         return max(table)
 
