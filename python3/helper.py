@@ -1,5 +1,5 @@
 from collections import deque
-from copy import copy
+from copy import copy, deepcopy
 from timeit import timeit
 from typing import Any, Callable, List, Optional, Tuple, Union
 
@@ -37,20 +37,21 @@ class Eg:  # Example
 
 def tester_helper(prob_num: int, examples: List[Eg], func: Callable,
                   should_test_timing: bool = False, timeit_count=100000,
-                  avg_count=3):
+                  avg_count=3, copy_input=False):
     setup_log(only_std_out=True, fmt_std_out='%(message)s')
     sw = StopWatch(f'Problem {prob_num}')
     if should_test_timing:
         test_vars = {
-            'examples': examples, 'func': func, 'test_func': _tester_body}
+            'examples': examples, 'func': func, 'test_func': _tester_body,
+            'copy_input': copy_input}
         vals = []
         for i in range(1, avg_count + 1):
-            vals.append(timeit('test_func(examples, func)', globals=test_vars,
-                               number=timeit_count))
+            vals.append(timeit('test_func(examples, func, copy_input)',
+                               globals=test_vars, number=timeit_count))
             log(f'{i} of {avg_count} time: {vals[-1]}')
         log(f'Average: {sum(vals) / len(vals)}')
     else:
-        _tester_body(examples, func)
+        _tester_body(examples, func, copy_input)
     sw.end()
 
 
@@ -109,9 +110,14 @@ def int_list_to_tree(lst: List[Optional[int]], node_cls: Callable = TreeNode):
     return root
 
 
-def _tester_body(examples: List[Eg], func: Callable):
+def _tester_body(examples: List[Eg], func: Callable, copy_input: bool):
     for example in examples:
         in_, exp, evaluator = example.as_tuple
-        out_ = func(*in_)
+
+        # For assert if input is mutilated by caller so that errors are still
+        # identifiable
+        in_dup = in_ if not copy_input else deepcopy(in_)
+
+        out_ = func(*in_dup)
         result = exp == out_ if evaluator is None else evaluator(in_, out_, exp)
         assert result, f'\ninp: {in_}\nout: {out_}\nexp: {exp}'
