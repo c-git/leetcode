@@ -11,3 +11,12 @@ class TreeNode:
 
     def __repr__(self):
         return f'({self.val} L:{self.left} R:{self.right})'
+
+
+class ListNode:
+    def __init__(self, x: int, next=None):
+        self.val = x
+        self.next = next
+
+    def __repr__(self):
+        return f'{self.val} -> {self.next}'

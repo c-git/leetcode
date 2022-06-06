@@ -6,7 +6,7 @@ from typing import Any, Callable, List, Optional, Tuple, Union
 from opylib.log import log, setup_log
 from opylib.stopwatch import StopWatch
 
-from python3.helper_classes import TreeNode
+from python3.helper_classes import ListNode, TreeNode
 
 
 class Eg:  # Example
@@ -108,6 +108,25 @@ def int_list_to_tree(lst: List[Optional[int]], node_cls: Callable = TreeNode):
             node.right = child
             queue.append(child)
     return root
+
+
+def int_list_to_linked_list(lst: List[int], node_cls: Callable = ListNode):
+    """
+    Takes a list of integers and returns a linked list
+    :param lst: List of integers to be converted to a linked list
+    :param node_cls: The class to use to construct the nodes
+    :return: Linked list of the list passed with nodes created using node_cls
+    """
+    if len(lst) == 0:
+        return None
+
+    head = node_cls(lst[0])
+    last = head
+    for i in range(1, len(lst)):
+        temp = node_cls(lst[i])
+        last.next = temp
+        last = temp
+    return head
 
 
 def _tester_body(examples: List[Eg], func: Callable, copy_input: bool):

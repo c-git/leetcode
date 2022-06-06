@@ -1,7 +1,7 @@
-from typing import List, Optional, Tuple
+from typing import Optional, Tuple
 
 # Definition for singly-linked list.
-from python3.helper import Eg, tester_helper
+from python3.helper import Eg, int_list_to_linked_list, tester_helper
 
 
 class ListNode:
@@ -16,16 +16,6 @@ class ListNode:
 
     def __repr__(self):
         return f'{self.val} -> {self.next}'
-
-
-def convert(l_in: List[int]) -> ListNode:
-    head = ListNode(l_in[0])
-    last = head
-    for i in range(1, len(l_in)):
-        next_ = ListNode(l_in[i])
-        last.next = next_
-        last = next_
-    return head
 
 
 class Solution:
@@ -56,10 +46,12 @@ class Solution:
 
 
 def tester():
+    cvt = int_list_to_linked_list
+    ln = ListNode
     examples = [
-        Eg((convert([2, 4, 3]), convert([5, 6, 4])), convert([7, 0, 8])),
-        Eg((convert([0]), convert([0])), convert([0])),
-        Eg((convert([9, 9, 9, 9, 9, 9, 9]), convert([9, 9, 9, 9])),
-           convert([8, 9, 9, 9, 0, 0, 0, 1])),
+        Eg((cvt([2, 4, 3], ln), cvt([5, 6, 4], ln)), cvt([7, 0, 8], ln)),
+        Eg((cvt([0], ln), cvt([0], ln)), cvt([0], ln)),
+        Eg((cvt([9, 9, 9, 9, 9, 9, 9], ln), cvt([9, 9, 9, 9], ln)),
+           cvt([8, 9, 9, 9, 0, 0, 0, 1], ln)),
     ]
     tester_helper(2, examples, Solution().addTwoNumbers)
