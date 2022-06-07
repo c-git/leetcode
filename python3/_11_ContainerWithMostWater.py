@@ -6,8 +6,11 @@ from python3.helper import Eg, tester_helper
 class Solution:
     def maxArea(self, height: List[int]) -> int:
         result = 0
-        for i in range(1, len(height)):
+        for i in range(len(height) - 1, -1, -1):
             curr_height = height[i]
+            if curr_height * i < result:
+                # Too short to improve result
+                continue
             curr_max = 0
             for j in range(0, i):
                 vol = min(curr_height, height[j]) * (i - j)
