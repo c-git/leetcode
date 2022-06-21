@@ -13,7 +13,7 @@ class Solution:
                     break
             else:
                 # Positive number
-                if x >= n[i]:
+                if x > n[i]:
                     break
             i += 1
         return n[:i] + x + n[i:]
@@ -25,5 +25,7 @@ def tester():
         Eg(("-13", 2), "-123"),
         Eg(("-132", 3), "-1323"),
         Eg(("332", 2), "3322"),
+        Eg(("469975787943862651173569913153377", 3),
+           "4699757879438632651173569913153377"),
     ]
     tester_helper(1881, examples, Solution().maxValue)
