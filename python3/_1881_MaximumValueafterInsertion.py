@@ -9,7 +9,7 @@ class Solution:
 
         while i < len(n):
             if is_negative:
-                if x <= n[i]:
+                if x < n[i]:
                     break
             else:
                 # Positive number
@@ -23,5 +23,7 @@ def tester():
     examples = [
         Eg(("99", 9), "999"),
         Eg(("-13", 2), "-123"),
+        Eg(("-132", 3), "-1323"),
+        Eg(("332", 2), "3322"),
     ]
     tester_helper(1881, examples, Solution().maxValue)
