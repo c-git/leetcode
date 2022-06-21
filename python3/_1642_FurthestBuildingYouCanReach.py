@@ -1,3 +1,4 @@
+from heapq import heappush, heappushpop
 from typing import List
 
 from python3.helper import Eg, tester_helper
@@ -5,34 +6,38 @@ from python3.helper import Eg, tester_helper
 
 class Solution:
     def furthestBuilding(self, heights: List[int], bricks: int,
-                         ladders: int, currBuilding: int = 0) -> int:
-        assert currBuilding <= len(heights)  # Not passed end
-        if len(heights) - 1 == currBuilding:
-            # At last building return index
-            return currBuilding
-        heightDiff = heights[currBuilding + 1] - heights[currBuilding]
-        if heightDiff <= 0:
-            # Just move to next building no resources needed
-            return self.furthestBuilding(heights, bricks, ladders,
-                                         currBuilding + 1)
-        if heightDiff > bricks:
-            # Not enough bricks
-            if ladders > 0:
-                return self.furthestBuilding(heights, bricks, ladders - 1,
-                                             currBuilding + 1)
+                         ladders: int) -> int:
+        currBuilding: int = 0
+        heap = []
+
+        # Fill heap to match number of ladders
+        while currBuilding < len(heights) - 1:
+            # LI:
+            # - There are more buildings to check
+            # - All jumps before currBuilding have been handled
+            # - All jumps before currBuilding have been handled 
+            # - The largest jumps are stored in the heap
+            # - Any jumps not in the heap have been removed from the block count
+            diff = heights[currBuilding + 1] - heights[currBuilding]
+            if diff <= 0:
+                currBuilding += 1
+                continue  # just step down go onto next building
+            if len(heap) < ladders:
+                heappush(heap, diff)
+            elif ladders == 0:
+                if diff > bricks:
+                    return currBuilding
+                else:
+                    bricks -= diff
             else:
-                return currBuilding
-        elif ladders == 0:
-            # Must use bricks
-            return self.furthestBuilding(heights, bricks - heightDiff, ladders,
-                                         currBuilding + 1)
-        else:
-            # Can use ladder or bricks
-            return max(
-                self.furthestBuilding(heights, bricks - heightDiff, ladders,
-                                      currBuilding + 1),
-                self.furthestBuilding(heights, bricks, ladders - 1,
-                                      currBuilding + 1))
+                # Heap full and we have ladders
+                smallest = heappushpop(heap, diff)
+                if smallest > bricks:
+                    return currBuilding
+                else:
+                    bricks -= smallest
+            currBuilding += 1
+        return currBuilding
 
 
 def tester():
