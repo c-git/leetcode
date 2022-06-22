@@ -1,7 +1,7 @@
 from math import inf
 from typing import List
 
-from python3.helper import Eg, evaluator_sort_to_compare_two_deep, tester_helper
+from python3.helper import Eg, tester_helper
 
 
 class Solution:
@@ -56,18 +56,45 @@ class Solution:
                 result.append([num] + x)
         return result
 
-    def fourSum(
-            self, nums: List[int], target: int) -> List[List[int]]:
+    def clean_out_useless_values(self, nums: List[int], target):
+        # src: Beixuan
+        if len(nums) < 4:
+            return nums
+        i = 0
+        min_ = target - sum(nums[-3:])
+        while i < len(nums) - 3:
+            if nums[i] < min_:
+                i += 1
+            else:
+                break
+
+        nums = nums[i:]
+
+        if len(nums) < 4:
+            return nums
+        i = len(nums) - 1
+        max_ = target - sum(nums[:3])
+        while i >= 3:
+            if nums[i] > max_:
+                i -= 1
+            else:
+                break
+        return nums[:i + 1]
+
+    def fourSum(self, nums: List[int], target: int) -> List[List[int]]:
         nums.sort()
+        nums = self.clean_out_useless_values(nums, target)
         return self.anySum(nums, target, 4)
 
 
 def tester():
     examples = [
-        Eg(([1, 0, -1, 0, -2, 2], 0),
-           [[-2, -1, 1, 2], [-2, 0, 0, 2], [-1, 0, 0, 1]],
-           evaluator_sort_to_compare_two_deep),
-        Eg(([2, 2, 2, 2, 2], 8), [[2, 2, 2, 2]]),
+        # Eg(([1, 0, -1, 0, -2, 2], 0),
+        #    [[-2, -1, 1, 2], [-2, 0, 0, 2], [-1, 0, 0, 1]],
+        #    evaluator_sort_to_compare_two_deep),
+        # Eg(([2, 2, 2, 2, 2], 8), [[2, 2, 2, 2]]),
+        Eg(([2, 2, 2, 2, 2, 80], 8), [[2, 2, 2, 2]]),
+        Eg(([-50, 2, 2, 2, 2, 2], 8), [[2, 2, 2, 2]]),
         Eg(([2, 2, 2, 2, 2, 2], 8), [[2, 2, 2, 2]]),
         Eg(([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 0), [[0, 0, 0, 0]]),
     ]
