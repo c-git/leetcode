@@ -73,6 +73,18 @@ def evaluator_any_order_list(_, out_: List[Any], exp: List[Any]) -> bool:
     return True
 
 
+def evaluator_sort_to_compare_two_deep(
+        _, out_: List[List[Any]], exp: List[List[Any]]) -> bool:
+    # Sort inner objects
+    for x in out_:
+        x.sort()
+
+    out_.sort()  # Sort outer loop
+
+    # Compare
+    return out_ == exp
+
+
 def int_list_to_tree(lst: List[Optional[int]], node_cls: Callable = TreeNode):
     """
     Takes a list of integers (or None) and returns a tree (or None if None rec)

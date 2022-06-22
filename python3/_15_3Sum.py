@@ -1,6 +1,6 @@
 from typing import List
 
-from python3.helper import Eg, tester_helper
+from python3.helper import Eg, evaluator_sort_to_compare_two_deep, tester_helper
 
 
 class Solution:
@@ -29,7 +29,8 @@ class Solution:
 
 def tester():
     examples = [
-        Eg([-1, 0, 1, 2, -1, -4], [[-1, -1, 2], [-1, 0, 1]]),
+        Eg([-1, 0, 1, 2, -1, -4], [[-1, -1, 2], [-1, 0, 1]],
+           evaluator_sort_to_compare_two_deep),
         Eg([], []),
         Eg([0], []),
         Eg([0, 0, 0], [[0, 0, 0]]),
