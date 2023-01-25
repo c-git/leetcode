@@ -1,1 +1,3 @@
-mod _1_two_sum;
+#![allow(dead_code)]
+// Add new file as a module to make it run
+// Create Solution struct `struct Solution;` in new module
