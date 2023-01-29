@@ -137,14 +137,12 @@ impl LFUCache {
             }
             Some(element) => {
                 match &removed {
-                    None => {
-                        unreachable!("This shouldn't happen as it's over capacity")
-                    }
                     Some(x) if x == element => {
                         // After match statement this key will need to be removed from self.keys
                     }
 
-                    Some(_) => {
+                    None | Some(_) => {
+                        // Nothing removed or not this key so remove element for this key
                         assert!(
                             self.values.remove(element),
                             "Invariant broken. Value should exist in both"
@@ -199,6 +197,17 @@ mod tests {
         let mut lfu = LFUCache::new(0);
         lfu.put(0, 0);
         assert_eq!(lfu.get(0), -1);
+    }
+
+    #[test]
+    fn empty_failed_case2() {
+        let mut lfu = LFUCache::new(2);
+        lfu.put(2, 1);
+        lfu.put(2, 2);
+        assert_eq!(lfu.get(2), 2);
+        lfu.put(1, 1);
+        lfu.put(4, 1);
+        assert_eq!(lfu.get(2), 2);
     }
 }
 /*
