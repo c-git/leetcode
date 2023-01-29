@@ -100,6 +100,11 @@ impl LFUCache {
     }
 
     fn put(&mut self, key: i32, value: i32) {
+        if self.capacity == 0 {
+            // Do nothing no space to store}
+            return;
+        }
+
         self.timestamp += 1;
         let removed = if self.capacity <= self.values.len() {
             // Need to remove a value
@@ -187,6 +192,13 @@ mod tests {
                                    // cache=[3,4], cnt(4)=1, cnt(3)=3
         assert_eq!(lfu.get(4), 4); // return 4
                                    // cache=[4,3], cnt(4)=2, cnt(3)=3
+    }
+
+    #[test]
+    fn empty_capacity() {
+        let mut lfu = LFUCache::new(0);
+        lfu.put(0, 0);
+        assert_eq!(lfu.get(0), -1);
     }
 }
 /*
