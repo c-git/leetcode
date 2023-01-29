@@ -3,6 +3,14 @@ use std::collections::{BTreeSet, HashMap};
 
 type TimeStamp = usize;
 
+fn get_first(set: &BTreeSet<Element>) -> Option<Element> {
+    let mut result = None;
+    if let Some(x) = set.iter().next() {
+        result = Some(x.clone());
+    }
+    result
+}
+
 #[derive(Debug, Clone)]
 struct Element {
     key: i32,
@@ -95,10 +103,16 @@ impl LFUCache {
         self.timestamp += 1;
         let removed = if self.capacity <= self.values.len() {
             // Need to remove a value
-            self.values.pop_first()
+            get_first(&self.values)
         } else {
             None
         };
+
+        // Remove value, cannot use pop_first on rust 1.58 which LeetCode uses
+        if let Some(x) = &removed {
+            self.values.remove(x);
+        }
+
         let element = match self.keys.get_mut(&key) {
             None => {
                 // Create new element because key is new
@@ -144,7 +158,6 @@ impl LFUCache {
                 self.keys.remove(&x.key);
             }
         }
-        dbg!(&self);
         assert_eq!(self.keys.len(), self.values.len());
     }
 }
@@ -162,7 +175,6 @@ mod tests {
         lfu.put(2, 2); // cache=[2,1], cnt(2)=1, cnt(1)=1
         assert_eq!(lfu.get(1), 1); // return 1
                                    // cache=[1,2], cnt(2)=1, cnt(1)=2
-        dbg!(&lfu);
         lfu.put(3, 3); // 2 is the LFU key because cnt(2)=1 is the smallest, invalidate 2.
                        // cache=[3,1], cnt(3)=1, cnt(1)=2
         assert_eq!(lfu.get(2), -1); // return -1 (not found)
