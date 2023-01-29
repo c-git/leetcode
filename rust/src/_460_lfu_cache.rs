@@ -4,6 +4,7 @@ use std::collections::{BTreeSet, HashMap};
 type TimeStamp = usize;
 
 fn get_first(set: &BTreeSet<Element>) -> Option<Element> {
+    // Written to replace BTreeSet::first not available on LeetCode due to rust version 1.58
     let mut result = None;
     if let Some(x) = set.iter().next() {
         result = Some(x.clone());
@@ -100,22 +101,18 @@ impl LFUCache {
     }
 
     fn put(&mut self, key: i32, value: i32) {
+        self.timestamp += 1;
+
         if self.capacity == 0 {
-            // Do nothing no space to store}
-            return;
+            return; // No capacity to add
         }
 
-        self.timestamp += 1;
-        let removed = if self.capacity <= self.values.len() {
-            // Need to remove a value
-            get_first(&self.values)
-        } else {
-            None
-        };
-
-        // Remove value, cannot use pop_first on rust 1.58 which LeetCode uses
-        if let Some(x) = &removed {
-            self.values.remove(x);
+        if self.capacity <= self.keys.len() && self.keys.get(&key).is_none() {
+            let remove_candidate = get_first(&self.values);
+            if let Some(x) = remove_candidate {
+                self.keys.remove(&x.key);
+                self.values.remove(&x);
+            }
         }
 
         let element = match self.keys.get_mut(&key) {
@@ -133,35 +130,20 @@ impl LFUCache {
                 self.keys
                     .get(&key)
                     .expect("Should have been here just inserted")
-                    .clone()
             }
             Some(element) => {
-                match &removed {
-                    Some(x) if x == element => {
-                        // After match statement this key will need to be removed from self.keys
-                    }
-
-                    None | Some(_) => {
-                        // Nothing removed or not this key so remove element for this key
-                        assert!(
-                            self.values.remove(element),
-                            "Invariant broken. Value should exist in both"
-                        );
-                    }
-                }
+                assert!(
+                    self.values.remove(element),
+                    "Invariant broken. Value should exist in both"
+                );
                 element.increment_count(self.timestamp);
                 element.value = value;
-                element.clone()
+                element
             }
         };
-        self.values.insert(element);
-        if let Some(x) = removed {
-            if x.key != key {
-                // The overflow value is not the one that was updated so remove from keys
-                self.keys.remove(&x.key);
-            }
-        }
+        self.values.insert(element.clone());
         assert_eq!(self.keys.len(), self.values.len());
+        assert!(self.capacity >= self.keys.len());
     }
 }
 
@@ -193,14 +175,14 @@ mod tests {
     }
 
     #[test]
-    fn empty_capacity() {
+    fn failed1_0_capacity() {
         let mut lfu = LFUCache::new(0);
         lfu.put(0, 0);
         assert_eq!(lfu.get(0), -1);
     }
 
     #[test]
-    fn empty_failed_case2() {
+    fn failed2() {
         let mut lfu = LFUCache::new(2);
         lfu.put(2, 1);
         lfu.put(2, 2);
@@ -208,6 +190,18 @@ mod tests {
         lfu.put(1, 1);
         lfu.put(4, 1);
         assert_eq!(lfu.get(2), 2);
+    }
+
+    #[test]
+    fn failed3() {
+        let mut lfu = LFUCache::new(2);
+        assert_eq!(lfu.get(2), -1);
+        lfu.put(2, 6);
+        assert_eq!(lfu.get(1), -1);
+        lfu.put(1, 5);
+        lfu.put(1, 2);
+        assert_eq!(lfu.get(1), 2);
+        assert_eq!(lfu.get(2), 6);
     }
 }
 /*
