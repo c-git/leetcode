@@ -1,11 +1,15 @@
+use std::collections::HashMap;
 struct Solution;
 
 impl Solution {
     pub fn two_sum(nums: Vec<i32>, target: i32) -> Vec<i32> {
-        for first in 0..nums.len() {
-            for second in first + 1..nums.len() {
-                if nums[first] + nums[second] == target {
-                    return vec![first as i32, second as i32];
+        let mut seen = HashMap::new();
+
+        for (i, num) in nums.iter().enumerate() {
+            match seen.get(num) {
+                Some(other_index) => return vec![*other_index, i as i32],
+                None => {
+                    seen.insert(target - num, i as i32);
                 }
             }
         }
