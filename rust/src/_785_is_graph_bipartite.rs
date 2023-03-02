@@ -4,41 +4,63 @@ struct Solution;
 
 impl Solution {
     pub fn is_bipartite(graph: Vec<Vec<i32>>) -> bool {
-        let mut a = HashSet::<i32>::new();
-        let mut b = HashSet::<i32>::new();
+        let mut sets: Vec<HashSet<i32>> = vec![];
+
         for (u, edges) in graph.iter().enumerate() {
             let u = u as i32;
-            let a_local: &mut HashSet<i32>;
-            let b_local: &mut HashSet<i32>;
-            if a.contains(&u) {
-                a_local = &mut a;
-                b_local = &mut b;
-            } else if b.contains(&u) || Self::edge_in(&a, edges) {
-                a_local = &mut b;
-                b_local = &mut a;
-            } else {
-                // Edge might be in be but we know it's not in a so this edge can only go in a
-                a_local = &mut a;
-                b_local = &mut b;
-            }
-            a_local.insert(u);
-            for edge in edges {
-                if a_local.contains(edge) {
-                    return false; // Both in same set
+
+            // Find the set u belongs to or add new set for u and ensure none of it's edges are in that set
+            let u_set = Self::get_set(&u, &sets);
+            match u_set {
+                Some((_, set)) => {
+                    // Confirm all edges for u are not in that set
+                    for edge in edges {
+                        if set.contains(edge) {
+                            return false;
+                        }
+                    }
                 }
-                b_local.insert(*edge);
+                None => {
+                    let mut new_set = HashSet::new();
+                    new_set.insert(u);
+                    sets.push(new_set);
+                }
+            };
+            let mut last_index: Option<usize> = None;
+            for edge in edges {
+                let edge_set = Self::get_set(edge, &sets);
+                if let Some((i, _)) = edge_set {
+                    if let Some(index) = last_index {
+                        if index == i {
+                            // Do nothing they are already both added and both the same set
+                        } else {
+                            let (lower_index, higher_index) =
+                                if i < index { (i, index) } else { (index, i) };
+                            let other_set = sets.remove(higher_index);
+                            sets[lower_index].extend(other_set);
+                            last_index = Some(lower_index);
+                        }
+                    } else {
+                        // Nothing to merge with and already added
+                        last_index = Some(i);
+                    }
+                } else if let Some(index) = last_index {
+                    // Add to same set as last edge because the new edge doesn't have a set yet
+                    sets[index].insert(*edge);
+                } else {
+                    // No last edge set to use, create a new set and add it to the end of the vector
+                    let mut new_set = HashSet::new();
+                    new_set.insert(*edge);
+                    sets.push(new_set);
+                    last_index = Some(sets.len() - 1);
+                }
             }
         }
         true
     }
 
-    fn edge_in(a: &HashSet<i32>, edges: &[i32]) -> bool {
-        for edge in edges {
-            if a.contains(edge) {
-                return true;
-            }
-        }
-        false
+    fn get_set<'a>(u: &i32, sets: &'a [HashSet<i32>]) -> Option<(usize, &'a HashSet<i32>)> {
+        sets.iter().enumerate().find(|(_, set)| set.contains(u))
     }
 }
 
@@ -59,9 +81,19 @@ fn case2() {
     let actual = Solution::is_bipartite(graph);
     assert_eq!(actual, expected);
 }
+
 #[test]
 fn case3() {
     let graph = vec![vec![1], vec![0, 3], vec![3], vec![1, 2]];
+    let expected = true;
+
+    let actual = Solution::is_bipartite(graph);
+    assert_eq!(actual, expected);
+}
+
+#[test]
+fn case4() {
+    let graph = vec![vec![3], vec![2, 4], vec![1], vec![0, 4], vec![1, 3]];
     let expected = true;
 
     let actual = Solution::is_bipartite(graph);
