@@ -21,38 +21,42 @@ impl Solution {
                     }
                 }
                 None => {
+                    // Add new set for u (no need to check for edges it's a new set)
                     let mut new_set = HashSet::new();
                     new_set.insert(u);
                     sets.push(new_set);
                 }
             };
-            let mut last_index: Option<usize> = None;
+
+            // Ensure all edges are added to the same set (if any are already in sets merge the sets)
+            let mut last_edge_index: Option<usize> = None;
             for edge in edges {
-                let edge_set = Self::get_set(edge, &sets);
-                if let Some((i, _)) = edge_set {
-                    if let Some(index) = last_index {
+                let new_edge_set = Self::get_set(edge, &sets);
+                if let Some((i, _)) = new_edge_set {
+                    if let Some(index) = last_edge_index {
                         if index == i {
                             // Do nothing they are already both added and both the same set
                         } else {
+                            // Both already in sets, merge the sets
                             let (lower_index, higher_index) =
                                 if i < index { (i, index) } else { (index, i) };
                             let other_set = sets.remove(higher_index);
                             sets[lower_index].extend(other_set);
-                            last_index = Some(lower_index);
+                            last_edge_index = Some(lower_index);
                         }
                     } else {
                         // Nothing to merge with and already added
-                        last_index = Some(i);
+                        last_edge_index = Some(i);
                     }
-                } else if let Some(index) = last_index {
+                } else if let Some(index) = last_edge_index {
                     // Add to same set as last edge because the new edge doesn't have a set yet
                     sets[index].insert(*edge);
                 } else {
-                    // No last edge set to use, create a new set and add it to the end of the vector
+                    // No last edge set and new edge not in set so create a new set and add it to the end of the vector
                     let mut new_set = HashSet::new();
                     new_set.insert(*edge);
                     sets.push(new_set);
-                    last_index = Some(sets.len() - 1);
+                    last_edge_index = Some(sets.len() - 1);
                 }
             }
         }
