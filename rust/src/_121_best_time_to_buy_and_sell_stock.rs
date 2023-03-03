@@ -1,7 +1,19 @@
 struct Solution;
 impl Solution {
     pub fn max_profit(prices: Vec<i32>) -> i32 {
-        todo!()
+        let mut max_diff = 0;
+        let mut min_price = i32::MAX;
+        for price in prices {
+            if price < min_price {
+                min_price = price;
+            } else {
+                let diff = price - min_price;
+                if diff > max_diff {
+                    max_diff = diff;
+                }
+            }
+        }
+        max_diff
     }
 }
 
