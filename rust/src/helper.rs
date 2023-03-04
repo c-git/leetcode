@@ -1,7 +1,7 @@
 use std::fmt::{Debug, Formatter};
 
 // Definition for singly-linked list.
-#[derive(PartialEq, Eq, Clone, Debug)]
+#[derive(PartialEq, Eq, Debug)]
 pub struct ListNode {
     pub val: i32,
     pub next: Option<Box<ListNode>>,
@@ -14,7 +14,7 @@ impl ListNode {
     }
 }
 
-#[derive(PartialEq, Eq, Clone)]
+#[derive(PartialEq, Eq)]
 pub struct ListHead {
     head: Option<Box<ListNode>>,
 }
