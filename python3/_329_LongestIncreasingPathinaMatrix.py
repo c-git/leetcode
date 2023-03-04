@@ -82,7 +82,6 @@ class Solution:
         """
         # Note: it is impossible to get a cycle because only increasing
         # values are allowed
-        val = self.matrix[row][col]  # TODO Remove test code
         if self.track[row][col] is not None:
             return self.track[row][col].count
         tracking = TrackData(0)
