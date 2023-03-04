@@ -24,8 +24,17 @@ use crate::helper::TreeNode;
 pub struct Solution;
 
 impl Solution {
-    pub fn invert_tree(root: Option<Rc<RefCell<TreeNode>>>) -> Option<Rc<RefCell<TreeNode>>> {
-        root // TODO: Implement
+    pub fn invert_tree(mut root: Option<Rc<RefCell<TreeNode>>>) -> Option<Rc<RefCell<TreeNode>>> {
+        if let Some(node) = root {
+            {
+                let mut node = node.borrow_mut();
+                let temp = node.left.clone();
+                node.left = Self::invert_tree(node.right.clone());
+                node.right = Self::invert_tree(temp);
+            }
+            root = Some(node);
+        }
+        root
     }
 }
 
