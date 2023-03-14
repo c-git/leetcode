@@ -77,10 +77,16 @@ Language
 ### Rust (How to add)
 
 1. Create file for problem in rust folder
-2. Copy starter code from LeetCode into file. Add `todo!()` in function body so code compiles.
+2. Setup Starter Code and get it able to be compiled
+    1. Copy starter code from LeetCode into file.
+    2. Add the required Solution unit struct `struct Solution;`
+    3. Add `todo!()` in function body.
 3. Optionally create a test module at the bottom of the file to put the tests into (usually only useful if the tests
    require imports).
 4. Create a test for each example. I usually call them Case1, Case2, Case3 and so on.
-5. Some problems may require input transformation, transformations for implemented types usually have a wrapper type and then an into from that wrapper type see example in [problem 2](https://github.com/c-git/leetcode/blob/main/rust/src/_2_add_two_numbers.rs#L46)
-6. Some problems allow multiple solutions. I haven't done any of those yet but should be evaluated using a custom evaluation method.
+5. Some problems may require input transformation, transformations for implemented types usually have a wrapper type and
+   then an into from that wrapper type see example
+   in [problem 2](https://github.com/c-git/leetcode/blob/main/rust/src/_2_add_two_numbers.rs#L46)
+6. Some problems allow multiple solutions. I haven't done any of those yet but should be evaluated using a custom
+   evaluation method.
 7. Now you can implement your solution and test and debug locally.
