@@ -85,6 +85,13 @@ def evaluator_sort_to_compare_two_deep(
     return out_ == exp
 
 
+def evaluator_height_balanced(
+        _in, out_: Optional[TreeNode], _exp) -> bool:
+    # Wrap solution to one of the problems
+    from python3._110_balanced_binary_tree import Solution
+    return Solution().isBalanced(out_)
+
+
 def int_list_to_tree(lst: List[Optional[int]], node_cls: Callable = TreeNode):
     """
     Takes a list of integers (or None) and returns a tree (or None if None rec)
