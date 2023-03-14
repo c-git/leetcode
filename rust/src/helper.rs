@@ -176,6 +176,42 @@ impl From<Option<Rc<RefCell<TreeNode>>>> for TreeRoot {
     }
 }
 
+impl From<&str> for TreeRoot {
+    /// Expects the "[]" around the values, separated by comma "," and only integers and "null"
+    /// (which is the format you'll get on LeetCode)
+    ///
+    /// # Panics
+    ///
+    /// This function panics if it doesn't match the expected format
+    fn from(value: &str) -> Self {
+        let mut result: Vec<Option<i32>>;
+        // Check and remove "[]"
+        assert!(value.len() >= 2);
+        assert_eq!('[', value.chars().next().unwrap());
+        assert_eq!(']', value.chars().nth(value.len() - 1).unwrap());
+        if value.len() == 2{
+            // Empty array return empty tree
+            return Self{ root: None }
+        }
+        let value = &value[1..value.len() - 1];
+
+        // Separate by comma
+        let values:Vec<&str> = value.split(',').map(|v| v.trim()).collect();
+
+        // Convert into values
+        result = vec![];
+        for value in values{
+            result.push(if value == "null"{
+                None
+            }else{
+                Some(value.parse().unwrap())
+            })
+        }
+
+        result.into()
+    }
+}
+
 impl Debug for TreeNode {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         let left = if let Some(left) = &self.left {
