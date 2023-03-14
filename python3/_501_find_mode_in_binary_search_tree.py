@@ -4,54 +4,54 @@
 #         self.val = val
 #         self.left = left
 #         self.right = right
-from typing import Optional, List, Dict
+from typing import Optional, List
 
 from python3.helper import Eg, tester_helper, int_list_to_tree, evaluator_any_order_list
 from python3.helper_classes import TreeNode
 
 
 class Solution:
-    def get_frequency_distribution(self, root: Optional[TreeNode]) -> Dict[int, int]:
-        if root is None:
-            return {}
-
-        # Initialize result with values from left child
-        result = self.get_frequency_distribution(root.left)
-
-        # Get values from right child
-        right_freq = self.get_frequency_distribution(root.right)
-
-        # Join right child to result
-        for key in right_freq:
-            if result.get(key) is None:
-                result[key] = 0
-            result[key] += right_freq[key]
-
-        # Include current node
-        if result.get(root.val) is None:
-            result[root.val] = 0
-        result[root.val] += 1
-
-        return result
-
     def findMode(self, root: Optional[TreeNode]) -> List[int]:
-        if root is None:
-            return []
+        # Used editorial for https://leetcode.com/problems/binary-tree-inorder-traversal/editorial/ to get in order traversal
+        assert root is not None, "Constraints in question state minim tree size is 1"
 
-        frequency_distribution = self.get_frequency_distribution(root)
-
-        assert len(frequency_distribution) > 0, "Should have had at least 1 value because root was not None"
-
-        # Get the highest frequency and save values in mode
         result = []
         highest_freq = 0
-        for key in frequency_distribution:
-            value = frequency_distribution[key]
-            if highest_freq < value:
-                highest_freq = value
-                result = [key]
-            elif value == highest_freq:
-                result.append(key)
+        curr_freq = 0
+        last_val = root.val
+
+        stack = []
+        curr = root
+        res = []
+        while curr is not None or len(stack) > 0:
+            # Get the leftmost node
+            while curr is not None:
+                stack.append(curr)
+                curr = curr.left
+            curr = stack.pop()
+
+            # Handle next value in sequence
+            if curr.val == last_val:
+                # Same value just increment freq
+                curr_freq += 1
+            else:
+                # New value, check if last was part of mode or a start of a new set of mode values
+                if curr_freq > highest_freq:
+                    highest_freq = curr_freq
+                    result = [last_val]
+                elif curr_freq == highest_freq:
+                    result.append(last_val)
+                curr_freq = 1
+                last_val = curr.val
+
+            # prepare for next iteration of loop
+            curr = curr.right
+
+        # Check for last value in sequence
+        if curr_freq > highest_freq:
+            result = [last_val]
+        elif curr_freq == highest_freq:
+            result.append(last_val)
 
         return result
 
