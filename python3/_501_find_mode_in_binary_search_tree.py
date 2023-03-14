@@ -42,15 +42,15 @@ class Solution:
 
         assert len(frequency_distribution) > 0, "Should have had at least 1 value because root was not None"
 
-        # Get the highest frequency
+        # Get the highest frequency and save values in mode
+        result = []
         highest_freq = 0
         for key in frequency_distribution:
-            if highest_freq < frequency_distribution[key]:
-                highest_freq = frequency_distribution[key]
-
-        result = []
-        for key in frequency_distribution:
-            if frequency_distribution[key] == highest_freq:
+            value = frequency_distribution[key]
+            if highest_freq < value:
+                highest_freq = value
+                result = [key]
+            elif value == highest_freq:
                 result.append(key)
 
         return result
