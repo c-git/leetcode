@@ -1,3 +1,6 @@
+use std::cell::RefCell;
+use std::rc::Rc;
+
 // Definition for a binary tree node.
 // #[derive(Debug, PartialEq, Eq)]
 // pub struct TreeNode {
@@ -17,33 +20,37 @@
 //   }
 // }
 use crate::helper::TreeNode;
-use std::cell::RefCell;
-use std::rc::Rc;
 
 struct Solution;
 
 impl Solution {
-    pub fn is_valid_bst(root: Option<Rc<RefCell<TreeNode>>>) -> bool {
+    fn is_valid_bst_in_range(
+        root: Option<Rc<RefCell<TreeNode>>>,
+        min: Option<i32>,
+        max: Option<i32>,
+    ) -> bool {
+        // Based on Fasil's idea
         if let Some(root) = root {
             let root = root.borrow();
-            if let Some(left) = &root.left {
-                let left = left.borrow();
-                // Based on question equal is not allowed
-                if root.val <= left.val {
+            if let Some(min) = min {
+                if root.val <= min {
                     return false;
                 }
             }
-            if let Some(right) = &root.right {
-                let right = right.borrow();
-                // Based on question equal is not allowed
-                if root.val >= right.val {
+            if let Some(max) = max {
+                if root.val >= max {
                     return false;
                 }
             }
-            Self::is_valid_bst(root.left.clone()) && Self::is_valid_bst(root.right.clone())
+            Self::is_valid_bst_in_range(root.left.clone(), min, Some(root.val))
+                && Self::is_valid_bst_in_range(root.right.clone(), Some(root.val), max)
         } else {
             true
         }
+    }
+
+    pub fn is_valid_bst(root: Option<Rc<RefCell<TreeNode>>>) -> bool {
+        Self::is_valid_bst_in_range(root, None, None)
     }
 }
 
@@ -65,6 +72,24 @@ mod tests {
     #[test]
     fn case2() {
         let input: TreeRoot = "[5,1,4,null,null,3,6]".into();
+        let expected = false;
+
+        let actual = Solution::is_valid_bst(input.into());
+        assert_eq!(actual, expected);
+    }
+
+    #[test]
+    fn case3() {
+        let input: TreeRoot = "[5,4,6,null,null,3,7]".into();
+        let expected = false;
+
+        let actual = Solution::is_valid_bst(input.into());
+        assert_eq!(actual, expected);
+    }
+
+    #[test]
+    fn case4() {
+        let input: TreeRoot = "[2,2,2]".into();
         let expected = false;
 
         let actual = Solution::is_valid_bst(input.into());
