@@ -116,12 +116,16 @@ def int_list_to_tree(lst: List[Optional[int]], node_cls: Callable = TreeNode):
         node = queue.popleft()
 
         # Get left child
+        if len(lst) == 0:
+            break
         child = int_to_node(lst.pop(0))
         if child is not None:
             node.left = child
             queue.append(child)
 
         # Get right child
+        if len(lst) == 0:
+            break
         child = int_to_node(lst.pop(0))
         if child is not None:
             node.right = child
