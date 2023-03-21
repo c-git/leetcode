@@ -17,9 +17,20 @@ class Solution:
         if root is None:
             return result
 
-        result += self.inorderTraversal(root.left)
-        result.append(root.val)
-        result += self.inorderTraversal(root.right)
+        stack = []
+        curr = root
+        while len(stack) > 0 or curr is not None:
+            # Go to the leftmost
+            while curr is not None:
+                stack.append(curr)
+                curr = curr.left
+            curr = stack.pop()
+
+            # Perform action
+            result.append(curr.val)
+
+            curr = curr.right
+
         return result
 
 
