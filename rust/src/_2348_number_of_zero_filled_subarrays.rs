@@ -1,6 +1,36 @@
 impl Solution {
+    fn get_subarray_contribution(length: i32) -> i64 {
+        // TODO: Memoize solutions already done
+        (1..=length as i64).sum()
+    }
     pub fn zero_filled_subarray(nums: Vec<i32>) -> i64 {
-        todo!()
+        let mut result = 0;
+        let mut on_zero_subarray = false;
+        let mut curr_len = 0;
+        for num in nums {
+            match num {
+                0 => {
+                    if !on_zero_subarray {
+                        on_zero_subarray = true;
+                        curr_len = 0;
+                    }
+                    curr_len += 1;
+                }
+                _ => {
+                    if on_zero_subarray {
+                        on_zero_subarray = false;
+                        result += Self::get_subarray_contribution(curr_len)
+                    }
+                }
+            }
+        }
+
+        // Add up values if list ends on a subarray of 0's
+        if on_zero_subarray {
+            result += Self::get_subarray_contribution(curr_len)
+        }
+
+        result
     }
 }
 
