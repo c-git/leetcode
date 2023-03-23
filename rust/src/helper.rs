@@ -189,21 +189,21 @@ impl From<&str> for TreeRoot {
         assert!(value.len() >= 2);
         assert_eq!('[', value.chars().next().unwrap());
         assert_eq!(']', value.chars().nth(value.len() - 1).unwrap());
-        if value.len() == 2{
+        if value.len() == 2 {
             // Empty array return empty tree
-            return Self{ root: None }
+            return Self { root: None };
         }
         let value = &value[1..value.len() - 1];
 
         // Separate by comma
-        let values:Vec<&str> = value.split(',').map(|v| v.trim()).collect();
+        let values: Vec<&str> = value.split(',').map(|v| v.trim()).collect();
 
         // Convert into values
         result = vec![];
-        for value in values{
-            result.push(if value == "null"{
+        for value in values {
+            result.push(if value == "null" {
                 None
-            }else{
+            } else {
                 Some(value.parse().unwrap())
             })
         }
@@ -262,6 +262,9 @@ impl From<Vec<Option<i32>>> for TreeRoot {
             let node = deque.pop_front().expect("Just check for non empty");
 
             // Get left child
+            if list.is_empty() {
+                break;
+            }
             let child = list.remove(0);
             if let Some(child) = child {
                 let child = TreeNode::wrapped_node(child);
@@ -270,6 +273,9 @@ impl From<Vec<Option<i32>>> for TreeRoot {
             }
 
             // Get right child
+            if list.is_empty() {
+                break;
+            }
             let child = list.remove(0);
             if let Some(child) = child {
                 let child = TreeNode::wrapped_node(child);
