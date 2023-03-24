@@ -119,7 +119,7 @@ impl TreeNode {
 
 #[derive(PartialEq, Eq)]
 pub struct TreeRoot {
-    root: Option<Rc<RefCell<TreeNode>>>,
+    pub root: Option<Rc<RefCell<TreeNode>>>,
 }
 
 impl Debug for TreeRoot {
