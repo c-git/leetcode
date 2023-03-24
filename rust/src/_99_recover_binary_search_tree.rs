@@ -1,6 +1,3 @@
-use std::rc::Rc;
-use std::{cell::RefCell, mem};
-
 // Definition for a binary tree node.
 // #[derive(Debug, PartialEq, Eq)]
 // pub struct TreeNode {
@@ -19,63 +16,49 @@ use std::{cell::RefCell, mem};
 //     }
 //   }
 // }
+use std::cell::RefCell;
+use std::rc::Rc;
+
 use crate::helper::TreeNode;
+
+type Node = Option<Rc<RefCell<TreeNode>>>;
 impl Solution {
-    pub fn recover_tree(root: &mut Option<Rc<RefCell<TreeNode>>>) {
-        // Based on solution from https://leetcode.com/problems/recover-binary-search-tree/solutions/1964742/rust-implementation-with-and-without-additional-memory/?languageTags=rust
+    pub fn recover_tree(root: &mut Node) {
+        // Source: Sample 0ms solution after completing problem
 
-        // TLDR: Find first out of place value in an in place traversal and find the place where it must go to not be wrong compared to the node after it
-        let mut current_node = root.clone();
-        let mut previous_node: Option<Rc<RefCell<TreeNode>>> = None;
-        let mut left_swap_node: Option<Rc<RefCell<TreeNode>>> = None;
-        let mut right_swap_node: Option<Rc<RefCell<TreeNode>>> = None;
-        let mut stack = vec![];
+        let mut first = Node::None;
+        let mut second = Node::None;
+        let mut pre = Node::None;
 
-        while !stack.is_empty() || current_node.is_some() {
-            // Go to leftmost node if on a new node (like root or first time visiting a right child)
-            while current_node.is_some() {
-                stack.push(current_node.clone());
-                current_node = current_node.clone().unwrap().borrow().left.clone();
-            }
-            current_node = stack
-                .pop()
-                .expect("Either stack already had values or current_node at start was added to it");
+        let mut root = root.as_ref().map(Rc::clone);
+        let mut stack = std::collections::LinkedList::new();
+        while root.is_some() || !stack.is_empty() {
+            if let Some(node) = root {
+                stack.push_front(Rc::clone(&node));
+                root = node.borrow().left.as_ref().map(Rc::clone);
+            } else if let Some(ref node) = stack.pop_front() {
+                let node_val = node.borrow().val;
 
-            // Perform action
-            if left_swap_node.is_none() {
-                // Looking for left side of swap
-                if previous_node.is_some()
-                    && previous_node.as_ref().unwrap().borrow().val
-                        > current_node.as_ref().unwrap().borrow().val
-                {
-                    left_swap_node = previous_node;
+                if let Some(ref pre_node) = pre {
+                    let pre_val = pre_node.borrow().val;
+                    if pre_val > node_val {
+                        if first.is_none() {
+                            first = Some(Rc::clone(pre_node));
+                        }
+                        second = Some(Rc::clone(node));
+                    } else {
+                        pre = Some(Rc::clone(node));
+                    }
+                } else {
+                    pre = Some(Rc::clone(node));
                 }
-            } else {
-                // Looking for where the left node needs to go to
-                if left_swap_node.as_ref().unwrap().borrow().val
-                    < current_node.as_ref().unwrap().borrow().val
-                {
-                    // Needs to go in previous position
-                    right_swap_node = previous_node.clone();
-                    break;
-                }
-            }
 
-            // Go to next node
-            previous_node = current_node;
-            current_node = previous_node.as_ref().unwrap().borrow().right.clone();
+                root = node.borrow().right.as_ref().map(Rc::clone);
+            }
         }
 
-        // Handle case where it goes at the end of the in order traversal
-        if right_swap_node.is_none() {
-            right_swap_node = previous_node;
-        }
-
-        match (left_swap_node, right_swap_node) {
-            (Some(a), Some(b)) => mem::swap(&mut a.borrow_mut().val, &mut b.borrow_mut().val),
-            (_, _) => unreachable!(
-                "Question asserts that there will always be a swap that needs to be made"
-            ),
+        if let (Some(first), Some(second)) = (first, second) {
+            std::mem::swap(&mut first.borrow_mut().val, &mut second.borrow_mut().val);
         }
     }
 }
