@@ -85,7 +85,8 @@ mod tests {
         let mut input: Option<Rc<RefCell<TreeNode>>> = input.into();
         let expected: TreeRoot = "[3,1,null,null,2]".into();
         Solution::recover_tree(&mut input);
-        assert_eq!(expected, input.into());
+        let debug_friendly_format: TreeRoot = input.into();
+        assert_eq!(debug_friendly_format, expected);
     }
 
     #[test]
@@ -94,7 +95,8 @@ mod tests {
         let mut input: Option<Rc<RefCell<TreeNode>>> = input.into();
         let expected: TreeRoot = "[2,1,4,null,null,3]".into();
         Solution::recover_tree(&mut input);
-        assert_eq!(expected, input.into());
+        let debug_friendly_format: TreeRoot = input.into();
+        assert_eq!(debug_friendly_format, expected);
     }
 
     #[test]
@@ -103,7 +105,8 @@ mod tests {
         let mut input: Option<Rc<RefCell<TreeNode>>> = input.into();
         let expected: TreeRoot = "[2,1,3]".into();
         Solution::recover_tree(&mut input);
-        assert_eq!(expected, input.into());
+        let debug_friendly_format: TreeRoot = input.into();
+        assert_eq!(debug_friendly_format, expected);
     }
 
     #[test]
@@ -112,7 +115,8 @@ mod tests {
         let mut input: Option<Rc<RefCell<TreeNode>>> = input.into();
         let expected: TreeRoot = "[2,1,3,null,null,null,5]".into();
         Solution::recover_tree(&mut input);
-        assert_eq!(expected, input.into());
+        let debug_friendly_format: TreeRoot = input.into();
+        assert_eq!(debug_friendly_format, expected);
     }
 
     #[test]
@@ -121,6 +125,7 @@ mod tests {
         let mut input: Option<Rc<RefCell<TreeNode>>> = input.into();
         let expected: TreeRoot = "[4,3,6,2]".into();
         Solution::recover_tree(&mut input);
-        assert_eq!(expected, input.into());
+        let debug_friendly_format: TreeRoot = input.into();
+        assert_eq!(debug_friendly_format, expected);
     }
 }

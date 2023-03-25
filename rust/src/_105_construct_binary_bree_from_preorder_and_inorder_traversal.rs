@@ -73,7 +73,7 @@ mod tests {
         let inorder = vec![9, 3, 15, 20, 7];
         let expected: TreeRoot = "[3,9,20,null,null,15,7]".into();
         let actual = Solution::build_tree(preorder, inorder);
-        assert_eq!(expected, actual.into());
+        assert_eq!(actual, expected.into());
     }
 
     #[test]
@@ -82,6 +82,6 @@ mod tests {
         let inorder = vec![-1];
         let expected: TreeRoot = "[-1]".into();
         let actual = Solution::build_tree(preorder, inorder);
-        assert_eq!(expected, actual.into());
+        assert_eq!(actual, expected.into());
     }
 }

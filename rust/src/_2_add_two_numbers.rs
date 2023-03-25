@@ -48,7 +48,7 @@ mod test {
         let expected: ListHead = vec![7, 0, 8].into();
 
         let actual = Solution::add_two_numbers(l1.into(), l2.into());
-        assert_eq!(expected, actual.into());
+        assert_eq!(actual, expected.into());
     }
 
     #[test]
@@ -58,7 +58,7 @@ mod test {
         let expected: ListHead = vec![0].into();
 
         let actual = Solution::add_two_numbers(l1.into(), l2.into());
-        assert_eq!(expected, actual.into());
+        assert_eq!(actual, expected.into());
     }
 
     #[test]
@@ -68,6 +68,6 @@ mod test {
         let expected: ListHead = vec![8, 9, 9, 9, 0, 0, 0, 1].into();
 
         let actual = Solution::add_two_numbers(l1.into(), l2.into());
-        assert_eq!(expected, actual.into());
+        assert_eq!(actual, expected.into());
     }
 }

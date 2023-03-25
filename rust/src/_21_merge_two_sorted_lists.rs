@@ -79,7 +79,7 @@ fn case1() {
     let expected: crate::helper::ListHead = vec![1, 1, 2, 3, 4, 4].into();
 
     let actual = Solution::merge_two_lists(l1.into(), l2.into());
-    assert_eq!(expected, actual.into());
+    assert_eq!(actual, expected.into());
 }
 
 #[test]
@@ -89,7 +89,7 @@ fn case2() {
     let expected: crate::helper::ListHead = vec![].into();
 
     let actual = Solution::merge_two_lists(l1.into(), l2.into());
-    assert_eq!(expected, actual.into());
+    assert_eq!(actual, expected.into());
 }
 
 #[test]
@@ -99,5 +99,5 @@ fn case3() {
     let expected: crate::helper::ListHead = vec![0].into();
 
     let actual = Solution::merge_two_lists(l1.into(), l2.into());
-    assert_eq!(expected, actual.into());
+    assert_eq!(actual, expected.into());
 }

@@ -62,7 +62,7 @@ mod tests {
         let input: TreeRoot = "[1,null,2,3]".into();
         let expected = vec![1, 3, 2];
         let actual = Solution::inorder_traversal(input.into());
-        assert_eq!(expected, actual);
+        assert_eq!(actual, expected);
     }
 
     #[test]
@@ -70,7 +70,7 @@ mod tests {
         let input: TreeRoot = "[]".into();
         let expected: Vec<i32> = vec![];
         let actual = Solution::inorder_traversal(input.into());
-        assert_eq!(expected, actual);
+        assert_eq!(actual, expected);
     }
 
     #[test]
@@ -78,6 +78,6 @@ mod tests {
         let input: TreeRoot = "[1]".into();
         let expected = vec![1];
         let actual = Solution::inorder_traversal(input.into());
-        assert_eq!(expected, actual);
+        assert_eq!(actual, expected);
     }
 }

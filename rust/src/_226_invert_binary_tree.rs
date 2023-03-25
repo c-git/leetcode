@@ -50,7 +50,8 @@ mod tests {
         let expected: TreeRoot = vec![4, 7, 2, 9, 6, 3, 1].into();
 
         let actual = Solution::invert_tree(root.into());
-        assert_eq!(expected, actual.into());
+        let debug_friendly_format: TreeRoot = actual.into();
+        assert_eq!(debug_friendly_format, expected);
     }
 
     #[test]
@@ -59,7 +60,8 @@ mod tests {
         let expected: TreeRoot = vec![2, 3, 1].into();
 
         let actual = Solution::invert_tree(root.into());
-        assert_eq!(expected, actual.into());
+        let debug_friendly_format: TreeRoot = actual.into();
+        assert_eq!(debug_friendly_format, expected);
     }
 
     #[test]
@@ -68,6 +70,7 @@ mod tests {
         let expected: TreeRoot = Vec::<i32>::new().into();
 
         let actual = Solution::invert_tree(root.into());
-        assert_eq!(expected, actual.into());
+        let debug_friendly_format: TreeRoot = actual.into();
+        assert_eq!(debug_friendly_format, expected);
     }
 }
