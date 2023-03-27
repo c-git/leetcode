@@ -233,50 +233,36 @@ impl From<Vec<i32>> for TreeRoot {
 
 impl From<Vec<Option<i32>>> for TreeRoot {
     /// Converts the incoming vec into a tree
-    /// Would be more efficient if the incoming vec were converted to a dequeue as we keep popping from the front
-    fn from(mut list: Vec<Option<i32>>) -> Self {
-        // TODO: Rewrite to comply with what the array actually means https://support.leetcode.com/hc/en-us/articles/360011883654-What-does-1-null-2-3-mean-in-binary-tree-representation-
+    fn from(list: Vec<Option<i32>>) -> Self {
+        // Based on https://leetcode.com/problems/recover-binary-search-tree/solutions/32539/Tree-Deserializer-and-Visualizer-for-Python/
+
         if list.is_empty() {
             return TreeRoot { root: None };
         }
 
-        let first_element = list.remove(0); // Get first element
-        if first_element.is_none() {
-            return TreeRoot { root: None };
-        }
+        let nodes: Vec<Option<Rc<RefCell<TreeNode>>>> = list
+            .iter()
+            .map(|x| TreeNode::wrapped_node_maybe(*x))
+            .collect();
 
-        let root = Self {
-            root: TreeNode::wrapped_node(first_element.expect("Checked for None above")),
-        };
+        let mut kids: Vec<Option<Rc<RefCell<TreeNode>>>> = nodes
+            .iter()
+            .rev()
+            .map(|x| x.as_ref().map(Rc::clone))
+            .collect();
 
-        let mut deque = VecDeque::<Rc<RefCell<TreeNode>>>::new();
-        deque.push_back(root.root.as_ref().unwrap().clone());
-        while !deque.is_empty() && !list.is_empty() {
-            let node = deque.pop_front().expect("Just check for non empty");
+        let root = kids.pop().expect("Check for empty done at top");
 
-            // Get left child
-            if list.is_empty() {
-                break;
+        for node in nodes.into_iter().flatten() {
+            if let Some(left_child) = kids.pop() {
+                node.borrow_mut().left = left_child;
             }
-            let child = list.remove(0);
-            if let Some(child) = child {
-                let child = TreeNode::wrapped_node(child);
-                node.borrow_mut().left = child.clone();
-                deque.push_back(child.unwrap());
-            }
-
-            // Get right child
-            if list.is_empty() {
-                break;
-            }
-            let child = list.remove(0);
-            if let Some(child) = child {
-                let child = TreeNode::wrapped_node(child);
-                node.borrow_mut().right = child.clone();
-                deque.push_back(child.unwrap());
+            if let Some(right_child) = kids.pop() {
+                node.borrow_mut().right = right_child;
             }
         }
-        root
+
+        TreeRoot { root }
     }
 }
 
