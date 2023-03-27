@@ -241,7 +241,6 @@ impl From<Vec<i32>> for TreeRoot {
 impl From<Vec<Option<i32>>> for TreeRoot {
     /// Converts the incoming vec into a tree
     /// Would be more efficient if the incoming vec were converted to a dequeue as we keep popping from the front
-    /// Assumes each node always has two children (could be None) but the positions in the vec are not just missing
     fn from(mut list: Vec<Option<i32>>) -> Self {
         if list.is_empty() {
             return TreeRoot { root: None };
