@@ -26,7 +26,7 @@ impl Solution {
         // Clones are cheap because of Rc
         let mut result = vec![];
 
-        let mut current_node = root.clone();
+        let mut current_node = root;
         let mut stack = vec![];
         while !stack.is_empty() || current_node.is_some() {
             // Go to leftmost node
