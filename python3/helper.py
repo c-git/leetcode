@@ -100,6 +100,7 @@ def int_list_to_tree(lst: List[Optional[int]], node_cls: Callable = TreeNode):
     :return: Tree representation of the list passed with nodes created using
       node_cls
     """
+    # Changed based on https://leetcode.com/problems/recover-binary-search-tree/solutions/32539/Tree-Deserializer-and-Visualizer-for-Python/
 
     def int_to_node(val: Optional[int]) -> Optional[node_cls]:
         if val is None:
@@ -110,26 +111,15 @@ def int_list_to_tree(lst: List[Optional[int]], node_cls: Callable = TreeNode):
     root = None if len(lst) == 0 else int_to_node(lst.pop(0))
     if root is None:
         return None
-    queue: deque[node_cls] = deque()
-    queue.append(root)
-    while len(queue) > 0 and len(lst) > 0:
-        node = queue.popleft()
-
-        # Get left child
-        if len(lst) == 0:
-            break
-        child = int_to_node(lst.pop(0))
-        if child is not None:
-            node.left = child
-            queue.append(child)
-
-        # Get right child
-        if len(lst) == 0:
-            break
-        child = int_to_node(lst.pop(0))
-        if child is not None:
-            node.right = child
-            queue.append(child)
+    nodes = [None if val == None else int_to_node(val) for val in lst]
+    kids = nodes[::-1]
+    root = kids.pop()
+    for node in nodes:
+        if node:
+            if kids:
+                node.left = kids.pop()
+            if kids:
+                node.right = kids.pop()
     return root
 
 
@@ -161,5 +151,6 @@ def _tester_body(examples: List[Eg], func: Callable, copy_input: bool):
         in_dup = in_ if not copy_input else deepcopy(in_)
 
         out_ = func(*in_dup)
-        result = exp == out_ if evaluator is None else evaluator(in_, out_, exp)
+        result = exp == out_ if evaluator is None else evaluator(
+            in_, out_, exp)
         assert result, f'\ninp: {in_}\nout: {out_}\nexp: {exp}'
