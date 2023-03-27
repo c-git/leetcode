@@ -242,6 +242,7 @@ impl From<Vec<Option<i32>>> for TreeRoot {
     /// Converts the incoming vec into a tree
     /// Would be more efficient if the incoming vec were converted to a dequeue as we keep popping from the front
     fn from(mut list: Vec<Option<i32>>) -> Self {
+        // TODO: Rewrite to comply with what the array actually means https://support.leetcode.com/hc/en-us/articles/360011883654-What-does-1-null-2-3-mean-in-binary-tree-representation-
         if list.is_empty() {
             return TreeRoot { root: None };
         }
