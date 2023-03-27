@@ -103,11 +103,7 @@ impl TreeNode {
         }
     }
     pub fn new_maybe(val: Option<i32>) -> Option<Self> {
-        val.map(|val| TreeNode {
-            val,
-            left: None,
-            right: None,
-        })
+        val.map(Self::new)
     }
     fn wrapped_node(val: i32) -> Option<Rc<RefCell<Self>>> {
         Some(Rc::new(RefCell::new(Self::new(val))))
