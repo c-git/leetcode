@@ -28,14 +28,13 @@ class Solution:
     def isMatch(self, s: str, p: str) -> bool:
         matcher = self.regex_compile(p)
         possible = deque()
-        possible.append((0,
-                         0))  # first value is position in str, second is
-        # position in matcher
+        # first value is position in str, second is
+        possible.append((0, 0))  # position in matcher
         while len(possible) > 0:
             i_s, i_m = possible.pop()
             s_v, m_v = s[i_s], matcher[i_m]
             if not m_v[1]:
-                # Excatly once
+                # Exactly once
                 if s_v != m_v[0] and m_v[0] != '.':
                     continue  # This branch cannot work discard
                 if i_s < len(s) - 1:
