@@ -17,6 +17,6 @@ mod helper;
 //         let input = ;
 //         let expected = ;
 //         let actual = Solution::(input);
-//         assert_eq!(expected, actual);
+//         assert_eq!(actual, expected);
 //     }
 // }
