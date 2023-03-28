@@ -20,9 +20,6 @@ impl Solution {
                 }
             }
             let option_cost = *cost + Self::mincost_tickets_helper(&days[covered_days..], costs);
-            if result > option_cost {
-                println!("days: {days:?}, duration: {duration}, covered days: {covered_days}, days left: {:?}, option cost: {option_cost}",&days[covered_days..]);
-            }
             result = result.min(option_cost);
         }
         result
