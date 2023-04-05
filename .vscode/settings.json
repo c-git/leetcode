@@ -4,5 +4,4 @@
         "mincost",
         "ninp"
     ],
-    "rust-analyzer.showUnlinkedFileNotification": false
 }
