@@ -1,88 +1,44 @@
-use std::{
-    cell::RefCell,
-    collections::{HashMap, HashSet},
-};
-
-#[derive(Debug, PartialEq, Eq)]
-enum NodeState {
-    Unvisited,
-    VisitInProgress,
-    VisitCompleted,
-}
-
-#[derive(Debug)]
-struct Node {
-    edge_list: HashSet<i32>,
-    state: RefCell<NodeState>,
-}
-
-impl Node {
-    fn new() -> Node {
-        Self {
-            edge_list: HashSet::new(),
-            state: RefCell::new(NodeState::Unvisited),
-        }
-    }
-}
-
 impl Solution {
     pub fn can_finish(num_courses: i32, prerequisites: Vec<Vec<i32>>) -> bool {
-        // Updated based on https://www.geeksforgeeks.org/detect-cycle-direct-graph-using-colors/
-        let mut adjacency_list: HashMap<i32, Node> = HashMap::with_capacity(num_courses as usize);
+        // Source: "Faster Solutions" this is the same as my other solution but with less enums and structs but better way of tracking visited in separate vec instead of RefCell
+        let mut graph = vec![Vec::new(); num_courses as usize];
+        let mut visited = vec![None; num_courses as usize];
 
-        for edge in prerequisites {
-            let (from, to) = (edge[0], edge[1]);
-            if adjacency_list.get(&from).is_none() {
-                adjacency_list.insert(from, Node::new());
-            }
-            let node = adjacency_list
-                .get_mut(&from)
-                .expect("Should have just been added if not yet present");
-            node.edge_list.insert(to);
-        }
-        dbg!(&adjacency_list);
-
-        let mut keys = vec![];
-        for key in adjacency_list.keys() {
-            keys.push(*key);
+        for item in prerequisites {
+            graph[item[0] as usize].push(item[1]);
         }
 
-        for key in keys {
-            if !Self::dfs(key, &adjacency_list) {
+        for i in 0..num_courses {
+            if Solution::contains_cycle(&graph, &mut visited, i as usize) {
                 return false;
-            };
+            }
         }
 
         true
     }
 
-    fn dfs(key: i32, adjacency_list: &HashMap<i32, Node>) -> bool {
-        let node = if let Some(node) = adjacency_list.get(&key) {
-            node
-        } else {
+    fn contains_cycle(
+        graph: &Vec<Vec<i32>>,
+        visited: &mut Vec<Option<bool>>,
+        course: usize,
+    ) -> bool {
+        if !visited[course].unwrap_or_else(|| true) {
             return true;
-        };
-
-        match *node.state.borrow() {
-            NodeState::Unvisited => (),
-            NodeState::VisitInProgress => return false, // Cycle detected
-            NodeState::VisitCompleted => return true,
-        };
-
-        *node.state.borrow_mut() = NodeState::VisitInProgress;
-
-        for edge in &node.edge_list {
-            if !Self::dfs(*edge, adjacency_list) {
-                return false;
-            };
+        } else if visited[course].is_some() {
+            return false;
         }
 
-        *node.state.borrow_mut() = NodeState::VisitCompleted;
+        visited[course] = Some(false);
+        for &prerequisite in &graph[course] {
+            if Solution::contains_cycle(graph, visited, prerequisite as usize) {
+                return true;
+            }
+        }
 
-        true
+        visited[course] = Some(true);
+        false
     }
 }
-
 struct Solution;
 #[cfg(test)]
 mod tests {
@@ -102,6 +58,15 @@ mod tests {
         let num_courses = 2;
         let prerequisites = vec![vec![1, 0], vec![0, 1]];
         let expected = false;
+        let actual = Solution::can_finish(num_courses, prerequisites);
+        assert_eq!(actual, expected);
+    }
+
+    #[test]
+    fn case3() {
+        let num_courses = 4;
+        let prerequisites = vec![vec![0, 1], vec![2, 1], vec![3, 2]];
+        let expected = true;
         let actual = Solution::can_finish(num_courses, prerequisites);
         assert_eq!(actual, expected);
     }
