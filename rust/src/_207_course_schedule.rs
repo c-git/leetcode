@@ -1,8 +1,15 @@
+#[derive(Clone, PartialEq, Eq)]
+enum Status {
+    NotVisited,
+    VisitInProgress,
+    VisitCompleted,
+}
+
 impl Solution {
     pub fn can_finish(num_courses: i32, prerequisites: Vec<Vec<i32>>) -> bool {
-        // Source: "Faster Solutions" this is the same as my other solution but with less enums and structs but better way of tracking visited in separate vec instead of RefCell
+        // Source: "Faster Solutions" Modified for readability (added 3ms)
         let mut graph = vec![Vec::new(); num_courses as usize];
-        let mut visited = vec![None; num_courses as usize];
+        let mut visited = vec![Status::NotVisited; num_courses as usize];
 
         for item in prerequisites {
             graph[item[0] as usize].push(item[1]);
@@ -17,25 +24,21 @@ impl Solution {
         true
     }
 
-    fn contains_cycle(
-        graph: &Vec<Vec<i32>>,
-        visited: &mut Vec<Option<bool>>,
-        course: usize,
-    ) -> bool {
-        if !visited[course].unwrap_or_else(|| true) {
+    fn contains_cycle(graph: &Vec<Vec<i32>>, visited: &mut Vec<Status>, course: usize) -> bool {
+        if visited[course] == Status::VisitInProgress {
             return true;
-        } else if visited[course].is_some() {
+        } else if visited[course] == Status::VisitCompleted {
             return false;
         }
 
-        visited[course] = Some(false);
+        visited[course] = Status::VisitInProgress;
         for &prerequisite in &graph[course] {
             if Solution::contains_cycle(graph, visited, prerequisite as usize) {
                 return true;
             }
         }
 
-        visited[course] = Some(true);
+        visited[course] = Status::VisitCompleted;
         false
     }
 }
