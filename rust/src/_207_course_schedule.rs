@@ -3,23 +3,31 @@ use std::{
     collections::{HashMap, HashSet},
 };
 
+#[derive(Debug, PartialEq, Eq)]
+enum NodeState {
+    Unvisited,
+    VisitInProgress,
+    VisitCompleted,
+}
+
 #[derive(Debug)]
 struct Node {
     edge_list: HashSet<i32>,
-    is_visited: RefCell<bool>,
+    state: RefCell<NodeState>,
 }
 
 impl Node {
     fn new() -> Node {
         Self {
             edge_list: HashSet::new(),
-            is_visited: RefCell::new(false),
+            state: RefCell::new(NodeState::Unvisited),
         }
     }
 }
 
 impl Solution {
     pub fn can_finish(num_courses: i32, prerequisites: Vec<Vec<i32>>) -> bool {
+        // Updated based on https://www.geeksforgeeks.org/detect-cycle-direct-graph-using-colors/
         let mut adjacency_list: HashMap<i32, Node> = HashMap::with_capacity(num_courses as usize);
 
         for edge in prerequisites {
@@ -40,7 +48,7 @@ impl Solution {
         }
 
         for key in keys {
-            if !Self::dfs(key, &adjacency_list, num_courses) {
+            if !Self::dfs(key, &adjacency_list) {
                 return false;
             };
         }
@@ -48,28 +56,28 @@ impl Solution {
         true
     }
 
-    fn dfs(key: i32, adjacency_list: &HashMap<i32, Node>, steps_left: i32) -> bool {
-        if steps_left < 0 {
-            return false; // Cycle detected taken more steps than there are nodes
-        }
-
+    fn dfs(key: i32, adjacency_list: &HashMap<i32, Node>) -> bool {
         let node = if let Some(node) = adjacency_list.get(&key) {
             node
         } else {
             return true;
         };
 
-        if *node.is_visited.borrow() {
-            return true;
-        }
+        match *node.state.borrow() {
+            NodeState::Unvisited => (),
+            NodeState::VisitInProgress => return false, // Cycle detected
+            NodeState::VisitCompleted => return true,
+        };
+
+        *node.state.borrow_mut() = NodeState::VisitInProgress;
 
         for edge in &node.edge_list {
-            if !Self::dfs(*edge, adjacency_list, steps_left - 1) {
+            if !Self::dfs(*edge, adjacency_list) {
                 return false;
             };
         }
 
-        *node.is_visited.borrow_mut() = true;
+        *node.state.borrow_mut() = NodeState::VisitCompleted;
 
         true
     }
