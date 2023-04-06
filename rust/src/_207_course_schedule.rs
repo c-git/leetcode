@@ -7,7 +7,7 @@ enum Status {
 
 impl Solution {
     pub fn can_finish(num_courses: i32, prerequisites: Vec<Vec<i32>>) -> bool {
-        // Source: "Faster Solutions" Modified for readability (added 3ms)
+        // Source: "Faster Solutions" Modified for readability
         let mut graph = vec![Vec::new(); num_courses as usize];
         let mut visited = vec![Status::NotVisited; num_courses as usize];
 
