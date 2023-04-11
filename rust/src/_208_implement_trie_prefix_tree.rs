@@ -6,7 +6,7 @@ use std::collections::HashMap;
 #[derive(Default)]
 struct TrieNode {
     is_end_of_word: bool,
-    children: HashMap<char, TrieNode>,
+    children: HashMap<u8, TrieNode>,
 }
 
 #[derive(Default)]
@@ -26,16 +26,16 @@ impl Trie {
     fn insert(&mut self, word: String) {
         let mut current_node = &mut self.root;
 
-        for c in word.chars() {
-            current_node = current_node.children.entry(c).or_default();
+        for b in word.bytes() {
+            current_node = current_node.children.entry(b).or_default();
         }
         current_node.is_end_of_word = true;
     }
     fn find_prefix_node(&self, word: &str) -> Option<&TrieNode> {
         let mut current_node = &self.root;
 
-        for c in word.chars() {
-            match current_node.children.get(&c) {
+        for b in word.bytes() {
+            match current_node.children.get(&b) {
                 Some(node) => current_node = node,
                 None => return None,
             }
