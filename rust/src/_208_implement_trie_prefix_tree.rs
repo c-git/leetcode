@@ -1,12 +1,13 @@
 //! Source: <https://dev.to/timclicks/two-trie-implementations-in-rust-ones-super-fast-2f3m>
 //! Wanted to test out some of the ideas he proposed in his video https://www.youtube.com/live/f9B87LA86g0
 
-use std::collections::HashMap;
-
 #[derive(Default)]
 struct TrieNode {
     is_end_of_word: bool,
-    children: HashMap<u8, TrieNode>,
+    children: Vec<(
+        u8, /* byte to match (for this problem based on constraints will be = char except 1/4 the space) */
+        TrieNode,
+    )>,
 }
 
 #[derive(Default)]
@@ -26,21 +27,31 @@ impl Trie {
     fn insert(&mut self, word: String) {
         let mut current_node = &mut self.root;
 
-        for b in word.bytes() {
-            current_node = current_node.children.entry(b).or_default();
+        'outer: for b in word.bytes() {
+            for element in current_node.children.iter_mut() {
+                if element.0 == b {
+                    current_node = &mut element.1;
+                    continue 'outer;
+                }
+            }
+            let n = current_node.children.len(); // Will be n - 1 after push
+            current_node.children.push((b, Default::default()));
+            current_node = &mut current_node.children[n].1;
         }
         current_node.is_end_of_word = true;
     }
     fn find_prefix_node(&self, word: &str) -> Option<&TrieNode> {
         let mut current_node = &self.root;
 
-        for b in word.bytes() {
-            match current_node.children.get(&b) {
-                Some(node) => current_node = node,
-                None => return None,
+        'outer: for b in word.bytes() {
+            for element in current_node.children.iter() {
+                if element.0 == b {
+                    current_node = &element.1;
+                    continue 'outer;
+                }
             }
+            return None;
         }
-
         Some(current_node)
     }
 
