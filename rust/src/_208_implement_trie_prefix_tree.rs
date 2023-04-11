@@ -1,6 +1,3 @@
-//! Source: <https://dev.to/timclicks/two-trie-implementations-in-rust-ones-super-fast-2f3m>
-//! Wanted to test out some of the ideas he proposed in his video https://www.youtube.com/live/f9B87LA86g0
-
 struct TrieNode {
     /// The value that this node was created for (in utf-8 this matches a char)
     /// For the leetcode problem this is the same as the ascii value of the letter
@@ -34,43 +31,37 @@ impl Trie {
         let mut current_node = &mut self.root;
 
         'outer: for b in word.bytes() {
-            for element in current_node.children.iter_mut() {
+            for (i, element) in current_node.children.iter().enumerate() {
                 if element.byte == b {
-                    current_node = element;
+                    current_node = &mut current_node.children[i];
                     continue 'outer;
                 }
             }
-            let n = current_node.children.len(); // Will be n - 1 after push
+
+            // `b` did not already have a node. Add one for `b`
             current_node.children.push(TrieNode::new(b));
-            current_node = &mut current_node.children[n];
+            current_node = current_node
+                .children
+                .last_mut()
+                .expect("Item was just added");
         }
         current_node.is_end_of_word = true;
     }
 
-    fn find_prefix_node(&self, word: &str) -> Option<&TrieNode> {
+    fn search(&self, word: String) -> bool {
         let mut current_node = &self.root;
 
         'outer: for b in word.bytes() {
             for element in current_node.children.iter() {
                 if element.byte == b {
-                    current_node = &element;
+                    current_node = element;
                     continue 'outer;
                 }
             }
-            return None;
+            return false;
         }
-        Some(current_node)
-    }
 
-    fn search(&self, word: String) -> bool {
-        match self.find_prefix_node(&word) {
-            Some(node) => node.is_end_of_word,
-            None => false,
-        }
-    }
-
-    fn starts_with(&self, prefix: String) -> bool {
-        self.find_prefix_node(&prefix).is_some()
+        current_node.is_end_of_word
     }
 }
 
@@ -84,7 +75,6 @@ mod tests {
         trie.insert("apple".to_owned());
         assert!(trie.search("apple".to_owned())); // return True
         assert!(!trie.search("app".to_owned())); // return False
-        assert!(trie.starts_with("app".to_owned())); // return True
         trie.insert("app".to_owned());
         assert!(trie.search("app".to_owned())); // return True
     }
