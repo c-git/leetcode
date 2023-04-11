@@ -1,6 +1,6 @@
 impl Solution {
     pub fn remove_stars(s: String) -> String {
-        let mut result = Vec::with_capacity(s.len());
+        let mut result = vec![];
         let mut to_delete: u32 = 0;
 
         for c in s.chars().rev() {
