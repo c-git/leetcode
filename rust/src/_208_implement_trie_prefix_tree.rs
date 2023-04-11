@@ -1,23 +1,33 @@
 //! Source: <https://dev.to/timclicks/two-trie-implementations-in-rust-ones-super-fast-2f3m>
 //! Wanted to test out some of the ideas he proposed in his video https://www.youtube.com/live/f9B87LA86g0
 
-#[derive(Default)]
 struct TrieNode {
+    /// The value that this node was created for (in utf-8 this matches a char)
+    /// For the leetcode problem this is the same as the ascii value of the letter
+    byte: u8,
     is_end_of_word: bool,
-    children: Vec<(
-        u8, /* byte to match (for this problem based on constraints will be = char except 1/4 the space) */
-        TrieNode,
-    )>,
+    children: Vec<TrieNode>,
 }
 
-#[derive(Default)]
+impl TrieNode {
+    fn new(byte: u8) -> Self {
+        Self {
+            byte,
+            is_end_of_word: false,
+            children: vec![],
+        }
+    }
+}
+
 struct Trie {
     root: TrieNode,
 }
 
 impl Trie {
     fn new() -> Self {
-        Default::default()
+        Self {
+            root: TrieNode::new(0), // The byte at the root does not get used by design just easier to have it than put an option when all the rest have
+        }
     }
 
     fn insert(&mut self, word: String) {
@@ -25,24 +35,25 @@ impl Trie {
 
         'outer: for b in word.bytes() {
             for (i, element) in current_node.children.iter_mut().enumerate() {
-                if element.0 == b {
-                    current_node = &mut current_node.children[i].1;
+                if element.byte == b {
+                    current_node = &mut current_node.children[i];
                     continue 'outer;
                 }
             }
             let n = current_node.children.len(); // Will be n - 1 after push
-            current_node.children.push((b, Default::default()));
-            current_node = &mut current_node.children[n].1;
+            current_node.children.push(TrieNode::new(b));
+            current_node = &mut current_node.children[n];
         }
         current_node.is_end_of_word = true;
     }
+
     fn find_prefix_node(&self, word: &str) -> Option<&TrieNode> {
         let mut current_node = &self.root;
 
         'outer: for b in word.bytes() {
             for element in current_node.children.iter() {
-                if element.0 == b {
-                    current_node = &element.1;
+                if element.byte == b {
+                    current_node = element;
                     continue 'outer;
                 }
             }
