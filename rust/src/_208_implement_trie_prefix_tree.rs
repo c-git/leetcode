@@ -15,10 +15,6 @@ struct Trie {
     root: TrieNode,
 }
 
-/**
- * `&self` means the method takes an immutable reference.
- * If you need a mutable reference, change it to `&mut self` instead.
- */
 impl Trie {
     fn new() -> Self {
         Default::default()
