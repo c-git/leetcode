@@ -34,9 +34,9 @@ impl Trie {
         let mut current_node = &mut self.root;
 
         'outer: for b in word.bytes() {
-            for (i, element) in current_node.children.iter_mut().enumerate() {
+            for element in current_node.children.iter_mut() {
                 if element.byte == b {
-                    current_node = &mut current_node.children[i];
+                    current_node = element;
                     continue 'outer;
                 }
             }
@@ -53,7 +53,7 @@ impl Trie {
         'outer: for b in word.bytes() {
             for element in current_node.children.iter() {
                 if element.byte == b {
-                    current_node = element;
+                    current_node = &element;
                     continue 'outer;
                 }
             }
