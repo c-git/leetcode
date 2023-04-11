@@ -31,30 +31,28 @@ impl Trie {
         }
         current_node.is_end_of_word = true;
     }
-
-    fn search(&self, word: String) -> bool {
+    fn find_prefix_node(&self, word: &str) -> Option<&TrieNode> {
         let mut current_node = &self.root;
 
         for c in word.chars() {
             match current_node.children.get(&c) {
                 Some(node) => current_node = node,
-                None => return false,
+                None => return None,
             }
         }
 
-        current_node.is_end_of_word
+        Some(current_node)
+    }
+
+    fn search(&self, word: String) -> bool {
+        match self.find_prefix_node(&word) {
+            Some(node) => node.is_end_of_word,
+            None => false,
+        }
     }
 
     fn starts_with(&self, prefix: String) -> bool {
-        let mut current_node = &self.root;
-
-        for c in prefix.chars() {
-            match current_node.children.get(&c) {
-                Some(node) => current_node = node,
-                None => return false,
-            }
-        }
-        true
+        self.find_prefix_node(&prefix).is_some()
     }
 }
 
