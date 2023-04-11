@@ -28,9 +28,9 @@ impl Trie {
         let mut current_node = &mut self.root;
 
         'outer: for b in word.bytes() {
-            for element in current_node.children.iter_mut() {
+            for (i, element) in current_node.children.iter_mut().enumerate() {
                 if element.0 == b {
-                    current_node = &mut element.1;
+                    current_node = &mut current_node.children[i].1;
                     continue 'outer;
                 }
             }
