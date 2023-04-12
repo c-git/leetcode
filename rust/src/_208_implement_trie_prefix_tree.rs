@@ -51,14 +51,12 @@ impl Trie {
     fn find_prefix_node(&self, word: &str) -> Option<&TrieNode> {
         let mut current_node = &self.root;
 
-        'outer: for b in word.bytes() {
-            for element in current_node.children.iter() {
-                if element.byte == b {
-                    current_node = element;
-                    continue 'outer;
-                }
+        for b in word.bytes() {
+            if let Some(node) = current_node.children.iter().find(|node| node.byte == b) {
+                current_node = node;
+            } else {
+                return None;
             }
-            return None;
         }
 
         Some(current_node)
