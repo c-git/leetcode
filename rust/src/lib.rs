@@ -3,7 +3,6 @@
 // Add new file as a module to make it run
 // Create Solution struct `struct Solution;` in new module
 // For an example of linked lists see _2_add_two_numbers
-mod _208_implement_trie_prefix_tree;
 mod helper;
 
 // Stub for creating test cases

@@ -33,8 +33,7 @@ impl Trie {
         'outer: for b in word.bytes() {
             for (i, element) in current_node.children.iter_mut().enumerate() {
                 if element.byte == b {
-                    // current_node = &mut current_node.children[i]; // This way works works
-                    current_node = element;
+                    current_node = &mut current_node.children[i];
                     continue 'outer;
                 }
             }
@@ -49,7 +48,7 @@ impl Trie {
         current_node.is_end_of_word = true;
     }
 
-    fn search(&self, word: String) -> bool {
+    fn find_prefix_node(&self, word: &str) -> Option<&TrieNode> {
         let mut current_node = &self.root;
 
         'outer: for b in word.bytes() {
@@ -59,10 +58,21 @@ impl Trie {
                     continue 'outer;
                 }
             }
-            return false;
+            return None;
         }
 
-        current_node.is_end_of_word
+        Some(current_node)
+    }
+
+    fn search(&self, word: String) -> bool {
+        match self.find_prefix_node(&word) {
+            Some(node) => node.is_end_of_word,
+            None => false,
+        }
+    }
+
+    fn starts_with(&self, prefix: String) -> bool {
+        self.find_prefix_node(&prefix).is_some()
     }
 }
 
@@ -76,38 +86,8 @@ mod tests {
         trie.insert("apple".to_owned());
         assert!(trie.search("apple".to_owned())); // return True
         assert!(!trie.search("app".to_owned())); // return False
+        assert!(trie.starts_with("app".to_owned())); // return True
         trie.insert("app".to_owned());
         assert!(trie.search("app".to_owned())); // return True
     }
 }
-
-// error[E0499]: cannot borrow `current_node.children` as mutable more than once at a time
-//   --> src/_208_implement_trie_prefix_tree.rs:43:13
-//    |
-// 34 |             for (i, element) in current_node.children.iter_mut().enumerate() {
-//    |                                 -------------------------------- first mutable borrow occurs here
-// ...
-// 43 |             current_node.children.push(TrieNode::new(b));
-//    |             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-//    |             |
-//    |             second mutable borrow occurs here
-//    |             first borrow later used here
-
-// error[E0499]: cannot borrow `current_node.children` as mutable more than once at a time
-//   --> src/_208_implement_trie_prefix_tree.rs:44:28
-//    |
-// 34 |               for (i, element) in current_node.children.iter_mut().enumerate() {
-//    |                                   -------------------------------- first mutable borrow occurs here
-// ...
-// 44 |               current_node = current_node
-//    |  ____________________________^
-// 45 | |                 .children
-// 46 | |                 .last_mut()
-//    | |                           ^
-//    | |                           |
-//    | |___________________________second mutable borrow occurs here
-//    |                             first borrow later used here
-
-// For more information about this error, try `rustc --explain E0499`.
-// warning: `rust` (lib) generated 1 warning
-// error: could not compile `rust` due to 2 previous errors; 1 warning emitted
