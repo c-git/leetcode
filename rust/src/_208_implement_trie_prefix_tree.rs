@@ -1,3 +1,6 @@
+//! Source: <https://dev.to/timclicks/two-trie-implementations-in-rust-ones-super-fast-2f3m>
+//! Wanted to test out some of the ideas he proposed in his video https://www.youtube.com/live/f9B87LA86g0
+
 struct TrieNode {
     /// The value that this node was created for (in utf-8 this matches a char)
     /// For the leetcode problem this is the same as the ascii value of the letter
