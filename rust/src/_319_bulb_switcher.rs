@@ -1,19 +1,21 @@
 impl Solution {
     pub fn bulb_switch(n: i32) -> i32 {
-        let n = n as usize;
-        let mut bulbs = vec![0; n]; // Used 0 and 1 instead because they are the same length and print better in columns
-        for step in 1..=n {
-            for bulb_index in (0..n).skip(step - 1).step_by(step) {
-                bulbs[bulb_index] = 1 - bulbs[bulb_index];
-            }
-            if cfg!(debug_assertions) {
-                println!("step = {step}. Bulbs = {bulbs:?}")
+        // Pattern discovered is that only number with an odd number of factors will be on.
+        // Because each number basically performs and xor with the previous numbers so the bulbs ("bits") will get flipped each time
+        // and only odd number number of factors will result in the light staying on. Only square numbers have an odd number of factors
+        // because one factor is repeated and that factor is the square root.
+
+        let mut result = 0;
+
+        // Count square numbers less than n
+        for x in 1..=n {
+            if x * x <= n {
+                result += 1;
+            } else {
+                break;
             }
         }
-        if cfg!(debug_assertions) {
-            println!("n = {n}. Bulbs = {bulbs:?}")
-        }
-        bulbs.iter().sum()
+        result
     }
 }
 struct Solution;
