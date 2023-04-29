@@ -29,7 +29,9 @@ impl Solution {
                             result = c.to_digit(10).unwrap();
                             state = State::ReadingNumbers;
                         }
-                        _ => unreachable!(),
+                        _ => {
+                            break;
+                        }
                     }
                 }
                 State::ReadingNumbers => {
@@ -87,6 +89,14 @@ mod tests {
     fn case3() {
         let input = "4193 with words".to_owned();
         let expected = 4193;
+        let actual = Solution::my_atoi(input);
+        assert_eq!(actual, expected);
+    }
+
+    #[test]
+    fn case4() {
+        let input = "words and 987".to_owned();
+        let expected = 0;
         let actual = Solution::my_atoi(input);
         assert_eq!(actual, expected);
     }
