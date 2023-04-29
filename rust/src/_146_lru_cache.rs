@@ -70,8 +70,11 @@ impl LinkedList {
 
         // If tail not set then this new node is the tail
         if self.tail.is_none() {
-            self.tail = Some(node);
+            self.tail = Some(Rc::clone(&node));
         }
+
+        node.borrow_mut().prev = None; // In case this is a node being reused
+        println!("After Insert:\n{self:?}");
     }
 
     fn remove(&mut self, node: Node) {
