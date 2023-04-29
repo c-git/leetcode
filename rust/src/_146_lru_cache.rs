@@ -1,4 +1,10 @@
-use std::{cell::RefCell, collections::HashMap, fmt::Debug, rc::Rc};
+use std::{
+    cell::RefCell,
+    collections::{HashMap, HashSet},
+    fmt::Debug,
+    rc::Rc,
+    vec,
+};
 
 type Node = Rc<RefCell<NakedNode>>;
 
@@ -42,7 +48,7 @@ impl Debug for NakedNode {
     }
 }
 
-#[derive(Default, Debug)]
+#[derive(Default)]
 struct LinkedList {
     head: Option<Node>,
     // TODO change to use WeakRefs for the back links to prevent memory leak
@@ -92,6 +98,46 @@ impl LinkedList {
 
     fn get_last(&self) -> Option<Node> {
         self.tail.as_ref().map(Rc::clone)
+    }
+
+    fn get_nodes_as_vec(start_node: Option<Node>, should_go_forward: bool) -> Vec<(i32, i32)> {
+        let mut seen = HashSet::new();
+        let mut result = vec![];
+        let mut curr_node = start_node;
+        while curr_node.is_some() {
+            let node = curr_node.unwrap();
+            debug_assert!(
+                !seen.contains(&node.borrow().key),
+                "Duplicate key found: {}",
+                node.borrow().key
+            );
+            seen.insert(node.borrow().key);
+            result.push((node.borrow().key, node.borrow().value));
+            if should_go_forward {
+                curr_node = node.borrow().next.clone()
+            } else {
+                curr_node = node.borrow().prev.clone()
+            }
+        }
+        result
+    }
+}
+
+impl Debug for LinkedList {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        // return write!(f, "skipped");
+        let fwd = Self::get_nodes_as_vec(self.head.clone(), true);
+        let mut bck = Self::get_nodes_as_vec(self.tail.clone(), false);
+        bck.reverse();
+        debug_assert_eq!(fwd, bck);
+        write!(
+            f,
+            "Fwd: ({}) {:?}\nBck: ({}) {:?}",
+            fwd.len(),
+            fwd,
+            bck.len(),
+            bck
+        )
     }
 }
 
