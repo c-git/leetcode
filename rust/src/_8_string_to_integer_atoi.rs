@@ -39,7 +39,11 @@ impl Solution {
                     //Convert these digits into an integer (i.e. "123" -> 123, "0032" -> 32). If no digits were read, then the integer is 0. Change the sign as necessary (from step 2).
                     //If the integer is out of the 32-bit signed integer range, then clamp the integer so that it remains in the range.
                     match c {
-                        '0'..='9' => result = result * 10 + c.to_digit(10).unwrap(),
+                        '0'..='9' => {
+                            result = result
+                                .saturating_mul(10)
+                                .saturating_add(c.to_digit(10).unwrap())
+                        }
                         _ => break,
                     }
                 }
@@ -97,6 +101,14 @@ mod tests {
     fn case4() {
         let input = "words and 987".to_owned();
         let expected = 0;
+        let actual = Solution::my_atoi(input);
+        assert_eq!(actual, expected);
+    }
+
+    #[test]
+    fn case5() {
+        let input = "-91283472332".to_owned();
+        let expected = -2147483648;
         let actual = Solution::my_atoi(input);
         assert_eq!(actual, expected);
     }
