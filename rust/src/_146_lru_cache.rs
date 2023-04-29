@@ -1,9 +1,5 @@
-use std::{
-    cell::RefCell,
-    collections::{HashMap, HashSet},
-    fmt::Debug,
-    rc::Rc,
-};
+use std::collections::{HashMap, HashSet};
+use std::{cell::RefCell, fmt::Debug, rc::Rc};
 
 type Node = Rc<RefCell<NakedNode>>;
 
