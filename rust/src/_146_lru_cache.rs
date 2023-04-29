@@ -3,7 +3,6 @@ use std::{
     collections::{HashMap, HashSet},
     fmt::Debug,
     rc::Rc,
-    vec,
 };
 
 type Node = Rc<RefCell<NakedNode>>;
@@ -74,7 +73,6 @@ impl LinkedList {
         }
 
         node.borrow_mut().prev = None; // In case this is a node being reused
-        println!("After Insert:\n{self:?}");
     }
 
     fn remove(&mut self, node: Node) {
