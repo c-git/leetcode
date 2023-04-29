@@ -1,4 +1,4 @@
-use std::collections::{HashMap, HashSet};
+use std::collections::HashMap;
 use std::{cell::RefCell, fmt::Debug, rc::Rc};
 
 type Node = Rc<RefCell<NakedNode>>;
@@ -98,17 +98,17 @@ impl LinkedList {
     }
 
     fn get_nodes_as_vec(start_node: Option<Node>, should_go_forward: bool) -> Vec<(i32, i32)> {
-        let mut seen = HashSet::new();
+        let mut seen = HashMap::new();
         let mut result = vec![];
         let mut curr_node = start_node;
         while curr_node.is_some() {
             let node = curr_node.unwrap();
             debug_assert!(
-                !seen.contains(&node.borrow().key),
+                seen.get(&node.borrow().key).is_some(),
                 "Duplicate key found: {}",
                 node.borrow().key
             );
-            seen.insert(node.borrow().key);
+            seen.insert(node.borrow().key, 0);
             result.push((node.borrow().key, node.borrow().value));
             if should_go_forward {
                 curr_node = node.borrow().next.clone()

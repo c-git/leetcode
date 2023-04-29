@@ -3,6 +3,7 @@
 // Add new file as a module to make it run
 // Create Solution struct `struct Solution;` in new module
 // For an example of linked lists see _2_add_two_numbers
+mod _146_lru_cache;
 mod helper;
 
 // Stub for creating test cases
