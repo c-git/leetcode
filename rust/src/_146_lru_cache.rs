@@ -1,44 +1,55 @@
+// Patterned fix for weak links on https://github.com/timClicks/live-streams/blob/main/doubly_linked_list/src/weak_ref.rs
+
 use std::collections::HashMap;
+use std::rc::Weak;
 use std::{cell::RefCell, rc::Rc};
 
-type Node = Rc<RefCell<NakedNode>>;
+type WrappedNode = Rc<RefCell<Node>>;
+type LinkFwd = Option<WrappedNode>; // Used only for forward links
+type LinkBack = Option<Weak<RefCell<Node>>>;
 
-#[derive(PartialEq, Eq)]
-struct NakedNode {
+struct Node {
     key: i32, // Needs to store key to ensure they are unique
     value: i32,
-    prev: Option<Node>,
-    next: Option<Node>,
+    prev: LinkBack,
+    next: LinkFwd,
 }
 
-impl NakedNode {
+impl Node {
     fn new(key: i32, value: i32) -> Self {
         Self {
             key,
             value,
-            // TODO change to use WeakRefs for the back links to prevent memory leak
             prev: Default::default(),
             next: Default::default(),
         }
     }
 
-    fn new_wrapped(key: i32, value: i32) -> Node {
+    fn new_wrapped(key: i32, value: i32) -> WrappedNode {
         Rc::new(RefCell::new(Self::new(key, value)))
+    }
+
+    fn prev_clone(&self) -> LinkBack {
+        self.prev
+            .as_ref()
+            .map(|x| Rc::downgrade(&x.upgrade().expect("Invalid link to node in a Some")))
+    }
+    fn next_clone(&self) -> LinkFwd {
+        self.next.as_ref().map(Rc::clone)
     }
 }
 
 #[derive(Default)]
 struct LinkedList {
-    head: Option<Node>,
-    // TODO change to use WeakRefs for the back links to prevent memory leak
-    tail: Option<Node>,
+    head: LinkFwd,
+    tail: LinkBack,
 }
 
 impl LinkedList {
-    fn insert(&mut self, node: Node) {
+    fn insert(&mut self, node: WrappedNode) {
         // Update head prev to new node
         if let Some(head) = &self.head {
-            head.borrow_mut().prev = Some(Rc::clone(&node));
+            head.borrow_mut().prev = Some(Rc::downgrade(&node));
         }
 
         // Set new node next to current head
@@ -49,36 +60,51 @@ impl LinkedList {
 
         // If tail not set then this new node is the tail
         if self.tail.is_none() {
-            self.tail = Some(Rc::clone(&node));
+            self.tail = Some(Rc::downgrade(&node));
         }
 
-        node.borrow_mut().prev = None; // In case this is a node being reused
+        node.borrow_mut().prev = None; // In case this is a node being reused (this is the new head can't have prev)
     }
 
-    fn remove(&mut self, node: Node) {
+    fn remove(&mut self, node: WrappedNode) {
         if let Some(head) = &self.head {
-            if head == &node {
+            if head.borrow().key == node.borrow().key {
                 self.head = node.borrow().next.as_ref().map(Rc::clone);
             }
         }
 
         if let Some(tail) = &self.tail {
-            if tail == &node {
-                self.tail = node.borrow().prev.as_ref().map(Rc::clone);
+            if tail
+                .upgrade()
+                .expect("Tail is Some but not pointing to a valid node")
+                .borrow()
+                .key
+                == node.borrow().key
+            {
+                self.tail = node.borrow().prev_clone();
             }
         }
 
         if let Some(prev_node) = &node.borrow().prev {
-            prev_node.borrow_mut().next = node.borrow().next.as_ref().map(Rc::clone);
+            prev_node
+                .upgrade()
+                .expect("Prev is some but not pointing to a valid node")
+                .borrow_mut()
+                .next = node.borrow().next_clone();
         }
 
         if let Some(next_node) = &node.borrow().next {
-            next_node.borrow_mut().prev = node.borrow().prev.as_ref().map(Rc::clone);
+            next_node.borrow_mut().prev = node.borrow().prev_clone();
         }
     }
 
-    fn get_last(&self) -> Option<Node> {
-        self.tail.as_ref().map(Rc::clone)
+    fn get_last(&self) -> WrappedNode {
+        debug_assert!(self.tail.is_some(), "get_last requires a last to exist");
+        self.tail
+            .as_ref()
+            .unwrap()
+            .upgrade()
+            .expect("Tail is some but doesn't point to a valid node")
     }
 }
 
@@ -86,7 +112,7 @@ struct LRUCache {
     capacity: usize,
     size: usize, // Current number of items in the Cache
     items_list: LinkedList,
-    items_map: HashMap<i32, Node>,
+    items_map: HashMap<i32, WrappedNode>,
 }
 
 /**
@@ -111,7 +137,7 @@ impl LRUCache {
 
     /// Removes the node from the cache if it exists and returns it
     /// The item will no longer be in the hashmap nor the linked list
-    fn extract_node(&mut self, key: i32) -> Option<Node> {
+    fn extract_node(&mut self, key: i32) -> Option<WrappedNode> {
         let result = self.items_map.remove(&key)?;
 
         self.items_list.remove(Rc::clone(&result));
@@ -137,7 +163,7 @@ impl LRUCache {
 
     pub fn put(&mut self, key: i32, value: i32) {
         // Create node
-        let node: Node = NakedNode::new_wrapped(key, value);
+        let node: WrappedNode = Node::new_wrapped(key, value);
 
         // Remove any node that already exists with the key
         let old_node = self.extract_node(key);
@@ -161,17 +187,14 @@ impl LRUCache {
         }
     }
 
-    fn insert_node(&mut self, node: Node) {
+    fn insert_node(&mut self, node: WrappedNode) {
         self.items_map.insert(node.borrow().key, Rc::clone(&node));
         self.items_list.insert(node);
     }
 
     fn remove_lru(&mut self) {
         debug_assert!(self.size > 0);
-        let last_node = self
-            .items_list
-            .get_last()
-            .expect("Expected the list to have at least 1 item");
+        let last_node = self.items_list.get_last();
         self.extract_node(last_node.borrow().key);
     }
 }
