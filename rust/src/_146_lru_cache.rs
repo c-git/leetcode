@@ -1,5 +1,5 @@
 use std::collections::HashMap;
-use std::{cell::RefCell, fmt::Debug, rc::Rc};
+use std::{cell::RefCell, rc::Rc};
 
 type Node = Rc<RefCell<NakedNode>>;
 
@@ -24,22 +24,6 @@ impl NakedNode {
 
     fn new_wrapped(key: i32, value: i32) -> Node {
         Rc::new(RefCell::new(Self::new(key, value)))
-    }
-}
-
-impl Debug for NakedNode {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let prev_status = if self.prev.is_some() {
-            "is_some"
-        } else {
-            "is_none"
-        };
-        f.debug_struct("NakedNode")
-            .field("key", &self.key)
-            .field("value", &self.value)
-            .field("prev", &prev_status)
-            .field("next", &self.next)
-            .finish()
     }
 }
 
@@ -96,49 +80,8 @@ impl LinkedList {
     fn get_last(&self) -> Option<Node> {
         self.tail.as_ref().map(Rc::clone)
     }
-
-    fn get_nodes_as_vec(start_node: Option<Node>, should_go_forward: bool) -> Vec<(i32, i32)> {
-        let mut seen = HashMap::new();
-        let mut result = vec![];
-        let mut curr_node = start_node;
-        while curr_node.is_some() {
-            let node = curr_node.unwrap();
-            debug_assert!(
-                seen.get(&node.borrow().key).is_some(),
-                "Duplicate key found: {}",
-                node.borrow().key
-            );
-            seen.insert(node.borrow().key, 0);
-            result.push((node.borrow().key, node.borrow().value));
-            if should_go_forward {
-                curr_node = node.borrow().next.clone()
-            } else {
-                curr_node = node.borrow().prev.clone()
-            }
-        }
-        result
-    }
 }
 
-impl Debug for LinkedList {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        // return write!(f, "skipped");
-        let fwd = Self::get_nodes_as_vec(self.head.clone(), true);
-        let mut bck = Self::get_nodes_as_vec(self.tail.clone(), false);
-        bck.reverse();
-        debug_assert_eq!(fwd, bck);
-        write!(
-            f,
-            "Fwd: ({}) {:?}\nBck: ({}) {:?}",
-            fwd.len(),
-            fwd,
-            bck.len(),
-            bck
-        )
-    }
-}
-
-#[derive(Debug)]
 struct LRUCache {
     capacity: usize,
     size: usize, // Current number of items in the Cache
