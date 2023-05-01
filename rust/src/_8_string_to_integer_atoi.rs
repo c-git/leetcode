@@ -4,8 +4,10 @@ enum State {
 }
 impl Solution {
     pub fn my_atoi(s: String) -> i32 {
-        let mut result: u32 = 0;
-        let mut is_positive = true;
+        // Using idea from "adotinthevoid" to just use an i32 and if it's negative just work with negative numbers each iteration
+        // Changed to use 1 or -1 and always multiply by it to avoid the brach inside of the loop
+        let mut result: i32 = 0;
+        let mut sign = 1; // Changed to negative if we need a negative number
         let mut state = State::Start;
 
         for c in s.chars() {
@@ -18,7 +20,7 @@ impl Solution {
                     // Assume the result is positive if neither is present.
                     match c {
                         '-' => {
-                            is_positive = false;
+                            sign = -1;
                             state = State::ReadingNumbers;
                         }
                         '+' => {
@@ -26,7 +28,7 @@ impl Solution {
                         }
                         ' ' => (),
                         '0'..='9' => {
-                            result = c.to_digit(10).unwrap();
+                            result = c.to_digit(10).unwrap() as i32 * sign;
                             state = State::ReadingNumbers;
                         }
                         _ => {
@@ -42,30 +44,14 @@ impl Solution {
                         '0'..='9' => {
                             result = result
                                 .saturating_mul(10)
-                                .saturating_add(c.to_digit(10).unwrap())
+                                .saturating_add(c.to_digit(10).unwrap() as i32 * sign)
                         }
                         _ => break,
                     }
                 }
             }
         }
-
-        let result = result as i64;
-
-        if is_positive {
-            if result > i32::MAX as i64 {
-                i32::MAX
-            } else {
-                result as i32
-            }
-        } else {
-            let temp = 0 - result;
-            if temp < i32::MIN as i64 {
-                i32::MIN
-            } else {
-                temp as i32
-            }
-        }
+        result
     }
 }
 struct Solution;
@@ -109,6 +95,14 @@ mod tests {
     fn case5() {
         let input = "-91283472332".to_owned();
         let expected = -2147483648;
+        let actual = Solution::my_atoi(input);
+        assert_eq!(actual, expected);
+    }
+
+    #[test]
+    fn case6() {
+        let input = "91283472332".to_owned();
+        let expected = 2147483647;
         let actual = Solution::my_atoi(input);
         assert_eq!(actual, expected);
     }
