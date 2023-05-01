@@ -106,10 +106,13 @@ impl Solution {
                 }
             }
         }
-        if matches!(state, State::FractionReq) {
-            Err("Expected a number of the . but reached the end of the string".to_string())
-        } else {
-            Ok("")
+
+        match state {
+            State::Start => Err("No number found".to_string()),
+            State::WholeNumber | State::FractionOpt => Ok(""),
+            State::FractionReq => {
+                Err("Expected a number of the . but reached the end of the string".to_string())
+            }
         }
     }
 }
@@ -146,6 +149,14 @@ mod tests {
     #[test]
     fn case4() {
         let input = ".".to_string();
+        let expected = false;
+        let actual = Solution::is_number(input);
+        assert_eq!(actual, expected);
+    }
+
+    #[test]
+    fn case5() {
+        let input = "+".to_string();
         let expected = false;
         let actual = Solution::is_number(input);
         assert_eq!(actual, expected);
