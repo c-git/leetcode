@@ -1,21 +1,11 @@
 {
     "code-runner.customCommand": "cd rust && cargo test --lib && echo \"--------------------------------------------------------------------------------------------------------------------------\"",
     "cSpell.words": [
-        "adcbaabcdf",
-        "adcbabcdf",
-        "anana",
         "atoi",
-        "baab",
-        "baaba",
-        "babad",
-        "cbbd",
         "conv",
-        "dcbaabcd",
-        "dcbabcd",
         "leetcode",
         "Manacher's",
         "mincost",
-        "ninp"
     ],
     "rust-analyzer.showUnlinkedFileNotification": false,
 }
