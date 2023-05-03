@@ -1,9 +1,9 @@
-use std::collections::BTreeSet;
+use std::collections::HashSet;
 
 impl Solution {
     pub fn find_difference(nums1: Vec<i32>, nums2: Vec<i32>) -> Vec<Vec<i32>> {
-        let nums1: BTreeSet<_> = nums1.into_iter().collect();
-        let nums2: BTreeSet<_> = nums2.into_iter().collect();
+        let nums1: HashSet<_> = nums1.into_iter().collect();
+        let nums2: HashSet<_> = nums2.into_iter().collect();
 
         // Must use copy here because otherwise values point to the values from the local variables
         vec![
