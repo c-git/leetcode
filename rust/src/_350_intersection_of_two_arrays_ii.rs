@@ -1,25 +1,31 @@
-impl Solution {
-    pub fn intersect(mut nums1: Vec<i32>, mut nums2: Vec<i32>) -> Vec<i32> {
-        nums1.sort_unstable();
-        nums2.sort_unstable();
-        let mut nums1 = nums1.into_iter();
-        let mut nums2 = nums2.into_iter();
-        let mut result = vec![];
-        let mut curr = (nums1.next(), nums2.next());
+use std::collections::HashMap;
 
-        while let (Some(num1), Some(num2)) = curr {
-            match num1.cmp(&num2) {
-                std::cmp::Ordering::Less => {
-                    //num1 is too small will never match
-                    curr = (nums1.next(), Some(num2));
-                }
-                std::cmp::Ordering::Equal => {
-                    result.push(num1);
-                    curr = (nums1.next(), nums2.next());
-                }
-                std::cmp::Ordering::Greater => {
-                    //num2 is too small will never match
-                    curr = (Some(num1), nums2.next());
+impl Solution {
+    pub fn intersect(nums1: Vec<i32>, nums2: Vec<i32>) -> Vec<i32> {
+        // This solution is to simulate the ability only read one value from num2 at a time because it is too big and is stored on disk
+        // See history in git for faster solution that requires sorting
+
+        let (nums1, nums2) = if nums1.len() < nums2.len() {
+            (nums1, nums2)
+        } else {
+            (nums2, nums1)
+        };
+
+        let mut lookup_set = HashMap::with_capacity(nums1.len());
+        for num in nums1 {
+            *lookup_set.entry(num).or_insert(0) += 1;
+        }
+
+        let mut result = vec![];
+
+        for num2 in nums2 {
+            if let Some(duplicity) = lookup_set.get_mut(&num2) {
+                result.push(num2);
+                debug_assert!(duplicity >= &mut 1);
+                if duplicity == &1 {
+                    lookup_set.remove(&num2);
+                } else {
+                    *duplicity -= 1;
                 }
             }
         }
