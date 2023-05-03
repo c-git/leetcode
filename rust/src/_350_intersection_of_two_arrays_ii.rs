@@ -5,28 +5,21 @@ impl Solution {
         let mut nums1 = nums1.into_iter();
         let mut nums2 = nums2.into_iter();
         let mut result = vec![];
-        let mut curr1 = nums1.next();
-        let mut curr2 = nums2.next();
+        let mut curr = (nums1.next(), nums2.next());
 
-        #[allow(clippy::while_let_loop)]
-        loop {
-            let num1 = if let Some(num) = curr1 { num } else { break };
-            let num2 = if let Some(num) = curr2 { num } else { break };
+        while let (Some(num1), Some(num2)) = curr {
             match num1.cmp(&num2) {
                 std::cmp::Ordering::Less => {
                     //num1 is too small will never match
-                    curr1 = nums1.next();
-                    curr2 = Some(num2);
+                    curr = (nums1.next(), Some(num2));
                 }
                 std::cmp::Ordering::Equal => {
                     result.push(num1);
-                    curr1 = nums1.next();
-                    curr2 = nums2.next();
+                    curr = (nums1.next(), nums2.next());
                 }
                 std::cmp::Ordering::Greater => {
                     //num2 is too small will never match
-                    curr1 = Some(num1);
-                    curr2 = nums2.next();
+                    curr = (Some(num1), nums2.next());
                 }
             }
         }
