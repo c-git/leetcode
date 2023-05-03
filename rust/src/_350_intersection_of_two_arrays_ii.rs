@@ -1,7 +1,7 @@
 impl Solution {
     pub fn intersect(mut nums1: Vec<i32>, mut nums2: Vec<i32>) -> Vec<i32> {
-        nums1.sort();
-        nums2.sort();
+        nums1.sort_unstable();
+        nums2.sort_unstable();
         let mut nums1 = nums1.into_iter();
         let mut nums2 = nums2.into_iter();
         let mut result = vec![];
