@@ -1,9 +1,11 @@
 impl Solution {
     pub fn int_to_roman(mut num: i32) -> String {
+        // Switched order of comparisons to remove useless operations based on solution with faster time
         debug_assert!(
             num >= 1,
             "What the romans didn't have 0 or negative numbers"
         );
+
         let mut result = String::new();
         let values = [
             (1000, "M"),
@@ -20,13 +22,11 @@ impl Solution {
             (4, "IV"),
             (1, "I"),
         ];
-        while num > 0 {
-            for &(value, symbol) in &values {
-                if num >= value {
-                    num -= value;
-                    result.push_str(symbol);
-                    break;
-                }
+
+        for &(value, symbol) in &values {
+            while num >= value {
+                num -= value;
+                result.push_str(symbol);
             }
         }
         result
