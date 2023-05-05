@@ -163,8 +163,12 @@ fn parse_second_line_helper(input: &str) -> IResult<&str, Vec<String>> {
             break;
         }
         let (input, _) = tag("[")(input)?;
-        let (input, val) = is_not("]")(input)?;
-        result.push(val.to_string());
+        let (input, val) = opt(is_not("]"))(input)?;
+        result.push(if let Some(val) = val {
+            val.to_string()
+        } else {
+            "".to_string()
+        });
         let (input, _) = tag("]")(input)?;
         let (input, _) = opt(tag(","))(input)?;
         let (input, _) = multispace0(input)?;
