@@ -280,15 +280,11 @@ impl AllOne {
 
     pub fn inc(&mut self, key: String) {
         let word = Rc::new(key);
-        match self.items_map.get_mut(&word) {
-            Some(node) => *node = self.count_list.increment_word(&word, Rc::clone(node)),
-            None => {
-                self.items_map.insert(
-                    Rc::clone(&word),
-                    self.count_list.insert_at_head(Rc::clone(&word)),
-                );
-            }
-        }
+        let new_node = match self.items_map.get(&word) {
+            Some(node) => self.count_list.increment_word(&word, Rc::clone(node)),
+            None => self.count_list.insert_at_head(Rc::clone(&word)),
+        };
+        self.items_map.insert(word, new_node);
     }
 
     pub fn dec(&mut self, key: String) {
