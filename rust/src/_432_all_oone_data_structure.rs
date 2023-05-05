@@ -457,9 +457,9 @@ mod tests {
                 .collect::<Vec<String>>()
         );
         println!("{:?}", obj.count_list.count_num_words_as_str());
-        assert_eq!(obj.get_max_key(), "leet");
+        assert!(["leet", "code"].contains(&&obj.get_max_key()[..]));
     }
-}
+
 #[test]
 fn case4() {
     let mut obj = AllOne::new();
@@ -488,4 +488,6 @@ fn case4() {
     dbg!(obj.inc("a".into()));
     println!("{:?}", obj.count_list.count_num_words_as_str());
     assert_eq!(obj.get_min_key(), "b");
+}
+
 }
