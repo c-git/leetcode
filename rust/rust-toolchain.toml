@@ -1,0 +1,4 @@
+[toolchain]
+# PIN rust version because leetcode uses an old version
+# https://support.leetcode.com/hc/en-us/articles/360011833974-What-are-the-environments-for-the-programming-languages-
+channel = "1.58.1" #1.58.2 doesn't exist
