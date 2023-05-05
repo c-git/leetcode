@@ -92,22 +92,28 @@ impl LinkedList {
         }
     }
 
-    fn insert_next_to_node(&mut self, existing_node: &Node, count: usize, word: Word) -> Node {
+    fn insert_next_to_node(&mut self, existing_node: Node, count: usize, word: Word) -> Node {
         let new_node = NakedNode::new_wrapped(count, word);
 
-        if let Some(next) = existing_node.borrow().next.as_ref() {
-            next.borrow_mut().prev = Some(Rc::downgrade(&new_node));
+        if existing_node.borrow().next.is_some() {
+            existing_node
+                .borrow()
+                .next
+                .as_ref()
+                .unwrap()
+                .borrow_mut()
+                .prev = Some(Rc::downgrade(&new_node));
             new_node.borrow_mut().next = existing_node.borrow().next_clone();
             existing_node.borrow_mut().next = Some(Rc::clone(&new_node));
-            new_node.borrow_mut().prev = Some(Rc::downgrade(existing_node));
+            new_node.borrow_mut().prev = Some(Rc::downgrade(&existing_node));
         } else {
             debug_assert!(self
                 .tail
                 .as_ref()
                 .unwrap()
-                .ptr_eq(&Rc::downgrade(existing_node)));
+                .ptr_eq(&Rc::downgrade(&existing_node)));
             existing_node.borrow_mut().next = Some(Rc::clone(&new_node));
-            new_node.borrow_mut().prev = Some(Rc::downgrade(existing_node));
+            new_node.borrow_mut().prev = Some(Rc::downgrade(&existing_node));
             self.tail = Some(Rc::downgrade(&new_node));
         }
         new_node
@@ -145,7 +151,8 @@ impl LinkedList {
             }
             (false, false) => {
                 node.borrow_mut().remove_word(word);
-                self.insert_next_to_node(&node, node.borrow().count + 1, Rc::clone(word))
+                let new_count = node.borrow().count + 1;
+                self.insert_next_to_node(Rc::clone(&node), new_count, Rc::clone(word))
             }
         }
     }
@@ -251,7 +258,7 @@ impl LinkedList {
 
     fn insert_prev_to_node(&mut self, node: &Node, count: usize, word: Word) -> Node {
         if let Some(prev) = node.borrow().prev.as_ref() {
-            self.insert_next_to_node(&prev.upgrade().expect("Prev point to nothing"), count, word)
+            self.insert_next_to_node(prev.upgrade().expect("Prev point to nothing"), count, word)
         } else {
             let new_node = self.insert_at_head(word);
             new_node.borrow_mut().count = count;
