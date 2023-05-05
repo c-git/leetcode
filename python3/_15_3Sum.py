@@ -9,7 +9,7 @@ class Solution:
             return []
         nums.sort()
         result = []
-        first_num = nums[0] - 1  # set to diff value
+        first_num = nums[0] - 1  # set to a different value (less than min so must be different)
         for ind_outer in range(len(nums) - 2):
             seen = set()  # Stores the 2nd numbers we've seen
             third_num = set()
