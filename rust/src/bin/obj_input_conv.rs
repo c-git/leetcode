@@ -1,4 +1,5 @@
 use std::{
+    env,
     fs::File,
     io::{self, BufRead, Write},
 };
@@ -10,52 +11,55 @@ use nom::{
     IResult,
 };
 
-use clap::Parser;
+// use clap::Parser;
 
-#[derive(Parser)]
-#[command(
-    author,
-    version,
-    about,
-    long_about = "This program reads up to the first three lines from the input file
-and outputs the corresponding rust code.
-First line: Specifies the function to call
-Second line: Specifies the arguments
-Third line: (Optional) The value that must be returned from the function call
+// #[derive(Parser)]
+// #[command(
+//     author,
+//     version,
+//     about,
+//     long_about = "This program reads up to the first three lines from the input file
+// and outputs the corresponding rust code.
+// First line: Specifies the function to call
+// Second line: Specifies the arguments
+// Third line: (Optional) The value that must be returned from the function call
 
-Sample cargo command
+// Sample cargo command
 
-cargo run --bin obj_input_conv -- sample_input.txt sample_output.txt
+// cargo run --bin obj_input_conv -- sample_input.txt sample_output.txt
 
-Example input from https://leetcode.com/problems/lru-cache/ (first function call modified):
+// Example input from https://leetcode.com/problems/lru-cache/ (first function call modified):
 
-[\"LRUCache::new\", \"put\", \"put\", \"get\", \"put\", \"get\", \"put\", \"get\", \"get\", \"get\"]
-[[2], [1, 1], [2, 2], [1], [3, 3], [2], [4, 4], [1], [3], [4]]
-[null, null, null, 1, null, -1, null, -1, 3, 4]
+// [\"LRUCache::new\", \"put\", \"put\", \"get\", \"put\", \"get\", \"put\", \"get\", \"get\", \"get\"]
+// [[2], [1, 1], [2, 2], [1], [3, 3], [2], [4, 4], [1], [3], [4]]
+// [null, null, null, 1, null, -1, null, -1, 3, 4]
 
-Example Output:
-let mut obj = LRUCache::new(2);
-obj.put(1, 1);
-obj.put(2, 2);
-assert_eq!(obj.get(1), 1);
-obj.put(3, 3);
-assert_eq!(obj.get(2), -1);
-obj.put(4, 4);
-assert_eq!(obj.get(1), -1);
-assert_eq!(obj.get(3), 3);
-assert_eq!(obj.get(4), 4);
-"
-)]
+// Example Output:
+// let mut obj = LRUCache::new(2);
+// obj.put(1, 1);
+// obj.put(2, 2);
+// assert_eq!(obj.get(1), 1);
+// obj.put(3, 3);
+// assert_eq!(obj.get(2), -1);
+// obj.put(4, 4);
+// assert_eq!(obj.get(1), -1);
+// assert_eq!(obj.get(3), 3);
+// assert_eq!(obj.get(4), 4);
+// "
+// )]
 pub struct Cli {
-    #[arg(help = "File to read input from")]
+    // #[arg(help = "File to read input from")]
     pub input_file: String,
 
-    #[arg(help = "File to write output to from")]
+    // #[arg(help = "File to write output to from")]
     pub output_file: String,
 }
 
 fn main() {
-    let cli = Cli::parse();
+    let cli = Cli {
+        input_file: env::args().nth(1).expect("No input argument found"),
+        output_file: env::args().nth(2).expect("No output argument found"),
+    };
 
     // Get input
     println!("Loading input...");
