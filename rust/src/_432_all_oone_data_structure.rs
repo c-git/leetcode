@@ -153,7 +153,7 @@ impl LinkedList {
             node.borrow()
                 .next
                 .as_ref()
-                .map(|next| next.borrow().count + 1 == node.borrow().count),
+                .map(|next| next.borrow().count == node.borrow().count + 1),
             Some(true)
         );
 
