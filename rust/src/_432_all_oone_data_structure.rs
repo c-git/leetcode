@@ -377,4 +377,22 @@ mod tests {
         all_one.inc("code".into());
         all_one.get_max_key();
     }
+
+    #[test]
+    fn case3() {
+        let mut obj = AllOne::new();
+        obj.inc("hello".into());
+        obj.inc("goodbye".into());
+        obj.inc("hello".into());
+        obj.inc("hello".into());
+        assert_eq!(obj.get_max_key(), "hello");
+        obj.inc("leet".into());
+        obj.inc("code".into());
+        obj.inc("leet".into());
+        obj.dec("hello".into());
+        obj.inc("leet".into());
+        obj.inc("code".into());
+        obj.inc("code".into());
+        assert_eq!(obj.get_max_key(), "leet");
+    }
 }
