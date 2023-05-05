@@ -117,12 +117,13 @@ impl LinkedList {
         debug_assert!(node.borrow().strings.contains(word));
 
         let is_single_word = node.borrow().strings.len() == 1;
-        let should_update_next = node
-            .borrow()
-            .next
-            .as_ref()
-            .and_then(|next| (next.borrow().count + 1 == node.borrow().count).then_some(()))
-            .is_some();
+        let should_update_next = matches!(
+            node.borrow()
+                .next
+                .as_ref()
+                .map(|next| next.borrow().count + 1 == node.borrow().count),
+            Some(true)
+        );
 
         match (is_single_word, should_update_next) {
             (true, true) => {
@@ -189,20 +190,19 @@ impl LinkedList {
         debug_assert!(node.borrow().strings.contains(&word));
 
         let is_single_word = node.borrow().strings.len() == 1;
-        let should_update_prev = node
-            .borrow()
-            .prev
-            .as_ref()
-            .and_then(|prev: &Weak<RefCell<NakedNode>>| {
-                (prev
-                    .upgrade()
-                    .expect("Prev is some but does not exist")
-                    .borrow()
-                    .count
-                    == node.borrow().count + 1)
-                    .then_some(())
-            })
-            .is_some();
+        let should_update_prev = matches!(
+            node.borrow()
+                .prev
+                .as_ref()
+                .map(|prev: &Weak<RefCell<NakedNode>>| {
+                    prev.upgrade()
+                        .expect("Prev is some but does not exist")
+                        .borrow()
+                        .count
+                        == node.borrow().count + 1
+                }),
+            Some(true)
+        );
 
         match (is_single_word, should_update_prev) {
             (true, true) => {
@@ -280,10 +280,15 @@ impl AllOne {
 
     pub fn inc(&mut self, key: String) {
         let word = Rc::new(key);
-        self.items_map
-            .entry(Rc::clone(&word))
-            .and_modify(|node| *node = self.count_list.increment_word(&word, Rc::clone(node)))
-            .or_insert_with_key(|word| self.count_list.insert_at_head(Rc::clone(word)));
+        match self.items_map.get_mut(&word) {
+            Some(node) => *node = self.count_list.increment_word(&word, Rc::clone(node)),
+            None => {
+                self.items_map.insert(
+                    Rc::clone(&word),
+                    self.count_list.insert_at_head(Rc::clone(&word)),
+                );
+            }
+        }
     }
 
     pub fn dec(&mut self, key: String) {
