@@ -43,8 +43,8 @@ impl NakedNode {
     }
 
     fn add_word(&mut self, word: &Word) {
-        let is_already_existing = self.strings.insert(Rc::clone(word));
-        debug_assert!(!is_already_existing, "Doesn't cause a problem for the node but not expecting this to be called if it was already there");
+        let is_newly_inserted = self.strings.insert(Rc::clone(word));
+        debug_assert!(is_newly_inserted, "Doesn't cause a problem for the node but not expecting this to be called if it was already there");
     }
 
     fn remove_word(&mut self, word: &Word) {
