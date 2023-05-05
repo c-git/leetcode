@@ -232,7 +232,7 @@ impl LinkedList {
                         .expect("Prev is some but does not exist")
                         .borrow()
                         .count
-                        == node.borrow().count + 1
+                        == node.borrow().count - 1
                 }),
             Some(true)
         );
