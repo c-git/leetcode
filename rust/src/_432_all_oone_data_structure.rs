@@ -356,4 +356,22 @@ mod tests {
         assert_eq!(all_one.get_max_key(), "hello"); // return "hello"
         assert_eq!(all_one.get_min_key(), "leet"); // return "leet"
     }
+
+    #[test]
+    fn case2() {
+        let mut all_one = AllOne::new();
+        all_one.inc("hello".into());
+        all_one.inc("goodbye".into());
+        all_one.inc("hello".into());
+        all_one.inc("hello".into());
+        all_one.get_max_key();
+        all_one.inc("leet".into());
+        all_one.inc("code".into());
+        all_one.dec("leet".into());
+        all_one.inc("hello".into());
+        all_one.inc("leet".into());
+        all_one.inc("code".into());
+        all_one.inc("code".into());
+        all_one.get_max_key();
+    }
 }
