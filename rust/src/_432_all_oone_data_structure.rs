@@ -1,6 +1,7 @@
 // Patterned fix for weak links on https://github.com/timClicks/live-streams/blob/main/doubly_linked_list/src/weak_ref.rs
 
 use std::collections::{HashMap, HashSet};
+use std::fmt::Debug;
 use std::iter::once;
 use std::rc::Weak;
 use std::{cell::RefCell, rc::Rc};
@@ -16,6 +17,19 @@ struct NakedNode {
     strings: HashSet<Word>,
     prev: LinkBack,
     next: LinkFwd,
+}
+
+impl Debug for NakedNode {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "Node: count: {}, strings: {:?}, has_prev: {}, next: {:?}",
+            self.count,
+            self.strings,
+            self.prev.is_some(),
+            self.next.as_ref().map(|next| next.borrow())
+        )
+    }
 }
 
 impl NakedNode {
@@ -66,6 +80,18 @@ struct LinkedList {
     head: LinkFwd,
     tail: LinkBack,
 }
+
+impl Debug for LinkedList {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "LinkedList: has_tail: {}, head: {:?}",
+            self.tail.is_some(),
+            self.head.as_ref().map(|head| head.borrow())
+        )
+    }
+}
+
 impl LinkedList {
     fn insert_at_head(&mut self, word: Word) -> Node {
         if let Some(head) = self.head.as_mut() {
@@ -265,6 +291,24 @@ impl LinkedList {
             new_node
         }
     }
+
+    fn count_num_words_as_str(&self) -> String {
+        if self.head.is_some() {
+            let mut result = String::new();
+            let mut opt_node = Some(Rc::clone(self.head.as_ref().unwrap()));
+            while let Some(node) = opt_node {
+                result.push_str(&format!(
+                    "{} ({}) -> ",
+                    node.borrow().count,
+                    node.borrow().strings.len(),
+                ));
+                opt_node = node.borrow().next_clone();
+            }
+            result
+        } else {
+            "No Nodes".to_string()
+        }
+    }
 }
 
 #[derive(Default)]
@@ -381,18 +425,38 @@ mod tests {
     #[test]
     fn case3() {
         let mut obj = AllOne::new();
-        obj.inc("hello".into());
-        obj.inc("goodbye".into());
-        obj.inc("hello".into());
-        obj.inc("hello".into());
+        println!("{:?}", obj.count_list.count_num_words_as_str());
+        dbg!(obj.inc("hello".into()));
+        println!("{:?}", obj.count_list.count_num_words_as_str());
+        dbg!(obj.inc("goodbye".into()));
+        println!("{:?}", obj.count_list.count_num_words_as_str());
+        dbg!(obj.inc("hello".into()));
+        println!("{:?}", obj.count_list.count_num_words_as_str());
+        dbg!(obj.inc("hello".into()));
+        println!("{:?}", obj.count_list.count_num_words_as_str());
         assert_eq!(obj.get_max_key(), "hello");
-        obj.inc("leet".into());
-        obj.inc("code".into());
-        obj.inc("leet".into());
-        obj.dec("hello".into());
-        obj.inc("leet".into());
-        obj.inc("code".into());
-        obj.inc("code".into());
+        dbg!(obj.inc("leet".into()));
+        println!("{:?}", obj.count_list.count_num_words_as_str());
+        dbg!(obj.inc("code".into()));
+        println!("{:?}", obj.count_list.count_num_words_as_str());
+        dbg!(obj.inc("leet".into()));
+        println!("{:?}", obj.count_list.count_num_words_as_str());
+        dbg!(obj.dec("hello".into()));
+        println!("{:?}", obj.count_list.count_num_words_as_str());
+        dbg!(obj.inc("leet".into()));
+        println!("{:?}", obj.count_list.count_num_words_as_str());
+        dbg!(obj.inc("code".into()));
+        println!("{:?}", obj.count_list.count_num_words_as_str());
+        dbg!(obj.inc("code".into()));
+        println!(
+            // Print map values
+            "{:?}",
+            obj.items_map
+                .iter()
+                .map(|(k, v)| format!("{k}: {}", v.borrow().count))
+                .collect::<Vec<String>>()
+        );
+        println!("{:?}", obj.count_list.count_num_words_as_str());
         assert_eq!(obj.get_max_key(), "leet");
     }
 }
