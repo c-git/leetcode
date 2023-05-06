@@ -10,6 +10,8 @@ impl Solution {
             if nums[left] + nums[right] <= target {
                 result = (result + 2i32.pow((right - left) as u32) % mod_) % mod_;
                 left += 1;
+            } else if right == 0 {
+                break;
             } else {
                 right -= 1;
             }
@@ -46,6 +48,15 @@ mod tests {
         let nums = vec![2, 3, 3, 4, 6, 7];
         let target = 12;
         let expected = 61;
+        let actual = Solution::num_subseq(nums, target);
+        assert_eq!(actual, expected);
+    }
+
+    #[test]
+    fn case4() {
+        let nums = vec![1];
+        let target = 1;
+        let expected = 0;
         let actual = Solution::num_subseq(nums, target);
         assert_eq!(actual, expected);
     }
