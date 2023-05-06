@@ -96,7 +96,7 @@ impl HashList {
     }
 
     fn get_max_key(&self) -> Option<String> {
-        self.data.last_key_value().map(|(_, set)| {
+        self.data.iter().rev().next().map(|(_, set)| {
             set.iter()
                 .next()
                 .expect("Empty Sets Not allowed")
@@ -105,7 +105,7 @@ impl HashList {
     }
 
     fn get_min_key(&self) -> Option<String> {
-        self.data.first_key_value().map(|(_, set)| {
+        self.data.iter().next().map(|(_, set)| {
             set.iter()
                 .next()
                 .expect("Empty Sets Not allowed")
