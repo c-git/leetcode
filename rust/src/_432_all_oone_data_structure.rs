@@ -56,17 +56,19 @@ impl HashList {
 
     fn move_word_to_new_id(&mut self, new_id: CountID, old_id: CountID, word: &Word) {
         //! Creates or updates the set for `new_count` unless it is 0
-        match self.data.get_mut(&new_id) {
-            Some(set) => {
-                let newly_inserted = set.insert(Rc::clone(word));
-                debug_assert!(newly_inserted, "Should not be a new value to the new set");
-            }
-            None => {
-                let newly_inserted = self.data.insert(new_id, once(Rc::clone(word)).collect());
-                debug_assert!(
-                    newly_inserted.is_none(),
-                    "Should not be a new value to the new set"
-                );
+        if new_id != CountID(0) {
+            match self.data.get_mut(&new_id) {
+                Some(set) => {
+                    let newly_inserted = set.insert(Rc::clone(word));
+                    debug_assert!(newly_inserted, "Should not be a new value to the new set");
+                }
+                None => {
+                    let newly_inserted = self.data.insert(new_id, once(Rc::clone(word)).collect());
+                    debug_assert!(
+                        newly_inserted.is_none(),
+                        "Should not be a new value to the new set"
+                    );
+                }
             }
         }
 
@@ -287,5 +289,24 @@ mod tests {
         obj.dec("j".into());
         obj.dec("k".into());
         obj.get_max_key();
+    }
+
+    #[test]
+    fn case6() {
+        let mut obj = AllOne::new();
+        obj.inc("a".into());
+        obj.inc("b".into());
+        obj.inc("b".into());
+        obj.inc("c".into());
+        obj.inc("c".into());
+        obj.inc("c".into());
+        obj.dec("b".into());
+        obj.dec("b".into());
+        println!("{}", obj.count_list.count_num_words_as_str());
+        assert_eq!(obj.get_min_key(), "a");
+        obj.dec("a".into());
+        println!("{}", obj.count_list.count_num_words_as_str());
+        assert_eq!(obj.get_max_key(), "c");
+        assert_eq!(obj.get_min_key(), "c");
     }
 }
