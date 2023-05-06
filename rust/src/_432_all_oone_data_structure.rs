@@ -1,330 +1,126 @@
-// Patterned fix for weak links on https://github.com/timClicks/live-streams/blob/main/doubly_linked_list/src/weak_ref.rs
-
-use std::collections::{HashMap, HashSet};
+use std::collections::{BTreeMap, HashMap, HashSet};
 use std::fmt::Debug;
 use std::iter::once;
-use std::rc::Weak;
-use std::{cell::RefCell, rc::Rc};
+use std::rc::Rc;
 
-type Node = Rc<RefCell<NakedNode>>;
-type NodeWeak = Weak<RefCell<NakedNode>>;
-type LinkFwd = Option<Node>; // Used only for forward links
-type LinkBack = Option<NodeWeak>;
 type Word = Rc<String>;
 
-struct NakedNode {
-    count: usize, // The count for the strings here
-    strings: HashSet<Word>,
-    prev: LinkBack,
-    next: LinkFwd,
+#[derive(Hash, Copy, Clone, PartialEq, PartialOrd, Eq, Ord)]
+struct CountID(usize);
+
+impl AsRef<usize> for CountID {
+    fn as_ref(&self) -> &usize {
+        &self.0
+    }
 }
 
-impl Debug for NakedNode {
+impl Debug for CountID {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(
-            f,
-            "Node: count: {}, strings: {:?}, has_prev: {}, next: {:?}",
-            self.count,
-            self.strings,
-            self.prev.is_some(),
-            self.next.as_ref().map(|next| next.borrow())
-        )
+        write!(f, "{}", self.0)
     }
 }
 
-impl NakedNode {
-    fn new(count: usize, word: Word) -> Self {
-        Self {
-            count,
-            strings: once(word).collect(),
-            prev: Default::default(),
-            next: Default::default(),
-        }
-    }
-
-    fn new_wrapped(count: usize, word: Word) -> Node {
-        Rc::new(RefCell::new(Self::new(count, word)))
-    }
-
-    fn prev_clone(&self) -> LinkBack {
-        self.prev
-            .as_ref()
-            .map(|x| Rc::downgrade(&x.upgrade().expect("Invalid link to node in a Some")))
-    }
-
-    fn next_clone(&self) -> LinkFwd {
-        self.next.as_ref().map(Rc::clone)
-    }
-
-    fn add_word(&mut self, word: &Word) {
-        let is_newly_inserted = self.strings.insert(Rc::clone(word));
-        debug_assert!(is_newly_inserted, "Doesn't cause a problem for the node but not expecting this to be called if it was already there");
-    }
-
-    fn remove_word(&mut self, word: &Word) {
-        let is_already_existing = self.strings.remove(word);
-        debug_assert!(is_already_existing, "Doesn't cause a problem for the node but not expecting this to be called if it was already there");
-    }
-
-    fn get_word(&self) -> String {
-        self.strings
-            .iter()
-            .next()
-            .expect("Empty nodes not supposed to be allowed")
-            .to_string()
-    }
+/// Only provides information of if the next/prev key value exists
+#[derive(Default, Debug)]
+struct HashList {
+    data: BTreeMap<CountID, HashSet<Word>>,
 }
 
-#[derive(Default)]
-struct LinkedList {
-    head: LinkFwd,
-    tail: LinkBack,
-}
-
-impl Debug for LinkedList {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(
-            f,
-            "LinkedList: has_tail: {}, head: {:?}",
-            self.tail.is_some(),
-            self.head.as_ref().map(|head| head.borrow())
-        )
-    }
-}
-
-impl LinkedList {
-    fn insert_at_head(&mut self, word: Word) -> Node {
-        if let Some(head) = self.head.as_mut() {
-            debug_assert!(self.tail.is_some());
-            if head.borrow().count == 1 {
-                // Add to existing head
-                head.borrow_mut().add_word(&word);
-                Rc::clone(head)
-            } else {
-                // Push head forward and make a new head
-                debug_assert!(head.borrow().prev.is_none());
-                let node = NakedNode::new_wrapped(1, word);
-                head.borrow_mut().prev = Some(Rc::downgrade(&node));
-                node.borrow_mut().next = Some(Rc::clone(head));
-                self.head = Some(Rc::clone(&node));
-                node
-            }
-        } else {
-            debug_assert!(self.tail.is_none());
-            let node = NakedNode::new_wrapped(1, word);
-            self.head = Some(Rc::clone(&node));
-            self.tail = Some(Rc::downgrade(&node));
-            node
-        }
-    }
-
-    fn insert_next_to_node(&mut self, existing_node: Node, count: usize, word: Word) -> Node {
-        let new_node = NakedNode::new_wrapped(count, word);
-
-        if existing_node.borrow().next.is_some() {
-            existing_node
-                .borrow()
-                .next
-                .as_ref()
-                .unwrap()
-                .borrow_mut()
-                .prev = Some(Rc::downgrade(&new_node));
-            new_node.borrow_mut().next = existing_node.borrow().next_clone();
-            existing_node.borrow_mut().next = Some(Rc::clone(&new_node));
-            new_node.borrow_mut().prev = Some(Rc::downgrade(&existing_node));
-        } else {
-            debug_assert!(self
-                .tail
-                .as_ref()
-                .unwrap()
-                .ptr_eq(&Rc::downgrade(&existing_node)));
-            existing_node.borrow_mut().next = Some(Rc::clone(&new_node));
-            new_node.borrow_mut().prev = Some(Rc::downgrade(&existing_node));
-            self.tail = Some(Rc::downgrade(&new_node));
-        }
-        new_node
-    }
-
-    fn increment_word(&mut self, word: &Word, node: Node) -> Node {
-        debug_assert!(node.borrow().strings.contains(word));
-
-        let is_single_word = node.borrow().strings.len() == 1;
-        let should_update_next = matches!(
-            node.borrow()
-                .next
-                .as_ref()
-                .map(|next| next.borrow().count == node.borrow().count + 1),
-            Some(true)
-        );
-
-        match (is_single_word, should_update_next) {
-            (true, true) => {
-                // Remove current node and move value to next node
-                let next = node.borrow().next_clone().expect("Checked above");
-                next.borrow_mut().add_word(word);
-                self.remove(node);
-                next
-            }
-            (true, false) => {
-                node.borrow_mut().count += 1;
-                node
-            }
-            (false, true) => {
-                node.borrow_mut().remove_word(word);
-                let next = node.borrow().next_clone().expect("Checked above");
-                next.borrow_mut().add_word(word);
-                next
-            }
-            (false, false) => {
-                node.borrow_mut().remove_word(word);
-                let new_count = node.borrow().count + 1;
-                self.insert_next_to_node(Rc::clone(&node), new_count, Rc::clone(word))
-            }
-        }
-    }
-
-    fn remove(&mut self, node: Node) {
-        if let Some(head) = &self.head {
-            debug_assert!(head.borrow().prev.is_none());
-            if head.as_ptr() == node.as_ptr() {
-                self.head = node.borrow().next_clone()
-            }
-        } else {
-            debug_assert!(false, "There must be a head");
-        }
-
-        if let Some(tail) = &self.tail {
-            if tail
-                .upgrade()
-                .expect("Tail is Some but not pointing to a valid node")
-                .as_ptr()
-                == node.as_ptr()
-            {
-                self.tail = node.borrow().prev_clone();
-            }
-        } else {
-            debug_assert!(false, "There must be a tail");
-        }
-
-        if let Some(prev_node) = &node.borrow().prev {
-            prev_node
-                .upgrade()
-                .expect("Prev is some but not pointing to a valid node")
-                .borrow_mut()
-                .next = node.borrow().next_clone();
-        }
-
-        if let Some(next_node) = &node.borrow().next {
-            next_node.borrow_mut().prev = node.borrow().prev_clone();
-        }
-    }
-
-    fn decrement_word(&mut self, word: Word, node: Node) -> Option<Node> {
-        debug_assert!(node.borrow().strings.contains(&word));
-
-        let is_single_word = node.borrow().strings.len() == 1;
-        let should_update_prev = matches!(
-            node.borrow()
-                .prev
-                .as_ref()
-                .map(|prev: &Weak<RefCell<NakedNode>>| {
-                    prev.upgrade()
-                        .expect("Prev is some but does not exist")
-                        .borrow()
-                        .count
-                        == node.borrow().count - 1
-                }),
-            Some(true)
-        );
-
-        match (is_single_word, should_update_prev) {
-            (true, true) => {
-                // Remove current node and move value to prev node
-                let prev = node
-                    .borrow()
-                    .prev_clone()
-                    .expect("Checked above")
-                    .upgrade()
-                    .expect("Prev points to nothing");
-                prev.borrow_mut().add_word(&word);
-                self.remove(node);
-                Some(prev)
-            }
-            (true, false) => {
-                if node.borrow().count == 1 {
-                    debug_assert_eq!(node.as_ptr(), self.head.as_ref().unwrap().as_ptr());
-                    self.remove(node);
-                    None
-                } else {
-                    node.borrow_mut().count -= 1;
-                    Some(node)
-                }
-            }
-            (false, true) => {
-                node.borrow_mut().remove_word(&word);
-                let prev = node
-                    .borrow()
-                    .prev_clone()
-                    .expect("Checked above")
-                    .upgrade()
-                    .expect("Prev points to nothing");
-                prev.borrow_mut().add_word(&word);
-                Some(prev)
-            }
-            (false, false) => {
-                node.borrow_mut().remove_word(&word);
-                if node.borrow().count == 1 {
-                    None
-                } else {
-                    let new_count = node.borrow().count - 1;
-                    Some(self.insert_prev_to_node(&node, new_count, word))
-                }
-            }
-        }
-    }
-
-    fn insert_prev_to_node(&mut self, node: &Node, count: usize, word: Word) -> Node {
-        if node.borrow().prev.is_some() {
-            let prev = node
-                .borrow()
-                .prev_clone()
-                .unwrap()
-                .upgrade()
-                .expect("Prev point to nothing");
-            self.insert_next_to_node(prev, count, word)
-        } else {
-            let new_node = self.insert_at_head(word);
-            new_node.borrow_mut().count = count;
-            new_node
-        }
-    }
-
+impl HashList {
     fn count_num_words_as_str(&self) -> String {
-        if self.head.is_some() {
-            let mut result = String::new();
-            let mut opt_node = Some(Rc::clone(self.head.as_ref().unwrap()));
-            while let Some(node) = opt_node {
-                result.push_str(&format!(
-                    "{} ({}) -> ",
-                    node.borrow().count,
-                    node.borrow().strings.len(),
-                ));
-                opt_node = node.borrow().next_clone();
+        if self.data.is_empty() {
+            "".to_string()
+        } else {
+            let mut result = String::with_capacity(self.data.len() * 11);
+            for (count_id, set) in self.data.iter() {
+                result.push_str(&format!("{} ({}) -> ", count_id.as_ref(), set.len()));
             }
             result
-        } else {
-            "No Nodes".to_string()
         }
+    }
+
+    fn decrement_word(&mut self, word: &Word, current_id: CountID) -> Option<CountID> {
+        let new_count = CountID(current_id.as_ref() - 1);
+        self.move_word_to_new_id(new_count, current_id, word);
+        match new_count {
+            CountID(0) => None,
+            val => Some(val),
+        }
+    }
+
+    fn increment_word(&mut self, word: &Word, current_id: CountID) -> CountID {
+        let new_count = CountID(current_id.as_ref() + 1);
+        self.move_word_to_new_id(new_count, current_id, word);
+        new_count
+    }
+
+    fn move_word_to_new_id(&mut self, new_id: CountID, old_id: CountID, word: &Word) {
+        //! Creates or updates the set for `new_count` unless it is 0
+        match self.data.get_mut(&new_id) {
+            Some(set) => {
+                let newly_inserted = set.insert(Rc::clone(word));
+                debug_assert!(newly_inserted, "Should not be a new value to the new set");
+            }
+            None => {
+                let newly_inserted = self.data.insert(new_id, once(Rc::clone(word)).collect());
+                debug_assert!(
+                    newly_inserted.is_none(),
+                    "Should not be a new value to the new set"
+                );
+            }
+        }
+
+        let old_set = self.data.get_mut(&old_id).expect("Must exist in map");
+        old_set.remove(word);
+        if old_set.is_empty() {
+            self.data.remove(&old_id);
+        }
+    }
+
+    fn insert_new(&mut self, word: Word) -> CountID {
+        let new_id = CountID(1);
+        match self.data.get_mut(&new_id) {
+            Some(set) => {
+                let newly_inserted = set.insert(Rc::clone(&word));
+                debug_assert!(newly_inserted, "Should not be a new value to the new set");
+            }
+            None => {
+                let newly_inserted = self.data.insert(new_id, once(Rc::clone(&word)).collect());
+                debug_assert!(
+                    newly_inserted.is_none(),
+                    "Should not be a new value to the new set"
+                );
+            }
+        }
+        new_id
+    }
+
+    fn get_max_key(&self) -> Option<String> {
+        self.data.last_key_value().map(|(_, set)| {
+            set.iter()
+                .next()
+                .expect("Empty Sets Not allowed")
+                .to_string()
+        })
+    }
+
+    fn get_min_key(&self) -> Option<String> {
+        self.data.first_key_value().map(|(_, set)| {
+            set.iter()
+                .next()
+                .expect("Empty Sets Not allowed")
+                .to_string()
+        })
     }
 }
 
 #[derive(Default)]
 struct AllOne {
-    /// Stores the list of nodes that have a count and the words with that count
-    count_list: LinkedList,
+    /// Stores the list of id's that have a count and the words with that count
+    count_list: HashList,
 
-    /// Stores a mapping from a word to the node in the list that has that word in it
-    items_map: HashMap<Word, Node>,
+    /// Stores a mapping from a word to the id in the list that has that word in it
+    items_map: HashMap<Word, CountID>,
 }
 
 /**
@@ -338,52 +134,33 @@ impl AllOne {
 
     pub fn inc(&mut self, key: String) {
         let word = Rc::new(key);
-        let new_node = match self.items_map.get(&word) {
-            Some(node) => self.count_list.increment_word(&word, Rc::clone(node)),
-            None => self.count_list.insert_at_head(Rc::clone(&word)),
+        let new_id = match self.items_map.get(&word) {
+            Some(id) => self.count_list.increment_word(&word, *id),
+            None => self.count_list.insert_new(Rc::clone(&word)),
         };
-        self.items_map.insert(word, new_node);
+        self.items_map.insert(word, new_id);
     }
 
     pub fn dec(&mut self, key: String) {
         let word = Rc::new(key);
-        let node = self
+        let old_id = self
             .items_map
             .get(&word)
             .expect("Based on constraints in the question");
 
-        if let Some(new_node) = self
-            .count_list
-            .decrement_word(Rc::clone(&word), Rc::clone(node))
-        {
-            self.items_map.insert(word, new_node);
+        if let Some(new_id) = self.count_list.decrement_word(&word, *old_id) {
+            self.items_map.insert(word, new_id);
         } else {
             self.items_map.remove(&word);
         }
     }
 
     pub fn get_max_key(&self) -> String {
-        self.get_max_key_helper().unwrap_or_default()
+        self.count_list.get_max_key().unwrap_or_default()
     }
 
     pub fn get_min_key(&self) -> String {
-        self.get_min_key_helper().unwrap_or_default()
-    }
-
-    fn get_max_key_helper(&self) -> Option<String> {
-        self.count_list.tail.as_ref().map(|tail| {
-            tail.upgrade()
-                .expect("Tail points to nothing")
-                .borrow()
-                .get_word()
-        })
-    }
-
-    fn get_min_key_helper(&self) -> Option<String> {
-        self.count_list
-            .head
-            .as_ref()
-            .map(|head| head.borrow().get_word())
+        self.count_list.get_min_key().unwrap_or_default()
     }
 }
 
@@ -459,9 +236,6 @@ mod tests {
             // Print map values
             "{:?}",
             obj.items_map
-                .iter()
-                .map(|(k, v)| format!("{k}: {}", v.borrow().count))
-                .collect::<Vec<String>>()
         );
         println!("{:?}", obj.count_list.count_num_words_as_str());
         assert!(["leet", "code"].contains(&&obj.get_max_key()[..]));
