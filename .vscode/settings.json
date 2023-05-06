@@ -6,6 +6,7 @@
         "leetcode",
         "Manacher's",
         "mincost",
+        "oone"
     ],
     "rust-analyzer.showUnlinkedFileNotification": false,
 }

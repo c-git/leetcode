@@ -276,15 +276,22 @@ impl LinkedList {
                 if node.borrow().count == 1 {
                     None
                 } else {
-                    Some(self.insert_prev_to_node(&node, node.borrow().count - 1, word))
+                    let new_count = node.borrow().count - 1;
+                    Some(self.insert_prev_to_node(&node, new_count, word))
                 }
             }
         }
     }
 
     fn insert_prev_to_node(&mut self, node: &Node, count: usize, word: Word) -> Node {
-        if let Some(prev) = node.borrow().prev.as_ref() {
-            self.insert_next_to_node(prev.upgrade().expect("Prev point to nothing"), count, word)
+        if node.borrow().prev.is_some() {
+            let prev = node
+                .borrow()
+                .prev_clone()
+                .unwrap()
+                .upgrade()
+                .expect("Prev point to nothing");
+            self.insert_next_to_node(prev, count, word)
         } else {
             let new_node = self.insert_at_head(word);
             new_node.borrow_mut().count = count;
