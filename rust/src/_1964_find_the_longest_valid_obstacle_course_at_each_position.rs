@@ -51,4 +51,14 @@ mod tests {
         let actual = Solution::longest_obstacle_course_at_each_position(input);
         assert_eq!(actual, expected);
     }
+
+    #[test]
+    fn case5() {
+        // Got a timeout but the test case was too big. Just adding this to help gauge the time better
+        let size = 10_000;
+        let input = vec![1; size];
+        let expected: Vec<i32> = (1..size).map(|x| x as i32).collect();
+        let actual = Solution::longest_obstacle_course_at_each_position(input);
+        assert_eq!(actual, expected);
+    }
 }
