@@ -72,4 +72,14 @@ mod tests {
         let actual = Solution::longest_obstacle_course_at_each_position(input);
         assert!(actual == expected);
     }
+
+    #[test]
+    fn case6() {
+        // Got a timeout but the test case was too big. Just adding this to help gauge the time better
+        let size = 10_000;
+        let input: Vec<i32> = (1..=size).collect();
+        let expected: Vec<i32> = input.clone();
+        let actual = Solution::longest_obstacle_course_at_each_position(input);
+        assert!(actual == expected);
+    }
 }
