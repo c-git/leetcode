@@ -15,28 +15,30 @@
 //   }
 // }
 impl Solution {
-    pub fn remove_nth_from_end(mut head: Option<Box<ListNode>>, n: i32) -> Option<Box<ListNode>> {
-        let mut node_values = vec![];
-
-        // Copy all nodes
-        while let Some(node) = head {
-            node_values.push(node.val);
-            head = node.next;
-        }
-
-        let target_index = node_values.len() - n as usize;
-
-        head = None; // Set tail of list
-        for (i, &val) in node_values.iter().enumerate().rev() {
-            if i != target_index {
-                let mut new_node = ListNode::new(val);
-                new_node.next = head;
-                head = Some(Box::new(new_node));
-            }
-        }
-
-        head
+    // Based on solution by Conrad Ludgate
+    pub fn remove_nth_from_end(head: Option<Box<ListNode>>, n: i32) -> Option<Box<ListNode>> {
+        let len = len(&head) as i32; // Get length of list to calculate how far from the front
+        remove_nth_from_start(head, len - n)
     }
+}
+
+pub fn remove_nth_from_start(head: Option<Box<ListNode>>, n: i32) -> Option<Box<ListNode>> {
+    let mut head = head?;
+    if n == 0 {
+        head.next
+    } else {
+        head.next = remove_nth_from_start(head.next, n - 1);
+        Some(head)
+    }
+}
+
+pub fn len(mut head: &Option<Box<ListNode>>) -> usize {
+    let mut len = 0;
+    while let Some(h) = head.as_ref() {
+        head = &h.next;
+        len += 1;
+    }
+    len
 }
 
 use crate::helper::ListNode;
@@ -54,6 +56,7 @@ mod tests {
         let expected: ListHead = vec![1, 2, 3, 5].into();
         let actual = Solution::remove_nth_from_end(head.into(), n);
         assert_eq!(actual, expected.into());
+        panic!("Intentional");
     }
 
     #[test]
