@@ -17,28 +17,37 @@
 impl Solution {
     // Based on solution by Conrad Ludgate
     pub fn remove_nth_from_end(head: Option<Box<ListNode>>, n: i32) -> Option<Box<ListNode>> {
-        let len = len(&head) as i32; // Get length of list to calculate how far from the front
-        remove_nth_from_start(head, len - n)
-    }
-}
+        let len = Self::get_list_length(&head);
 
-pub fn remove_nth_from_start(head: Option<Box<ListNode>>, n: i32) -> Option<Box<ListNode>> {
-    let mut head = head?;
-    if n == 0 {
-        head.next
-    } else {
-        head.next = remove_nth_from_start(head.next, n - 1);
-        Some(head)
-    }
-}
+        // Walk from front and collect values to rebuild list without undesirable node
+        let target_length = len - n as usize; // Doesn't have space for the undesirable node
+        let mut values = Vec::with_capacity(target_length);
+        let mut rest_of_list = head;
+        while values.len() < target_length {
+            let node = rest_of_list.expect("Target Length must be less than full length");
+            values.push(node.val);
+            rest_of_list = node.next;
+        }
 
-pub fn len(mut head: &Option<Box<ListNode>>) -> usize {
-    let mut len = 0;
-    while let Some(h) = head.as_ref() {
-        head = &h.next;
-        len += 1;
+        // Rebuild list skipping the undesirable value
+        rest_of_list = rest_of_list.expect("This is the node to skip").next; // Skipped here
+        for val in values.iter().rev() {
+            let mut new_node = ListNode::new(*val);
+            new_node.next = rest_of_list;
+            rest_of_list = Some(Box::new(new_node));
+        }
+
+        rest_of_list
     }
-    len
+
+    fn get_list_length(mut head: &Option<Box<ListNode>>) -> usize {
+        let mut len = 0;
+        while let Some(h) = head.as_ref() {
+            head = &h.next;
+            len += 1;
+        }
+        len
+    }
 }
 
 use crate::helper::ListNode;
@@ -56,7 +65,6 @@ mod tests {
         let expected: ListHead = vec![1, 2, 3, 5].into();
         let actual = Solution::remove_nth_from_end(head.into(), n);
         assert_eq!(actual, expected.into());
-        panic!("Intentional");
     }
 
     #[test]
