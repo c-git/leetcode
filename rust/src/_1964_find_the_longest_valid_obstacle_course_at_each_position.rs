@@ -1,15 +1,26 @@
+use std::collections::BTreeMap;
+
 impl Solution {
     pub fn longest_obstacle_course_at_each_position(obstacles: Vec<i32>) -> Vec<i32> {
+        let mut largest_seen: BTreeMap<i32, i32> = BTreeMap::new();
         let mut result: Vec<i32> = Vec::with_capacity(obstacles.len());
-        for (outer_index, outer_height) in obstacles.iter().enumerate() {
+        for current_height in obstacles {
             let mut max_prev_len = 0;
-            for (inner_index, inner_height) in obstacles.iter().take(outer_index).enumerate().rev()
-            {
-                if inner_height <= outer_height && max_prev_len < result[inner_index] {
-                    max_prev_len = result[inner_index]
+            for (&prev_height, &prev_length) in largest_seen.iter() {
+                if prev_height > current_height {
+                    break; // No more useful values to look at
+                }
+                if prev_length > max_prev_len {
+                    max_prev_len = prev_length;
                 }
             }
-            result.push(max_prev_len + 1);
+            let new_length = max_prev_len + 1;
+            result.push(new_length);
+
+            // This new height must be higher than any with the same height because
+            // it would be at least 1 longer, because it would have extended the previous
+            // longest of the same height if that was the longest previous
+            largest_seen.insert(current_height, new_length);
         }
         result
     }
@@ -57,8 +68,8 @@ mod tests {
         // Got a timeout but the test case was too big. Just adding this to help gauge the time better
         let size = 10_000;
         let input = vec![1; size];
-        let expected: Vec<i32> = (1..size).map(|x| x as i32).collect();
+        let expected: Vec<i32> = (1..=size).map(|x| x as i32).collect();
         let actual = Solution::longest_obstacle_course_at_each_position(input);
-        assert_eq!(actual, expected);
+        assert!(actual == expected);
     }
 }
