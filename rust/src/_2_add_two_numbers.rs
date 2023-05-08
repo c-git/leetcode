@@ -1,7 +1,3 @@
-use crate::helper::ListNode;
-
-struct Solution;
-
 impl Solution {
     pub fn add_two_numbers(
         l1: Option<Box<ListNode>>,
@@ -35,6 +31,9 @@ impl Solution {
     }
 }
 
+use crate::helper::ListNode;
+
+struct Solution;
 #[cfg(test)]
 mod test {
     use crate::helper::ListHead;
