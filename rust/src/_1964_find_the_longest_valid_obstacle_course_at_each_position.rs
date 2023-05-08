@@ -14,7 +14,7 @@ impl Solution {
             if idx == lis.len() {
                 lis.push(height);
             } else {
-                lis[idx] = height.min(lis[idx]);
+                lis[idx] = height;
             }
             result.push((idx + 1) as i32);
         }
