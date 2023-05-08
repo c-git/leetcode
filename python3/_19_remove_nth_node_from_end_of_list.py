@@ -25,6 +25,9 @@ class Solution:
             # Next must exist because n is min 1 and thus n_plus_1 is min 2
             node_before = last_n_plus_1[-n_plus_1]
             node_before.next = node_before.next.next
+        elif len(last_n_plus_1) == n:
+            # Head should be removed
+            head = head.next
         else:
             return None  # Can only not have a previous if it is the only node
         return head
