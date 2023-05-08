@@ -20,3 +20,8 @@ class ListNode:
 
     def __repr__(self):
         return f'{self.val} -> {self.next}'
+
+    def __eq__(self, other):
+        if isinstance(other, ListNode):
+            return self.val == other.val and self.next == other.next
+        return False

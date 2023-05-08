@@ -1,20 +1,7 @@
 from typing import Optional
 
 from python3.helper import Eg, int_list_to_linked_list, tester_helper
-
-
-class ListNode:
-    def __init__(self, x: int, next=None):
-        self.val = x
-        self.next = next
-
-    def __repr__(self):
-        return f'{self.val} -> {self.next}'
-
-    def __eq__(self, other):
-        if isinstance(other, ListNode):
-            return self.val == other.val and self.next == other.next
-        return False
+from python3.helper_classes import ListNode
 
 
 class Solution:
@@ -51,15 +38,14 @@ class Solution:
 
 def tester():
     build = int_list_to_linked_list
-    ln = ListNode
     examples = [
-        Eg(build([1, 2, 3, 4, 5], ln), build([1, 3, 5, 2, 4], ln)),
-        Eg(build([2, 1, 3, 5, 6, 4, 7], ln), build([2, 3, 6, 7, 1, 5, 4], ln)),
-        Eg(build([2, ], ln), build([2, ], ln)),
-        Eg(build([2, 1], ln), build([2, 1], ln)),
-        Eg(build([2, 1, 3], ln), build([2, 3, 1], ln)),
-        Eg(build([2, 1, 3, 4], ln), build([2, 3, 1, 4], ln)),
-        Eg(build([], ln), build([], ln)),
+        Eg(build([1, 2, 3, 4, 5]), build([1, 3, 5, 2, 4])),
+        Eg(build([2, 1, 3, 5, 6, 4, 7]), build([2, 3, 6, 7, 1, 5, 4])),
+        Eg(build([2, ]), build([2, ])),
+        Eg(build([2, 1]), build([2, 1])),
+        Eg(build([2, 1, 3]), build([2, 3, 1])),
+        Eg(build([2, 1, 3, 4]), build([2, 3, 1, 4])),
+        Eg(build([]), build([])),
 
     ]
     tester_helper(328, examples, Solution().oddEvenList)
