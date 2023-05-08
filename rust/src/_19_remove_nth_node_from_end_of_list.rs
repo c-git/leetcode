@@ -30,7 +30,7 @@ impl Solution {
         }
 
         // Rebuild list skipping the undesirable value
-        rest_of_list = rest_of_list.expect("This is the node to skip").next; // Skipped here
+        rest_of_list = rest_of_list.expect("This is the node to skip").next; // Node skipped here
         for val in values.iter().rev() {
             let mut new_node = ListNode::new(*val);
             new_node.next = rest_of_list;
