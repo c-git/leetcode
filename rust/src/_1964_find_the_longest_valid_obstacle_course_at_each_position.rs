@@ -7,7 +7,7 @@ impl Solution {
         // lis[i] records the lowest increasing sequence of length i + 1.
         let mut lis = vec![];
 
-        for (i, &height) in obstacles.iter().enumerate() {
+        for height in obstacles.iter() {
             // Find the rightmost insertion position idx.
             let idx = lis.partition_point(|&x| x <= height);
 
