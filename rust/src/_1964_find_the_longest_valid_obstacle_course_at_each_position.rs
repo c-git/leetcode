@@ -1,26 +1,22 @@
-use std::collections::BTreeMap;
-
 impl Solution {
     pub fn longest_obstacle_course_at_each_position(obstacles: Vec<i32>) -> Vec<i32> {
-        let mut largest_seen: BTreeMap<i32, i32> = BTreeMap::new();
-        let mut result: Vec<i32> = Vec::with_capacity(obstacles.len());
-        for current_height in obstacles {
-            let mut max_prev_len = 0;
-            for (&prev_height, &prev_length) in largest_seen.iter() {
-                if prev_height > current_height {
-                    break; // No more useful values to look at
-                }
-                if prev_length > max_prev_len {
-                    max_prev_len = prev_length;
-                }
-            }
-            let new_length = max_prev_len + 1;
-            result.push(new_length);
+        // Solution from editorial
+        let n = obstacles.len();
+        let mut result = Vec::<i32>::with_capacity(n);
 
-            // This new height must be higher than any with the same height because
-            // it would be at least 1 longer, because it would have extended the previous
-            // longest of the same height if that was the longest previous
-            largest_seen.insert(current_height, new_length);
+        // lis[i] records the lowest increasing sequence of length i + 1.
+        let mut lis = vec![];
+
+        for (i, &height) in obstacles.iter().enumerate() {
+            // Find the rightmost insertion position idx.
+            let idx = lis.partition_point(|&x| x <= height);
+
+            if idx == lis.len() {
+                lis.push(height);
+            } else {
+                lis[idx] = height.min(lis[idx]);
+            }
+            result.push((idx + 1) as i32);
         }
         result
     }
