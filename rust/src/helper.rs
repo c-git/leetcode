@@ -6,10 +6,24 @@ use std::{
 };
 
 // Definition for singly-linked list.
-#[derive(PartialEq, Eq, Debug)]
+#[derive(PartialEq, Eq)]
 pub struct ListNode {
     pub val: i32,
     pub next: Option<Box<ListNode>>,
+}
+
+impl Debug for ListNode {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "{} -> {}",
+            self.val,
+            match self.next.as_ref() {
+                Some(next) => format!("{next:?}"),
+                None => "None".to_owned(),
+            }
+        )
+    }
 }
 
 impl ListNode {
