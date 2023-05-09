@@ -37,8 +37,10 @@ impl Solution {
         let mut pos = Position { row: 0, col: 0 };
         let mut direction = Right;
         while bound_top <= bound_bottom && bound_left <= bound_right {
-            dbg!(&pos);
-            println!("{result:?}");
+            if cfg!(debug_assert) {
+                dbg!(&pos);
+                println!("{result:?}");
+            }
             debug_assert!(
                 pos.row >= bound_top
                     && pos.row <= bound_bottom
@@ -55,6 +57,10 @@ impl Solution {
                     direction = direction.next_direction();
                 }
                 (Position { row, col: _ }, Down) if *row == bound_bottom => {
+                    if bound_right == 0 {
+                        // Prevent underflow during subtraction
+                        break;
+                    }
                     bound_right -= 1;
                     direction = direction.next_direction();
                 }
@@ -129,6 +135,52 @@ mod tests {
             11, 12, 13, 14, 15, 25, 35, 45, 55, 65, 75, 85, 84, 83, 82, 81, 71, 61, 51, 41, 31, 21,
             22, 23, 24, 34, 44, 54, 64, 74, 73, 72, 62, 52, 42, 32, 33, 43, 53, 63,
         ];
+        let actual = Solution::spiral_order(input);
+        assert_eq!(actual, expected);
+    }
+
+    #[test]
+    fn case4() {
+        let input = [
+            [3], //
+            [2],
+        ];
+        let input = input.into_iter().map(|x| x.into()).collect();
+        let expected = [3, 2];
+        let actual = Solution::spiral_order(input);
+        assert_eq!(actual, expected);
+    }
+
+    #[test]
+    fn case5() {
+        let input = [
+            [1, 2], //
+            [3, 4],
+        ];
+        let input = input.into_iter().map(|x| x.into()).collect();
+        let expected = [1, 2, 4, 3];
+        let actual = Solution::spiral_order(input);
+        assert_eq!(actual, expected);
+    }
+
+    #[test]
+    fn case6() {
+        let input = [
+            [1, 2], //
+        ];
+        let input = input.into_iter().map(|x| x.into()).collect();
+        let expected = [1, 2];
+        let actual = Solution::spiral_order(input);
+        assert_eq!(actual, expected);
+    }
+
+    #[test]
+    fn case7() {
+        let input = [
+            [1], //
+        ];
+        let input = input.into_iter().map(|x| x.into()).collect();
+        let expected = [1];
         let actual = Solution::spiral_order(input);
         assert_eq!(actual, expected);
     }
