@@ -1,4 +1,6 @@
 #![allow(clippy::needless_range_loop)]
+
+use std::mem;
 impl Solution {
     pub fn max_uncrossed_lines(nums1: Vec<i32>, nums2: Vec<i32>) -> i32 {
         // After reading editorial
@@ -8,26 +10,26 @@ impl Solution {
         debug_assert_ne!(n1, 0);
         debug_assert_ne!(n2, 0);
 
-        // 2d array to store solutions to sub problems with that number of elements
-        // taken from either array
-        // Each entry stores the solution to using that prefix of each array only
-        // Base cases are 0's on the left and top
-        let mut dp = vec![vec![0; n2 + 1]; n1 + 1]; //n1 rows x n2 cols
+        let mut dp = vec![0; n2 + 1]; // values for current row (n2 cols)
+        let mut dp_prev = vec![0; n2 + 1]; // values for previous row (n2 cols)
 
         // Fill rest of cases
         for row in 1..=n1 {
             for col in 1..=n2 {
-                dp[row][col] = if nums1[row - 1] == nums2[col - 1] {
-                    dp[row - 1][col - 1] + 1
+                dp[col] = if nums1[row - 1] == nums2[col - 1] {
+                    dp_prev[col - 1] + 1
                 } else {
-                    dp[row][col - 1].max(dp[row - 1][col])
+                    dp[col - 1].max(dp_prev[col])
                 };
                 if cfg!(debug_assertions) {
-                    println!("({row}, {col}): {dp:?}");
+                    println!("({row}, {col}): dp:      {dp:?}");
+                    println!("({row}, {col}): dp_prev: {dp_prev:?}");
+                    println!();
                 }
             }
+            mem::swap(&mut dp, &mut dp_prev);
         }
-        dp[n1][n2]
+        dp_prev[n2]
     }
 }
 
