@@ -26,7 +26,7 @@ impl Solution {
     }
 
     pub fn most_points(questions: Vec<Vec<i32>>) -> i64 {
-        let mut memo = vec![None; questions.len() + 1];
+        let mut memo = vec![None; questions.len()];
         Self::most_points_helper(0, &questions[..], &mut memo)
     }
 }
