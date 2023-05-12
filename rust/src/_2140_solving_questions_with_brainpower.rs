@@ -1,33 +1,25 @@
 impl Solution {
-    fn most_points_helper(
-        starting_index: usize,
-        questions: &[Vec<i32>],
-        memo: &mut [Option<i64>],
-    ) -> i64 {
-        if starting_index >= questions.len() {
-            return 0;
-        }
-        if let Some(result) = memo[starting_index] {
-            return result;
-        }
-
-        let (points, brain_power) = (
-            questions[starting_index][0] as i64,
-            questions[starting_index][1] as usize,
-        );
-
-        let option1_answer_this_question =
-            points + Self::most_points_helper(starting_index + 1 + brain_power, questions, memo);
-        let option2_skip_this_question =
-            Self::most_points_helper(starting_index + 1, questions, memo);
-        let result = option1_answer_this_question.max(option2_skip_this_question);
-        memo[starting_index] = Some(result);
-        result
-    }
-
     pub fn most_points(questions: Vec<Vec<i32>>) -> i64 {
-        let mut memo = vec![None; questions.len()];
-        Self::most_points_helper(0, &questions[..], &mut memo)
+        let mut dp = vec![0; questions.len()];
+
+        for i in (0..questions.len()).rev() {
+            let (points, brain_power) = (questions[i][0] as i64, questions[i][1] as usize);
+
+            let option1_answer_this_question = points
+                + if let Some(rest) = dp.get(i + 1 + brain_power) {
+                    *rest
+                } else {
+                    0
+                };
+            let option2_skip_this_question = if let Some(rest) = dp.get(i + 1) {
+                *rest
+            } else {
+                0
+            };
+            let result = option1_answer_this_question.max(option2_skip_this_question);
+            dp[i] = result;
+        }
+        dp[0]
     }
 }
 
