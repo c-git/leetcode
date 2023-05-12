@@ -7,9 +7,8 @@ impl Solution {
         for i in (0..questions.len()).rev() {
             let (points, brain_power) = (questions[i][0] as i64, questions[i][1] as usize);
 
-            let option1_answer_this_question =
-                points + dp.get(i + 1 + brain_power).copied().unwrap_or_default();
-            let option2_skip_this_question = dp.get(i + 1).copied().unwrap_or_default();
+            let option1_answer_this_question = points + dp.get(i + 1 + brain_power).unwrap_or(&0);
+            let option2_skip_this_question = *dp.get(i + 1).unwrap_or(&0);
             dp[i] = max(option1_answer_this_question, option2_skip_this_question);
         }
         dp[0]
