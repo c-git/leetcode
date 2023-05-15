@@ -212,28 +212,28 @@ mod tests {
     fn case3() {
         let mut obj = AllOne::new();
         println!("{:?}", obj.count_list.count_num_words_as_str());
-        dbg!(obj.inc("hello".into()));
+        println!("{:?}", obj.inc("hello".into()));
         println!("{:?}", obj.count_list.count_num_words_as_str());
-        dbg!(obj.inc("goodbye".into()));
+        println!("{:?}", obj.inc("goodbye".into()));
         println!("{:?}", obj.count_list.count_num_words_as_str());
-        dbg!(obj.inc("hello".into()));
+        println!("{:?}", obj.inc("hello".into()));
         println!("{:?}", obj.count_list.count_num_words_as_str());
-        dbg!(obj.inc("hello".into()));
+        println!("{:?}", obj.inc("hello".into()));
         println!("{:?}", obj.count_list.count_num_words_as_str());
         assert_eq!(obj.get_max_key(), "hello");
-        dbg!(obj.inc("leet".into()));
+        println!("{:?}", obj.inc("leet".into()));
         println!("{:?}", obj.count_list.count_num_words_as_str());
-        dbg!(obj.inc("code".into()));
+        println!("{:?}", obj.inc("code".into()));
         println!("{:?}", obj.count_list.count_num_words_as_str());
-        dbg!(obj.inc("leet".into()));
+        println!("{:?}", obj.inc("leet".into()));
         println!("{:?}", obj.count_list.count_num_words_as_str());
-        dbg!(obj.dec("hello".into()));
+        println!("{:?}", obj.dec("hello".into()));
         println!("{:?}", obj.count_list.count_num_words_as_str());
-        dbg!(obj.inc("leet".into()));
+        println!("{:?}", obj.inc("leet".into()));
         println!("{:?}", obj.count_list.count_num_words_as_str());
-        dbg!(obj.inc("code".into()));
+        println!("{:?}", obj.inc("code".into()));
         println!("{:?}", obj.count_list.count_num_words_as_str());
-        dbg!(obj.inc("code".into()));
+        println!("{:?}", obj.inc("code".into()));
         println!(
             // Print map values
             "{:?}",
@@ -246,29 +246,29 @@ mod tests {
     #[test]
     fn case4() {
         let mut obj = AllOne::new();
-        dbg!(obj.inc("a".into()));
+        println!("{:?}", obj.inc("a".into()));
         println!("{:?}", obj.count_list.count_num_words_as_str());
-        dbg!(obj.inc("b".into()));
+        println!("{:?}", obj.inc("b".into()));
         println!("{:?}", obj.count_list.count_num_words_as_str());
-        dbg!(obj.inc("c".into()));
+        println!("{:?}", obj.inc("c".into()));
         println!("{:?}", obj.count_list.count_num_words_as_str());
-        dbg!(obj.inc("d".into()));
+        println!("{:?}", obj.inc("d".into()));
         println!("{:?}", obj.count_list.count_num_words_as_str());
-        dbg!(obj.inc("a".into()));
+        println!("{:?}", obj.inc("a".into()));
         println!("{:?}", obj.count_list.count_num_words_as_str());
-        dbg!(obj.inc("b".into()));
+        println!("{:?}", obj.inc("b".into()));
         println!("{:?}", obj.count_list.count_num_words_as_str());
-        dbg!(obj.inc("c".into()));
+        println!("{:?}", obj.inc("c".into()));
         println!("{:?}", obj.count_list.count_num_words_as_str());
-        dbg!(obj.inc("d".into()));
+        println!("{:?}", obj.inc("d".into()));
         println!("{:?}", obj.count_list.count_num_words_as_str());
-        dbg!(obj.inc("c".into()));
+        println!("{:?}", obj.inc("c".into()));
         println!("{:?}", obj.count_list.count_num_words_as_str());
-        dbg!(obj.inc("d".into()));
+        println!("{:?}", obj.inc("d".into()));
         println!("{:?}", obj.count_list.count_num_words_as_str());
-        dbg!(obj.inc("d".into()));
+        println!("{:?}", obj.inc("d".into()));
         println!("{:?}", obj.count_list.count_num_words_as_str());
-        dbg!(obj.inc("a".into()));
+        println!("{:?}", obj.inc("a".into()));
         println!("{:?}", obj.count_list.count_num_words_as_str());
         assert_eq!(obj.get_min_key(), "b");
     }

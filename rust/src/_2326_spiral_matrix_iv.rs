@@ -37,7 +37,6 @@ impl Solution {
         let mut direction = Right;
         while bound_top <= bound_bottom && bound_left <= bound_right {
             if cfg!(debug_assert) {
-                dbg!(&pos);
                 println!("{result:?}");
             }
             debug_assert!(

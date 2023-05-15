@@ -29,7 +29,7 @@ impl Solution {
         }
 
         // Move slow to k before the end
-        let mut second_index = 0;
+        let mut second_index = 0; // TODO switch to 1 based indexing
         while let Some(node) = fast {
             fast = &node.next;
             slow = slow
