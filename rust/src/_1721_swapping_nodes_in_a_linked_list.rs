@@ -119,4 +119,22 @@ mod tests {
         let actual = Solution::swap_nodes(head.into(), k);
         assert_eq!(actual, expected.into());
     }
+
+    #[test]
+    fn case7() {
+        let head: ListHead = vec![1, 2, 3, 4, 5, 6].into();
+        let k = 6;
+        let expected: ListHead = vec![6, 2, 3, 4, 5, 1].into();
+        let actual = Solution::swap_nodes(head.into(), k);
+        assert_eq!(actual, expected.into());
+    }
+
+    #[test]
+    fn case8() {
+        let head: ListHead = vec![1, 2, 3, 4, 5, 6, 7, 8, 9, 10].into();
+        let k = 8;
+        let expected: ListHead = vec![1, 2, 8, 4, 5, 6, 7, 3, 9, 10].into();
+        let actual = Solution::swap_nodes(head.into(), k);
+        assert_eq!(actual, expected.into());
+    }
 }
