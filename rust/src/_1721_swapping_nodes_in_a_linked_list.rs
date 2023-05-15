@@ -21,7 +21,7 @@ impl Solution {
         let mut slow = head.as_ref().expect("Constraint is n >= 1");
 
         // Move fast ahead of slow by k
-        for _ in 0..k {
+        for _ in 1..=k {
             fast = &fast
                 .as_ref()
                 .expect("Based on constraint in question k <= n")
@@ -29,7 +29,7 @@ impl Solution {
         }
 
         // Move slow to k before the end
-        let mut second_index = 0; // TODO switch to 1 based indexing
+        let mut second_index = 1;
         while let Some(node) = fast {
             fast = &node.next;
             slow = slow
@@ -43,13 +43,17 @@ impl Solution {
         let second_value = slow.val;
 
         // Walk the list again and update the nodes
+
+        // Find k from start
         let mut node = &mut head;
-        for _ in 0..k - 1 {
+        for _ in 1..k {
             node = &mut node.as_mut().expect("k <= n by constraint").next;
         }
         let first_value = node.as_ref().expect("At first node").val;
         node.as_mut().expect("At first node").val = second_value;
-        for _ in k - 1..second_index {
+
+        // Find k from end
+        for _ in k..second_index {
             node = &mut node.as_mut().expect("k <= n by constraint").next;
         }
         node.as_mut().expect("At second node").val = first_value;
