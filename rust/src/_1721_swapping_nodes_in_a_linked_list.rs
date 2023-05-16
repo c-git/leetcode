@@ -14,49 +14,67 @@
 //     }
 //   }
 // }
+
+use std::cmp::Ordering::{Equal, Greater, Less};
+
 impl Solution {
     pub fn swap_nodes(mut head: Option<Box<ListNode>>, k: i32) -> Option<Box<ListNode>> {
         let k = k as usize;
         let mut fast = &head;
         let mut slow = head.as_ref().expect("Constraint is n >= 1");
 
-        // Move fast ahead of slow by k
-        for _ in 1..=k {
+        // Move fast to index k
+        for _ in 1..k {
             fast = &fast
                 .as_ref()
                 .expect("Based on constraint in question k <= n")
                 .next;
         }
 
+        // Save value at k from start
+        let k_from_start_value = fast
+            .as_ref()
+            .expect("Based on constraint in question k <= n")
+            .val;
+
+        // Move fast onto the next node after k from start so it is k ahead of slow which is on 1
+        fast = &fast
+            .as_ref()
+            .expect("Based on constraint in question k <= n")
+            .next;
+
         // Move slow to k before the end
-        let mut second_index = 1;
+        let mut k_from_end_index = 1;
         while let Some(node) = fast {
             fast = &node.next;
             slow = slow
                 .next
                 .as_ref()
                 .expect("This is behind fast so must exist");
-            second_index += 1;
+            k_from_end_index += 1;
         }
 
-        // Save value from 2nd node to update the first
-        let second_value = slow.val;
+        // Save value from k from end
+        let k_from_end_value = slow.val;
 
-        // Walk the list again and update the nodes
+        let (first_index, second_index, first_value, second_value) = match k.cmp(&k_from_end_index)
+        {
+            Less | Equal => (k, k_from_end_index, k_from_end_value, k_from_start_value),
+            Greater => (k_from_end_index, k, k_from_start_value, k_from_end_value),
+        };
 
-        // Find k from start
+        // Find first node
         let mut node = &mut head;
-        for _ in 1..k {
-            node = &mut node.as_mut().expect("k <= n by constraint").next;
+        for _ in 1..first_index {
+            node = &mut node.as_mut().unwrap().next;
         }
-        let first_value = node.as_ref().expect("At first node").val;
-        node.as_mut().expect("At first node").val = second_value;
+        node.as_mut().expect("At first node").val = first_value;
 
-        // Find k from end
-        for _ in k..second_index {
-            node = &mut node.as_mut().expect("k <= n by constraint").next;
+        // Update second node
+        for _ in first_index..second_index {
+            node = &mut node.as_mut().unwrap().next;
         }
-        node.as_mut().expect("At second node").val = first_value;
+        node.as_mut().expect("At second node").val = second_value;
 
         head
     }
