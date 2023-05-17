@@ -59,8 +59,10 @@ impl Solution {
         }
         let mut root = TreeNode::new(value);
         index += 1;
-        (root.left, index) = Self::build_bst(min, value - 1, preorder, index);
-        (root.right, index) = Self::build_bst(value + 1, max, preorder, index);
+        let (left, index) = Self::build_bst(min, value - 1, preorder, index);
+        root.left = left;
+        let (right, index) = Self::build_bst(value + 1, max, preorder, index);
+        root.right = right;
         (Some(Rc::new(RefCell::new(root))), index)
     }
 }
