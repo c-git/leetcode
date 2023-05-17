@@ -16,48 +16,24 @@
 // }
 impl Solution {
     pub fn pair_sum(mut head: Option<Box<ListNode>>) -> i32 {
+        // Replaced O(1) memory option with a "faster" option that uses O(1) memory but with a much bigger constant
         let mut result = 0; // Initialized to 0 because, values are all positive and min of 2
+        let mut values = Vec::with_capacity(100_000); // Size based on constraint in question
 
-        // Calculate n
-        let mut node_opt = &head;
-        let mut n = 0;
-        while let Some(node) = node_opt {
-            n += 1;
-            node_opt = &node.next;
+        // Store values in vec
+        while let Some(node) = head {
+            values.push(node.val);
+            head = node.next;
         }
 
-        // Move right pointer to first node in right side
-        let mut left = &mut head;
-        for _ in 0..n / 2 - 1 {
-            left = &mut left.as_mut().unwrap().next;
-        }
-
-        // Flip second part of list
-        let mut rest = None;
-        let mut right = left.as_mut().unwrap().next.take();
-        for _ in 0..n / 2 {
-            let next = right.as_mut().unwrap().next.take();
-            right.as_mut().unwrap().next = rest;
-            rest = right;
-            right = next;
-        }
-
-        // Walk lists and compare sums
-        let mut left = head; // Use left as nodes from head
-        right = rest; // Move rest into the variable for the right side of the twins (The flipped second half of the list)
-        while let (Some(node1), Some(node2)) = (left, right) {
-            let sum = node1.val + node2.val;
+        // Walk pairs and compare sums
+        let n = values.len();
+        for i in 0..n / 2 {
+            let sum = values[i] + values[n - 1 - i];
             if sum > result {
                 result = sum;
             }
-            left = node1.next;
-            right = node2.next;
-            debug_assert!(
-                left.is_none() == right.is_none(),
-                "Lists should be equal length and finish at the same time"
-            );
         }
-
         result
     }
 }
