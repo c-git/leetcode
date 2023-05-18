@@ -14,6 +14,10 @@ impl Solution {
     }
 
     fn dfs(source: usize, destination: usize, graph: &[Vec<usize>], visited: &mut [bool]) -> bool {
+        if source == destination {
+            return true;
+        }
+
         if visited[source] {
             return false;
         }
@@ -21,7 +25,7 @@ impl Solution {
         visited[source] = true;
 
         for &other in graph[source].iter() {
-            if other == destination || Self::dfs(other, destination, graph, visited) {
+            if Self::dfs(other, destination, graph, visited) {
                 return true;
             }
         }
@@ -54,6 +58,18 @@ mod tests {
         let destination = 5;
         let edges = edges.into_iter().map(|x| x.into()).collect();
         let expected = false;
+        let actual = Solution::valid_path(n, edges, source, destination);
+        assert_eq!(actual, expected);
+    }
+
+    #[test]
+    fn case3() {
+        let n = 1;
+        let edges: [[i32; 2]; 0] = [];
+        let source = 0;
+        let destination = 0;
+        let edges = edges.into_iter().map(|x| x.into()).collect();
+        let expected = true;
         let actual = Solution::valid_path(n, edges, source, destination);
         assert_eq!(actual, expected);
     }
