@@ -1,35 +1,42 @@
-impl Solution {
-    pub fn valid_path(n: i32, edges: Vec<Vec<i32>>, source: i32, destination: i32) -> bool {
-        // Build adjacency graph
-        let mut graph: Vec<Vec<usize>> = vec![vec![]; n as usize];
-        let mut visited = vec![false; n as usize];
-        for edge in edges {
-            debug_assert_eq!(edge.len(), 2);
-            let (from, to) = (edge[0] as usize, edge[1] as usize);
-            graph[from].push(to);
-            graph[to].push(from);
-        }
+struct UnionFind {
+    components: Vec<usize>,
+}
 
-        Self::dfs(source as usize, destination as usize, &graph, &mut visited)
+impl UnionFind {
+    fn new(n: usize) -> Self {
+        Self {
+            components: (0..n).collect(),
+        }
     }
 
-    fn dfs(source: usize, destination: usize, graph: &[Vec<usize>], visited: &mut [bool]) -> bool {
-        if source == destination {
-            return true;
+    fn find(&mut self, x: usize) -> usize {
+        if x == self.components[x] {
+            return x;
         }
+        let parent = self.find(self.components[x]);
+        self.components[x] = parent;
+        parent
+    }
 
-        if visited[source] {
-            return false;
+    fn union(&mut self, a: usize, b: usize) {
+        let parent_a = self.find(a);
+        let parent_b = self.find(b);
+        self.components[parent_a] = self.components[parent_b];
+    }
+
+    fn is_same_set(&mut self, a: usize, b: usize) -> bool {
+        self.find(a) == self.find(b)
+    }
+}
+
+impl Solution {
+    // Source: Based on faster submission on leetcode
+    pub fn valid_path(n: i32, edges: Vec<Vec<i32>>, source: i32, destination: i32) -> bool {
+        let mut uf = UnionFind::new(n as usize);
+        for edge in edges {
+            uf.union(edge[0] as usize, edge[1] as usize)
         }
-
-        visited[source] = true;
-
-        for &other in graph[source].iter() {
-            if Self::dfs(other, destination, graph, visited) {
-                return true;
-            }
-        }
-        false
+        uf.is_same_set(source as usize, destination as usize)
     }
 }
 
