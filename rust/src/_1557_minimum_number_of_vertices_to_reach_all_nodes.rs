@@ -1,16 +1,34 @@
-use std::collections::HashSet;
-
 impl Solution {
     pub fn find_smallest_set_of_vertices(n: i32, edges: Vec<Vec<i32>>) -> Vec<i32> {
-        let mut result: HashSet<i32> = (0..n).collect();
+        let mut result = vec![];
+        let num_bit_groups = (n as usize + 64 - 1) / 64; // Divide by 64 rounding up to get how man u64's we need to store all the values seen
+        let mut seen = vec![0; num_bit_groups];
 
         // Check which vertices have edges leading to them
         for edge in edges {
-            let to_vertex = edge[1];
-            result.remove(&to_vertex);
+            let to_vertex = edge[1] as usize;
+            let group_index = to_vertex / 64;
+            let bit_index = to_vertex as u32 % 64;
+            let or_val = usize::pow(2, bit_index);
+            seen[group_index] |= or_val;
         }
 
-        result.into_iter().collect()
+        // Check which veracities were not seen
+        let mut group_index = 0;
+        let mut and_val = 1;
+        for _ in 0..n {
+            if seen[group_index] & and_val == 0 {
+                let vertex_number = group_index as i32 * 64 + and_val.trailing_zeros() as i32;
+                result.push(vertex_number)
+            }
+            and_val <<= 1;
+            if and_val == 0 {
+                and_val = 1;
+                group_index += 1;
+            }
+        }
+
+        result
     }
 }
 
