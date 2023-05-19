@@ -1,27 +1,35 @@
+use std::mem::swap;
+
 struct UnionFind {
     components: Vec<usize>,
+    rank: Vec<usize>,
 }
 
 impl UnionFind {
     fn new(n: usize) -> Self {
         Self {
             components: (0..n).collect(),
+            rank: vec![1; n],
         }
     }
 
     fn find(&mut self, x: usize) -> usize {
-        if x == self.components[x] {
-            return x;
+        if x != self.components[x] {
+            self.components[x] = self.find(self.components[x]);
         }
-        let parent = self.find(self.components[x]);
-        self.components[x] = parent;
-        parent
+        self.components[x]
     }
 
-    fn union(&mut self, a: usize, b: usize) {
-        let parent_a = self.find(a);
-        let parent_b = self.find(b);
-        self.components[parent_a] = self.components[parent_b];
+    fn union(&mut self, x: usize, y: usize) {
+        let mut root_x = self.find(x);
+        let mut root_y = self.find(y);
+        if root_x != root_y {
+            if self.rank[root_x] > self.rank[root_y] {
+                swap(&mut root_x, &mut root_y)
+            }
+            self.rank[root_y] += self.rank[root_x];
+            self.components[root_x] = root_y;
+        }
     }
 
     fn is_same_set(&mut self, a: usize, b: usize) -> bool {
@@ -30,7 +38,7 @@ impl UnionFind {
 }
 
 impl Solution {
-    // Source: Based on faster submission on leetcode
+    // Source: Based on faster submission on leetcode (Updated to include join by rank after reading editorial)
     pub fn valid_path(n: i32, edges: Vec<Vec<i32>>, source: i32, destination: i32) -> bool {
         let mut uf = UnionFind::new(n as usize);
         for edge in edges {
