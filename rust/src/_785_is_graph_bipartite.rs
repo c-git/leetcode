@@ -1,72 +1,64 @@
-use std::collections::HashSet;
+use std::mem::swap;
 
-struct Solution;
+struct UnionFind {
+    components: Vec<usize>,
+    rank: Vec<usize>,
+}
+
+impl UnionFind {
+    pub fn new(n: usize) -> Self {
+        Self {
+            components: (0..n).collect(),
+            rank: vec![1; n],
+        }
+    }
+
+    pub fn find(&mut self, x: usize) -> usize {
+        if x != self.components[x] {
+            self.components[x] = self.find(self.components[x]);
+        }
+        self.components[x]
+    }
+
+    pub fn union(&mut self, x: usize, y: usize) {
+        let mut root_x = self.find(x);
+        let mut root_y = self.find(y);
+        if root_x != root_y {
+            if self.rank[root_x] > self.rank[root_y] {
+                swap(&mut root_x, &mut root_y)
+            }
+            self.rank[root_y] += self.rank[root_x];
+            self.components[root_x] = root_y;
+        }
+    }
+
+    pub fn is_same_set(&mut self, a: usize, b: usize) -> bool {
+        self.find(a) == self.find(b)
+    }
+}
 
 impl Solution {
     pub fn is_bipartite(graph: Vec<Vec<i32>>) -> bool {
-        let mut sets: Vec<HashSet<i32>> = vec![];
+        let mut uf = UnionFind::new(graph.len());
 
-        for (u, edges) in graph.iter().enumerate() {
-            let u = u as i32;
-
-            // Find the set u belongs to or add new set for u and ensure none of it's edges are in that set
-            let u_set = Self::get_set(&u, &sets);
-            match u_set {
-                Some((_, set)) => {
-                    // Confirm all edges for u are not in that set
-                    for edge in edges {
-                        if set.contains(edge) {
-                            return false;
-                        }
-                    }
+        for (node, edges) in graph.iter().enumerate() {
+            // Ensure the node is not in the same set as any of it's edges and ensure it's edges are all in the same set
+            let mut iter = edges.iter();
+            if let Some(first_edge) = iter.next() {
+                let edge_set = uf.find(*first_edge as usize);
+                for edge in iter {
+                    uf.union(edge_set, *edge as usize);
                 }
-                None => {
-                    // Add new set for u (no need to check for edges it's a new set)
-                    let mut new_set = HashSet::new();
-                    new_set.insert(u);
-                    sets.push(new_set);
-                }
-            };
-
-            // Ensure all edges are added to the same set (if any are already in sets merge the sets)
-            let mut last_edge_index: Option<usize> = None;
-            for edge in edges {
-                let new_edge_set = Self::get_set(edge, &sets);
-                if let Some((i, _)) = new_edge_set {
-                    if let Some(index) = last_edge_index {
-                        if index == i {
-                            // Do nothing they are already both added and both the same set
-                        } else {
-                            // Both already in sets, merge the sets
-                            let (lower_index, higher_index) =
-                                if i < index { (i, index) } else { (index, i) };
-                            let other_set = sets.remove(higher_index);
-                            sets[lower_index].extend(other_set);
-                            last_edge_index = Some(lower_index);
-                        }
-                    } else {
-                        // Nothing to merge with and already added
-                        last_edge_index = Some(i);
-                    }
-                } else if let Some(index) = last_edge_index {
-                    // Add to same set as last edge because the new edge doesn't have a set yet
-                    sets[index].insert(*edge);
-                } else {
-                    // No last edge set and new edge not in set so create a new set and add it to the end of the vector
-                    let mut new_set = HashSet::new();
-                    new_set.insert(*edge);
-                    sets.push(new_set);
-                    last_edge_index = Some(sets.len() - 1);
+                if uf.is_same_set(node, edge_set) {
+                    return false;
                 }
             }
         }
         true
     }
-
-    fn get_set<'a>(u: &i32, sets: &'a [HashSet<i32>]) -> Option<(usize, &'a HashSet<i32>)> {
-        sets.iter().enumerate().find(|(_, set)| set.contains(u))
-    }
 }
+
+struct Solution;
 
 #[test]
 fn case1() {
