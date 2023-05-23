@@ -157,8 +157,9 @@ impl Solution {
         }
 
         // Walk out from edges of first island until we find the second island (and well the answer)
+        let land_value: i32 = Land.into(); //Updated to work on leetcode where it was ambiguous
         while let Some(CellReference { pos, distance }) = bfs_queue.pop() {
-            if grid[pos.0 as usize][pos.1 as usize] == Land.into() {
+            if grid[pos.0 as usize][pos.1 as usize] == land_value {
                 return distance;
             }
             for neighbour in Direction::neighbours(pos, n) {
