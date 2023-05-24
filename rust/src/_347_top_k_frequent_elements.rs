@@ -5,21 +5,13 @@ impl Solution {
         let k = k as usize;
         let mut freq = HashMap::new();
         for num in nums {
-            let entry = freq.entry(num).or_insert(0);
-            *entry += 1;
+            *freq.entry(num).or_insert(0) += 1;
         }
 
-        let mut result = Vec::with_capacity(k + 1);
-
-        for (key, value) in freq {
-            result.push((value, key));
-            result.sort_unstable_by(|(a, _), (b, _)| b.cmp(a)); // This is fine because the solution is unique
-            if result.len() > k {
-                result.pop();
-            }
-        }
-
-        result.into_iter().map(|(_, k)| k).collect()
+        let mut result: Vec<_> = freq.iter().collect();
+        result.sort_unstable_by(|(a, _), (b, _)| b.cmp(a)); // This is fine because the solution is unique
+        result.drain(k..);
+        result.into_iter().map(|(_, &k)| k).collect()
     }
 }
 
