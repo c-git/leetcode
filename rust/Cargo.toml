@@ -7,6 +7,6 @@ default-run = "name_converter"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-# clap = { version = "*", features = ["derive"] }
 nom = "*"
 regex = "*"
+rstest = "0.12.0" #Old version used because or old version of rust on leetcode
