@@ -21,10 +21,10 @@ class Solution:
 
         sum_ -= q.get()
         for (x, y) in pairs[k:]:
-            ans = max(ans, (sum_ + x) * y)
+            sum_ += x
             q.put(x)
-            sum_ += x - q.get()
-
+            ans = max(ans, sum_ * y)
+            sum_ -= q.get()
         return ans
 
 
