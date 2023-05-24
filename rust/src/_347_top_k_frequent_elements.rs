@@ -9,9 +9,9 @@ impl Solution {
         }
 
         let mut result: Vec<_> = freq.iter().collect();
-        result.sort_unstable_by(|(a, _), (b, _)| b.cmp(a)); // This is fine because the solution is unique
+        result.sort_unstable_by(|(_, a), (_, b)| b.cmp(a)); // This is fine because the solution is unique
         result.drain(k..);
-        result.into_iter().map(|(_, &k)| k).collect()
+        result.into_iter().map(|(&k, _)| k).collect()
     }
 }
 
@@ -38,6 +38,15 @@ mod tests {
     #[test]
     fn case2() {
         let nums = vec![1];
+        let k = 1;
+        let expected = vec![1];
+        let actual = Solution::top_k_frequent(nums, k);
+        validate(actual, expected);
+    }
+
+    #[test]
+    fn case3() {
+        let nums = vec![1, 1, 1, 1];
         let k = 1;
         let expected = vec![1];
         let actual = Solution::top_k_frequent(nums, k);
