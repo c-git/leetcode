@@ -31,36 +31,19 @@ struct Solution;
 #[cfg(test)]
 mod tests {
     use super::*;
+    use rstest::rstest;
 
-    #[test]
-    fn case1() {
-        let low = 3;
-        let high = 3;
-        let zero = 1;
-        let one = 1;
-        let expected = 8;
-        let actual = Solution::count_good_strings(low, high, zero, one);
-        assert_eq!(actual, expected);
-    }
-
-    #[test]
-    fn case2() {
-        let low = 2;
-        let high = 3;
-        let zero = 1;
-        let one = 2;
-        let expected = 5;
-        let actual = Solution::count_good_strings(low, high, zero, one);
-        assert_eq!(actual, expected);
-    }
-
-    #[test]
-    fn case3() {
-        let low = 1;
-        let high = 100_000;
-        let zero = 1;
-        let one = 1;
-        let expected = 215447031;
+    #[rstest]
+    #[case(3, 3, 1, 1, 8)]
+    #[case(2, 3, 1, 2, 5)]
+    #[case(1, 100_000, 1, 1, 215447031)]
+    fn case(
+        #[case] low: i32,
+        #[case] high: i32,
+        #[case] zero: i32,
+        #[case] one: i32,
+        #[case] expected: i32,
+    ) {
         let actual = Solution::count_good_strings(low, high, zero, one);
         assert_eq!(actual, expected);
     }
