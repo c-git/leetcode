@@ -1,45 +1,39 @@
 impl Solution {
     pub fn three_sum_closest(mut nums: Vec<i32>, target: i32) -> i32 {
+        // Updated based on fastest submission
         nums.sort_unstable();
+        let n = nums.len();
         let mut result: i32 = nums.iter().take(3).sum();
         let mut best_diff = (target - result).abs();
-        for (index1, num1) in nums.iter().enumerate() {
-            for (index2, num2) in nums.iter().enumerate() {
-                if index1 != index2 {
-                    let partial = num1 + num2;
-                    let remainder = target - partial;
-                    let second_partition_start = nums.partition_point(|x| x < &remainder);
+        for (index1, &num1) in nums.iter().take(n - 2).enumerate() {
+            if index1 > 0 && nums[index1 - 1] == num1 {
+                continue;
+            }
+            // set left and right sides of search
+            let (mut index2, mut index3) = (index1 + 1, n - 1);
 
-                    if second_partition_start > 0 {
-                        let first_partition_end = second_partition_start - 1;
-                        if first_partition_end != index1 && first_partition_end != index2 {
-                            let attempt = partial + nums[first_partition_end];
-                            Self::compare_result(target, attempt, &mut best_diff, &mut result);
+            let inner_target = num1 - target;
+            while index2 < index3 {
+                match inner_target + nums[index2] + nums[index3] {
+                    0 => return target,
+                    x if x < 0 => {
+                        if x.abs() < best_diff {
+                            result = target + x;
+                            best_diff = x.abs();
                         }
+                        index2 += 1;
                     }
-                    if second_partition_start < nums.len()
-                        && second_partition_start != index1
-                        && second_partition_start != index2
-                    {
-                        let attempt = partial + nums[second_partition_start];
-                        Self::compare_result(target, attempt, &mut best_diff, &mut result);
-                    }
-                    if best_diff == 0 {
-                        return result;
+                    x => {
+                        if x.abs() < best_diff.abs() {
+                            result = target + x;
+                            best_diff = x.abs();
+                        }
+                        index3 -= 1;
                     }
                 }
             }
         }
         result
-    }
-
-    #[inline]
-    fn compare_result(target: i32, attempt: i32, best_diff: &mut i32, result: &mut i32) {
-        let diff = (target - attempt).abs();
-        if diff < *best_diff {
-            *result = attempt;
-            *best_diff = diff;
-        }
     }
 }
 
