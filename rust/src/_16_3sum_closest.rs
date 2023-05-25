@@ -2,7 +2,7 @@ impl Solution {
     pub fn three_sum_closest(mut nums: Vec<i32>, target: i32) -> i32 {
         nums.sort_unstable();
         let mut result: i32 = nums.iter().take(3).sum();
-        let mut best_diff = target.abs_diff(result);
+        let mut best_diff = (target - result).abs();
         for (index1, num1) in nums.iter().enumerate() {
             for (index2, num2) in nums.iter().enumerate() {
                 if index1 != index2 {
@@ -34,8 +34,8 @@ impl Solution {
     }
 
     #[inline]
-    fn compare_result(target: i32, attempt: i32, best_diff: &mut u32, result: &mut i32) {
-        let diff = target.abs_diff(attempt);
+    fn compare_result(target: i32, attempt: i32, best_diff: &mut i32, result: &mut i32) {
+        let diff = (target - attempt).abs();
         if diff < *best_diff {
             *result = attempt;
             *best_diff = diff;
