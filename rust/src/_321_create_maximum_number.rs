@@ -1,3 +1,4 @@
+use std::cmp::Ordering::*;
 use std::collections::HashMap;
 impl Solution {
     fn merge(mut nums1: &[i32], mut nums2: &[i32], merged: &mut Vec<i32>) {
@@ -25,9 +26,10 @@ impl Solution {
         mut nums2: &[i32],
         mut k: usize,
         memory: &'a mut HashMap<(usize, usize, usize), Vec<i32>>,
-    ) -> &'a std::vec::Vec<i32> {
+    ) -> &'a Vec<i32> {
         let key = (nums1.len(), nums2.len(), k);
         if memory.contains_key(&key) {
+            panic!("Is this used");
             return memory.get(&key).unwrap();
         } else {
             // no of drop allowed to select 1 element
@@ -38,6 +40,7 @@ impl Solution {
                     Self::merge(nums1, nums2, &mut ans);
                     break;
                 } else {
+                    // Get index of max usable value (last index must exist because k < number of values in both lists)
                     let nums1_idx =
                         Self::get_max_index(&nums1[..(drop_for_one + 1).min(nums1.len())]);
                     let nums2_idx =
@@ -46,19 +49,19 @@ impl Solution {
                         .and_then(|x| nums1.get(x))
                         .cmp(&nums2_idx.and_then(|x| nums2.get(x)))
                     {
-                        std::cmp::Ordering::Less => {
+                        Less => {
                             let idx = nums2_idx.unwrap();
                             ans.push(nums2[idx]);
                             nums2 = &nums2[idx + 1..];
                             k -= 1;
                         }
-                        std::cmp::Ordering::Greater => {
+                        Greater => {
                             let idx = nums1_idx.unwrap();
                             ans.push(nums1[idx]);
                             nums1 = &nums1[idx + 1..];
                             k -= 1;
                         }
-                        std::cmp::Ordering::Equal => {
+                        Equal => {
                             let nums2_ = &nums2[nums2_idx.unwrap() + 1..];
                             let nums1_ = &nums1[nums1_idx.unwrap() + 1..];
                             ans.push(nums1[nums1_idx.unwrap()]);
