@@ -29,7 +29,6 @@ impl Solution {
     ) -> &'a Vec<i32> {
         let key = (nums1.len(), nums2.len(), k);
         if memory.contains_key(&key) {
-            panic!("Is this used");
             return memory.get(&key).unwrap();
         } else {
             // no of drop allowed to select 1 element
@@ -84,6 +83,7 @@ impl Solution {
 
     pub fn max_number(nums1: Vec<i32>, nums2: Vec<i32>, k: i32) -> Vec<i32> {
         // Source: sak96 https://leetcode.com/problems/create-maximum-number/solutions/3538339/fast-solution-using-slice-and-hashmap/
+        // Fundamental problem I originally missed is you always want to maximize the next digit and not remove the smallest digits
         let mut memory = HashMap::new();
         Self::max_number_dp(&nums1, &nums2, k as usize, &mut memory);
         memory
@@ -106,6 +106,11 @@ mod tests {
     #[case(vec![6,7], vec![6,9,4], 4, vec![9,6,7,4])]
     #[case(vec![9,9], vec![9,9], 1, vec![9])]
     #[case(vec![9,7], vec![9,8], 1, vec![9])]
+    #[case(
+        vec![8,0,4,4,1,7,3,6,5,9,3,6,6,0,2,5,1,7,7,7,8,7,1,4,4,5,4,8,7,6,2,2,9,4,7,5,6,2,2,8,4,6,0,4,7,8,9,1,7,0],
+        vec![6,9,8,1,1,5,7,3,1,3,3,4,9,2,8,0,6,9,3,3,7,8,3,4,2,4,7,4,5,7,7,2,5,6,3,6,7,0,3,5,3,2,8,1,6,6,1,0,8,4],
+        50,
+        vec![9,9,9,9,9,8,7,5,6,3,4,2,4,7,4,5,7,7,2,5,6,3,6,7,2,2,8,4,6,0,4,7,8,9,1,7,0,3,5,3,2,8,1,6,6,1,0,8,4,0])]
     fn case(
         #[case] nums1: Vec<i32>,
         #[case] nums2: Vec<i32>,
