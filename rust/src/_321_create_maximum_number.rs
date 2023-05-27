@@ -40,7 +40,6 @@ impl Solution {
                     Self::merge(nums1, nums2, &mut ans);
                     break;
                 } else {
-                    // Get index of max usable value (last index must exist because k < number of values in both lists)
                     let nums1_idx =
                         Self::get_max_index(&nums1[..(drop_for_one + 1).min(nums1.len())]);
                     let nums2_idx =
