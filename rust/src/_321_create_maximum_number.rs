@@ -1,5 +1,4 @@
 use std::cmp::Ordering::*;
-use std::collections::HashMap;
 impl Solution {
     fn merge(mut nums1: &[i32], mut nums2: &[i32], merged: &mut Vec<i32>) {
         while !nums1.is_empty() || !nums2.is_empty() {
@@ -21,74 +20,58 @@ impl Solution {
             .map(|(idx, _)| idx)
     }
 
-    pub fn max_number_dp<'a>(
-        mut nums1: &[i32],
-        mut nums2: &[i32],
-        mut k: usize,
-        memory: &'a mut HashMap<(usize, usize, usize), Vec<i32>>,
-    ) -> &'a Vec<i32> {
-        let key = (nums1.len(), nums2.len(), k);
-        if memory.contains_key(&key) {
-            return memory.get(&key).unwrap();
-        } else {
-            // no of drop allowed to select 1 element
-            let mut ans = Vec::with_capacity(k);
-            while k > 0 {
-                let drop_for_one = nums1.len() + nums2.len() - k;
-                if drop_for_one == 0 {
-                    Self::merge(nums1, nums2, &mut ans);
-                    break;
-                } else {
-                    let nums1_idx =
-                        Self::get_max_index(&nums1[..(drop_for_one + 1).min(nums1.len())]);
-                    let nums2_idx =
-                        Self::get_max_index(&nums2[..(drop_for_one + 1).min(nums2.len())]);
-                    match nums1_idx
-                        .and_then(|x| nums1.get(x))
-                        .cmp(&nums2_idx.and_then(|x| nums2.get(x)))
-                    {
-                        Less => {
-                            let idx = nums2_idx.unwrap();
-                            ans.push(nums2[idx]);
-                            nums2 = &nums2[idx + 1..];
-                            k -= 1;
-                        }
-                        Greater => {
-                            let idx = nums1_idx.unwrap();
-                            ans.push(nums1[idx]);
-                            nums1 = &nums1[idx + 1..];
-                            k -= 1;
-                        }
-                        Equal => {
-                            let nums2_ = &nums2[nums2_idx.unwrap() + 1..];
-                            let nums1_ = &nums1[nums1_idx.unwrap() + 1..];
-                            ans.push(nums1[nums1_idx.unwrap()]);
+    pub fn max_number_dp(mut nums1: &[i32], mut nums2: &[i32], mut k: usize) -> Vec<i32> {
+        // no of drop allowed to select 1 element
+        let mut ans = Vec::with_capacity(k);
+        while k > 0 {
+            let drop_for_one = nums1.len() + nums2.len() - k;
+            if drop_for_one == 0 {
+                Self::merge(nums1, nums2, &mut ans);
+                break;
+            } else {
+                let nums1_idx = Self::get_max_index(&nums1[..(drop_for_one + 1).min(nums1.len())]);
+                let nums2_idx = Self::get_max_index(&nums2[..(drop_for_one + 1).min(nums2.len())]);
+                match nums1_idx
+                    .and_then(|x| nums1.get(x))
+                    .cmp(&nums2_idx.and_then(|x| nums2.get(x)))
+                {
+                    Less => {
+                        let idx = nums2_idx.unwrap();
+                        ans.push(nums2[idx]);
+                        nums2 = &nums2[idx + 1..];
+                        k -= 1;
+                    }
+                    Greater => {
+                        let idx = nums1_idx.unwrap();
+                        ans.push(nums1[idx]);
+                        nums1 = &nums1[idx + 1..];
+                        k -= 1;
+                    }
+                    Equal => {
+                        let nums2_ = &nums2[nums2_idx.unwrap() + 1..];
+                        let nums1_ = &nums1[nums1_idx.unwrap() + 1..];
+                        ans.push(nums1[nums1_idx.unwrap()]);
 
-                            let len = ans.len();
-                            k -= 1;
-                            ans.extend(Self::max_number_dp(nums1_, nums2, k, memory));
-                            let nums = Self::max_number_dp(nums1, nums2_, k, memory);
-                            if &ans[len..] < nums {
-                                ans.truncate(len);
-                                ans.extend(nums);
-                            }
-                            break;
+                        let len = ans.len();
+                        k -= 1;
+                        ans.extend(Self::max_number_dp(nums1_, nums2, k));
+                        let nums = Self::max_number_dp(nums1, nums2_, k);
+                        if &ans[len..] < &nums {
+                            ans.truncate(len);
+                            ans.extend(nums);
                         }
+                        break;
                     }
                 }
             }
-            memory.entry(key).or_insert(ans)
         }
+        ans
     }
 
     pub fn max_number(nums1: Vec<i32>, nums2: Vec<i32>, k: i32) -> Vec<i32> {
         // Source: sak96 https://leetcode.com/problems/create-maximum-number/solutions/3538339/fast-solution-using-slice-and-hashmap/
         // Fundamental problem I originally missed is you always want to maximize the next digit and not remove the smallest digits
-        let mut memory = HashMap::new();
-        Self::max_number_dp(&nums1, &nums2, k as usize, &mut memory);
-        memory
-            .remove(&(nums1.len(), nums2.len(), k as usize))
-            .unwrap()
+        Self::max_number_dp(&nums1, &nums2, k as usize)
     }
 }
 
