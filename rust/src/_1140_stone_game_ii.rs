@@ -7,7 +7,7 @@ impl Solution {
         m: usize,
         memory: &mut HashMap<(usize, usize), i32>,
     ) -> i32 {
-        debug_assert_eq!(sum_piles, piles.iter().sum());
+        debug_assert_eq!(sum_piles, piles.iter().sum::<i32>());
         let key = (piles.len(), m);
         let value = if piles.len() <= 2 * m {
             // take all you can and give nothing back
