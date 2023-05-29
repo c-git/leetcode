@@ -17,6 +17,7 @@ fn main() {
         .expect("Failed to open file for writing");
     file.write_all(&get_boilerplate())
         .expect("Failed to write to file");
+    println!("Created New file");
 
     // Update lib.rs
     let filename = "src/lib.rs";
@@ -26,6 +27,7 @@ fn main() {
         .expect("Failed to open lib.rs");
     file.write_all(format!("mod {converted_name};").as_bytes())
         .expect("Failed to update lib.rs");
+    println!("Added to lib.rs");
 }
 
 fn get_boilerplate() -> Vec<u8> {
