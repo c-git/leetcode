@@ -1,8 +1,4 @@
-use std::{
-    env,
-    fs::{File, OpenOptions},
-    io::Write,
-};
+use std::{env, fs::OpenOptions, io::Write};
 
 use regex::Regex;
 
