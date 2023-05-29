@@ -8,7 +8,9 @@ impl Solution {
         cuts.sort_unstable();
         let m = cuts.len();
 
-        // TODO Add what each cell in the matrix represents
+        // Stores the minimum cost of cutting each stick fragment,
+        // where dp[left][right] represents the minimum cost of cutting
+        // the stick fragment [new_cuts[left], new_cuts[right]]
         let mut dp = vec![vec![0; m]; m];
 
         for diff in 2..m {
