@@ -1,12 +1,54 @@
-use std::env;
+use std::{
+    env,
+    fs::{File, OpenOptions},
+    io::Write,
+};
 
 use regex::Regex;
 
 fn main() {
+    // Get input and convert to output filename
     let problem_name = env::args().skip(1).collect::<Vec<_>>().join(" ");
-    let mut converted_name = convert_name(problem_name);
-    converted_name.push_str(".rs"); // Add rust extension
+    let converted_name = convert_name(problem_name);
     println!("\nNew Name is: \n{converted_name}\n");
+
+    // Create new file
+    let filename = format!("src/{converted_name}.rs");
+    let mut file = OpenOptions::new()
+        .write(true)
+        .create_new(true)
+        .open(filename)
+        .expect("Failed to open file for writing");
+    file.write_all(&get_boilerplate())
+        .expect("Failed to write to file");
+
+    // Update lib.rs
+    let filename = "src/lib.rs";
+    let mut file = OpenOptions::new()
+        .append(true)
+        .open(filename)
+        .expect("Failed to open lib.rs");
+    file.write_all(format!("mod {converted_name};").as_bytes())
+        .expect("Failed to update lib.rs");
+}
+
+fn get_boilerplate() -> Vec<u8> {
+    "
+
+struct Solution;
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use rstest::rstest;
+
+    #[rstest]
+    #[case(,)]
+    fn case(#[case] input: , #[case] expected: ) {
+        let actual = Solution::(input);
+        assert_eq!(actual, expected);
+    }
+}"
+    .into()
 }
 
 fn convert_name(problem_name: String) -> String {
