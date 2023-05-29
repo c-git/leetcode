@@ -3,19 +3,23 @@ use std::env;
 use regex::Regex;
 
 fn main() {
-    println!("\n{}\n", convert_name());
+    let problem_name = env::args().skip(1).collect::<Vec<_>>().join(" ");
+    let mut converted_name = convert_name(problem_name);
+    converted_name.push_str(".rs"); // Add rust extension
+    println!("\nNew Name is: \n{converted_name}\n");
 }
 
-fn convert_name() -> String {
-    let mut result = env::args().skip(1).collect::<Vec<_>>().join(" ");
+fn convert_name(problem_name: String) -> String {
+    let mut result = problem_name;
 
     // Check for no input
     if result.is_empty() {
-        return "
+        panic!(
+            "
 Expected the name to be converted to be passed as argument(s) to the function
 Eg. \"cargo run -- 2215. Find the Difference of Two Arrays\"
 "
-        .to_string();
+        )
     }
 
     // Remove invalid characters
@@ -25,9 +29,6 @@ Eg. \"cargo run -- 2215. Find the Difference of Two Arrays\"
 
     //Trim any _ at start or end (could be from brackets or other char not just spaces so done now not earlier)
     result = result.trim_matches('_').to_string();
-
-    // Add rust extension
-    result.push_str(".rs");
 
     // Handle if leading character is a number
     if result.starts_with(char::is_numeric) {
