@@ -1,39 +1,31 @@
-use std::collections::HashMap;
+use std::cmp::min;
 
 impl Solution {
     pub fn min_cost(n: i32, mut cuts: Vec<i32>) -> i32 {
         // After reading editorial
-        let mut memo = HashMap::new();
-
         cuts.push(0);
         cuts.push(n);
         cuts.sort_unstable();
+        let m = cuts.len();
 
-        Self::cost(0, cuts.len() - 1, &cuts, &mut memo)
-    }
+        // TODO Add what each cell in the matrix represents
+        let mut dp = vec![vec![0; m]; m];
 
-    fn cost(
-        left: usize,
-        right: usize,
-        cuts: &[i32],
-        memo: &mut HashMap<(usize, usize), i32>,
-    ) -> i32 {
-        if right - left == 1 {
-            return 0;
+        for diff in 2..m {
+            for left in 0..m - diff {
+                let right = left + diff;
+                let mut ans = i32::MAX;
+                for mid in left + 1..right {
+                    ans = min(
+                        ans,
+                        dp[left][mid] + dp[mid][right] + cuts[right] - cuts[left],
+                    );
+                }
+                dp[left][right] = ans;
+            }
         }
-        let key = (left, right);
-        if let Some(value) = memo.get(&key) {
-            return *value;
-        }
-        let result = (left + 1..right)
-            .map(|mid| {
-                Self::cost(left, mid, cuts, memo) + Self::cost(mid, right, cuts, memo) + cuts[right]
-                    - cuts[left]
-            })
-            .min()
-            .unwrap();
-        memo.insert(key, result);
-        result
+
+        dp[0][m - 1]
     }
 }
 
