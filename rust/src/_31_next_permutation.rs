@@ -3,6 +3,9 @@ impl Solution {
     pub fn next_permutation(nums: &mut Vec<i32>) {
         // After checking editorial
         let n = nums.len();
+        if n == 1 {
+            return;
+        }
 
         // Find first pair of values where nums[i] < nums[i+1]
         let mut i = n - 2;
@@ -46,6 +49,7 @@ mod tests {
     #[case(vec![3,2,1],vec![1,2,3])]
     #[case(vec![1,1,5],vec![1,5,1])]
     #[case(vec![1,1,1],vec![1,1,1])]
+    #[case(vec![1],vec![1])]
     #[case(vec![1, 2, 3, 4],vec![1, 2, 4, 3])]
     #[case(vec![1, 2, 4, 3],vec![1, 3, 2, 4])]
     #[case(vec![1, 3, 2, 4],vec![1, 3, 4, 2])]
