@@ -1,17 +1,17 @@
 struct SeenTracker {
-    version_id: usize,
-    data: [usize; 9],
+    data: [bool; 9],
 }
 impl SeenTracker {
     fn new() -> Self {
         Self {
             data: Default::default(),
-            version_id: Default::default(),
         }
     }
 
     fn reset(&mut self) {
-        self.version_id += 1;
+        for element in &mut self.data {
+            *element = false;
+        }
     }
 
     /// Sets this value as seen. If it has been seen before returns false
@@ -20,8 +20,8 @@ impl SeenTracker {
             return true; // This is always fine
         }
         let value = value.to_digit(10).unwrap() as usize - 1;
-        if self.data[value] != self.version_id {
-            self.data[value] = self.version_id;
+        if !self.data[value] {
+            self.data[value] = true;
             true // Check can proceed
         } else {
             false // Already seen check has failed
