@@ -36,4 +36,3 @@ mod helper;
 //         assert_eq!(actual, expected);
 //     }
 // }
-mod _36_valid_sudoku;
