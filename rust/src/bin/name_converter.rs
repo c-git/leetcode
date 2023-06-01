@@ -25,7 +25,7 @@ fn main() {
         .append(true)
         .open(filename)
         .expect("Failed to open lib.rs");
-    file.write_all(format!("mod {converted_name};").as_bytes())
+    file.write_all(format!("mod {converted_name};\n").as_bytes())
         .expect("Failed to update lib.rs");
     println!("Added to lib.rs");
 }
