@@ -15,6 +15,10 @@ impl Solution {
 
         let n = grid.len();
         let target = n - 1; // Target cell position index
+        if target == 0 && grid[0][0] == 0 {
+            return 1;
+        }
+
         let mut is_visited = vec![vec![false; n]; n];
         let n = n as i32; // Converted here to reduce the overall number of conversions required
         let mut queue = VecDeque::new();
@@ -66,6 +70,7 @@ mod tests {
     #[case(vec![vec![0,0,0],vec![1,1,0],vec![1,1,0]],4)]
     #[case(vec![vec![1,0,0],vec![1,1,0],vec![1,1,0]],-1)]
     #[case(vec![vec![0,0,0],vec![1,1,0],vec![1,1,1]],-1)]
+    #[case(vec![vec![0]], 1)]
     fn case(#[case] input: Vec<Vec<i32>>, #[case] expected: i32) {
         let actual = Solution::shortest_path_binary_matrix(input);
         assert_eq!(actual, expected);
