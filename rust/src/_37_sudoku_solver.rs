@@ -1,4 +1,4 @@
-use std::collections::HashSet;
+use std::collections::BTreeSet;
 
 impl Solution {
     fn solve_sudoku_helper(board: &mut Vec<Vec<char>>, row: usize, col: usize) -> bool {
@@ -58,8 +58,8 @@ impl Solution {
         None
     }
 
-    fn get_candidates(board: &[Vec<char>], row: usize, col: usize) -> HashSet<char> {
-        let mut result = HashSet::new();
+    fn get_candidates(board: &[Vec<char>], row: usize, col: usize) -> BTreeSet<char> {
+        let mut result = BTreeSet::new();
 
         // Add all as possibilities
         for c in '1'..='9' {
