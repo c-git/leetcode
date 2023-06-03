@@ -1,4 +1,4 @@
-use std::cmp::max;
+use std::collections::VecDeque;
 use std::convert::TryInto;
 
 struct Node {
@@ -45,11 +45,17 @@ impl OrgChart {
     }
 
     fn calculate_max_inform_time(&self, head_id: usize) -> i32 {
-        let mut max_sub = 0;
-        for &subordinate in self.nodes[head_id].subordinates.iter() {
-            max_sub = max(max_sub, self.calculate_max_inform_time(subordinate));
+        // Changed from DFS (in previous git commit) to BFS to see if there would be an improvement in speed
+        let mut result = 0;
+        let mut queue = VecDeque::new();
+        queue.push_back((head_id, self.nodes[head_id].inform_time));
+        while let Some((id, curr_time)) = queue.pop_front() {
+            result = result.max(curr_time);
+            for &subordinate in self.nodes[id].subordinates.iter() {
+                queue.push_back((subordinate, curr_time + self.nodes[subordinate].inform_time));
+            }
         }
-        max_sub + self.nodes[head_id].inform_time
+        result
     }
 }
 
