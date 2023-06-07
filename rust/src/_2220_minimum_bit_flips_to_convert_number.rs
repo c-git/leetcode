@@ -1,16 +1,7 @@
 impl Solution {
-    pub fn min_bit_flips(mut start: i32, mut goal: i32) -> i32 {
-        let mut result = 0;
-        while start | goal > 0 {
-            // Use or to ensure we don't overflow
-            // Check last bit and see if it is the same if not count ad change required
-            if (start % 2) ^ (goal % 2) == 1 {
-                result += 1;
-            }
-            start >>= 1;
-            goal >>= 1;
-        }
-        result
+    pub fn min_bit_flips(start: i32, goal: i32) -> i32 {
+        // simplified based on fastest submission
+        (start ^ goal).count_ones() as i32
     }
 }
 
