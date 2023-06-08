@@ -74,6 +74,8 @@ mod tests {
     #[case(vec![1,2,2,1], 2, 2)]
     #[case(vec![1,2,1,2], 2, 0)]
     #[case(vec![1,1,2,2,1,1], 2, 2)]
+    #[case(vec![20744,7642,19090,9992,2457,16848,3458,15721], 22891, 4)]
+    #[case(vec![207,76,190,99,24,168,34,157], 228, 4)]
     fn case(#[case] nums: Vec<i32>, #[case] limit: i32, #[case] expected: i32) {
         let actual = Solution::min_moves(nums, limit);
         assert_eq!(actual, expected);
