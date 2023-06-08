@@ -1,63 +1,42 @@
-use std::{
-    cmp::{max, min, Ordering},
-    collections::HashMap,
-};
-
 impl Solution {
+    /// Source: sak96 - https://leetcode.com/problems/minimum-moves-to-make-array-complementary/solutions/3611937/toggle-distribution/
+    ///
+    /// Special thanks to: https://github.com/vim-scripts/DrawIt
+    ///
+    /// Toggle distribution based for pair (x,y) with x < y
+    /// Based on final sum that is chosen
+    ///
+    ///                   [no toggle]
+    ///   [reduce]            0                [increase]
+    ///   [x & y ] [reduce y] | [increase x]   [ x & y  ]
+    ///   +-------+           v               +-----------+
+    ///   |       |-----------+---------------|           |
+    ///   |   2   |    1      |      1        |     2     |
+    ///   +-------+-----------+---------------+-----------+
+    ///  2       x           x+y     y + limit
+    ///  ----------------- final sum ---------------------->
+    ///
     pub fn min_moves(nums: Vec<i32>, limit: i32) -> i32 {
-        // Calculate frequency of sums
-        let mut frequencies: HashMap<i32, i32> = HashMap::new();
-        let n = nums.len();
-        for i in 0..n / 2 {
-            let pair_sum = nums[i] + nums[n - 1 - i];
-            *frequencies.entry(pair_sum).or_default() += 1;
+        let limit = limit as usize;
+        // max sum index = limit + limit + 1 when is y is limit
+        let mut toggle_edges = vec![0; 2 * limit + 2];
+        let mut nums = std::collections::VecDeque::from(nums);
+        while let (Some(a), Some(b)) = (nums.pop_front(), nums.pop_back()) {
+            let x = a.min(b) as usize;
+            let y = a.max(b) as usize;
+            // add only edges so total is got by cumulative sum
+            toggle_edges[2] += 2;
+            toggle_edges[x + 1] -= 1;
+            toggle_edges[x + y] -= 1;
+            toggle_edges[x + y + 1] += 1;
+            toggle_edges[y + limit + 1] += 1;
         }
 
-        if frequencies.len() == 1 {
-            return 0; // Only one sum
-        }
-
-        // Create vec of most common pair_sums
-        let mut most_popular_pair_sums = Vec::new();
-        let mut max_freq = 0;
-        for (pair_sum, frequency) in frequencies {
-            match frequency.cmp(&max_freq) {
-                Ordering::Less => {} // Just ignore this cannot be part of most popular
-                Ordering::Equal => most_popular_pair_sums.push(pair_sum),
-                Ordering::Greater => {
-                    most_popular_pair_sums.clear();
-                    most_popular_pair_sums.push(pair_sum);
-                    max_freq = frequency;
-                }
-            }
-        }
-
-        // Try all popular sums to see which produces the least required changes
         let mut min_moves = i32::MAX;
-        for target_sum in most_popular_pair_sums {
-            let mut moves = 0;
-            for i in 0..n / 2 {
-                let curr_sum = nums[i] + nums[n - 1 - i];
-                let diff = target_sum - curr_sum;
-                match diff.cmp(&0) {
-                    Ordering::Less => {
-                        // Diff is negative see if we can reduce the larger number enough to hit the target otherwise we need to change both
-                        let larger = max(nums[i], nums[n - 1 - i]);
-                        moves += if larger + diff <= 0 { 2 } else { 1 };
-                    }
-                    Ordering::Equal => {} // Do nothing already on target
-                    Ordering::Greater => {
-                        // Diff is positive see if we can increase the smaller number enough to hit the target otherwise we need to change both
-                        let smaller = min(nums[i], nums[n - 1 - i]);
-                        moves += if smaller + diff > limit { 2 } else { 1 };
-                    }
-                }
-            }
-            min_moves = min(min_moves, moves);
-            if min_moves == 1 {
-                // No need to check more this is the best we can do
-                return 1;
-            }
+        let mut toggles = toggle_edges.drain(..2).sum();
+        for toggle_edge in toggle_edges {
+            toggles += toggle_edge;
+            min_moves = min_moves.min(toggles);
         }
         min_moves
     }
