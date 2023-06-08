@@ -86,7 +86,7 @@ Language
     5. Create a test for each example. I usually call them Case1, Case2, Case3 and so on.
 3. Some problems may require input transformation, transformations for implemented types usually have a wrapper type and
    then an into from that wrapper type see example
-   in [problem 2](https://github.com/c-git/leetcode/blob/main/rust/src/_2_add_two_numbers.rs#L46)
+   in [problem 2](https://github.com/c-git/leetcode/blob/main/rust/src/_2_add_two_numbers.rs#L46) for linked list or [problem 100](https://github.com/c-git/leetcode/blob/main/rust/src/_100_same_tree.rs#L44) for Tree.
 4. Some problems allow multiple solutions. I haven't done any of those yet but should be evaluated using a custom
    evaluation method.
 5. Now you can implement your solution and test and debug locally.
