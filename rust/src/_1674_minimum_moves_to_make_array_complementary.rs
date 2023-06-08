@@ -1,5 +1,3 @@
-use std::collections::BTreeMap;
-
 impl Solution {
     /// Source: sak96 - https://leetcode.com/problems/minimum-moves-to-make-array-complementary/solutions/3611937/toggle-distribution/
     ///
@@ -20,22 +18,23 @@ impl Solution {
     ///
     pub fn min_moves(nums: Vec<i32>, limit: i32) -> i32 {
         let limit = limit as usize;
-        let mut toggle_edges = BTreeMap::new();
+        // max sum index = limit + limit + 1 when is y is limit
+        let mut toggle_edges = vec![0; 2 * limit + 2];
         let mut nums = std::collections::VecDeque::from(nums);
         while let (Some(a), Some(b)) = (nums.pop_front(), nums.pop_back()) {
             let x = a.min(b) as usize;
             let y = a.max(b) as usize;
             // add only edges so total is got by cumulative sum
-            *toggle_edges.entry(2).or_default() += 2;
-            *toggle_edges.entry(x + 1).or_default() -= 1;
-            *toggle_edges.entry(x + y).or_default() -= 1;
-            *toggle_edges.entry(x + y + 1).or_default() += 1;
-            *toggle_edges.entry(y + limit + 1).or_default() += 1;
+            toggle_edges[2] += 2;
+            toggle_edges[x + 1] -= 1;
+            toggle_edges[x + y] -= 1;
+            toggle_edges[x + y + 1] += 1;
+            toggle_edges[y + limit + 1] += 1;
         }
 
         let mut min_moves = i32::MAX;
-        let mut toggles = 0;
-        for (_sum, toggle_edge) in toggle_edges.iter() {
+        let mut toggles = toggle_edges.drain(..2).sum();
+        for toggle_edge in toggle_edges {
             toggles += toggle_edge;
             min_moves = min_moves.min(toggles);
         }
