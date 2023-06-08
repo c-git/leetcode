@@ -18,7 +18,10 @@ impl Solution {
     ///
     pub fn min_moves(nums: Vec<i32>, limit: i32) -> i32 {
         let limit = limit as usize;
-        // max sum index = limit + limit + 1 when is y is limit
+        // Max index occurs when y is equal to the limit as 2 moves required
+        // after it passes `y + limit + 1`. Plus an additional 1 for 0 based indexing.
+        // Even though this sum is not achievable it doesn't matter as it is guaranteed
+        // to be larger than the values to its left and we are only looking for the minimum value
         let mut toggle_edges = vec![0; 2 * limit + 2];
         let mut nums = std::collections::VecDeque::from(nums);
         while let (Some(a), Some(b)) = (nums.pop_front(), nums.pop_back()) {
