@@ -3,6 +3,10 @@ use std::mem::swap;
 impl Solution {
     pub fn first_missing_positive(mut nums: Vec<i32>) -> i32 {
         let n = nums.len();
+        if n == 1 {
+            return if nums[0] == 1 { 2 } else { 1 };
+        }
+
         for i in 0..n {
             if nums[i] != i as i32 {
                 Self::swap_sort(&mut nums, i);
@@ -48,6 +52,7 @@ mod tests {
     #[case(vec![3,4,-1,1],2)]
     #[case(vec![7,8,9,11,12],1)]
     #[case(vec![1,0,0],2)]
+    #[case(vec![1],2)]
     fn case(#[case] input: Vec<i32>, #[case] expected: i32) {
         let actual = Solution::first_missing_positive(input);
         assert_eq!(actual, expected);
