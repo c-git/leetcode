@@ -35,10 +35,15 @@ impl Solution {
 
         if first_element <= target {
             attempt.push(first_element);
-            Self::_combination_sum(candidates, target - first_element, attempt)
-        } else {
-            Self::_combination_sum(&candidates[1..], target, attempt)
+            if Self::_combination_sum(candidates, target - first_element, attempt) {
+                return true;
+            } else {
+                attempt.pop(); // Remove value added
+            }
         }
+
+        // If this first value was too big or didn't work skip it
+        Self::_combination_sum(&candidates[1..], target, attempt)
     }
 }
 
@@ -52,6 +57,7 @@ mod tests {
     #[case(vec![2,3,6,7], 7, vec![vec![2,2,3],vec![7]])]
     #[case(vec![2,3,5], 8, vec![vec![2,2,2,2],vec![2,3,3],vec![3,5]])]
     #[case(vec![2], 1, vec![])]
+    #[case(vec![3,5,8], 11, vec![vec![3,3,5],vec![3,8]])]
     fn case(
         #[case] candidates: Vec<i32>,
         #[case] target: i32,
