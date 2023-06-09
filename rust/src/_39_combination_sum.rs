@@ -1,49 +1,29 @@
 impl Solution {
+    // Source: https://leetcode.com/problems/combination-sum/solutions/3280398/rust-beats-100-memory-and-100-complexety-easy-recursive-sort-solution/
     pub fn combination_sum(mut candidates: Vec<i32>, target: i32) -> Vec<Vec<i32>> {
-        let mut result: Vec<Vec<i32>> = Vec::new();
+        let mut result = vec![];
         candidates.sort_unstable();
-        for (i, &val) in candidates.iter().enumerate() {
-            for multiplicity in 1.. {
-                let prefix_sum = val * multiplicity;
-                if prefix_sum <= target {
-                    let mut attempt = vec![val; multiplicity as usize];
-                    if Self::_combination_sum(
-                        &candidates[i + 1..],
-                        target - prefix_sum,
-                        &mut attempt,
-                    ) {
-                        result.push(attempt);
-                    }
-                } else {
-                    // No more solutions can be made from this value
-                    break;
-                }
-            }
-        }
+        Self::_combination_sum(&candidates, target, &mut result, vec![]);
         result
     }
-
-    fn _combination_sum(candidates: &[i32], target: i32, attempt: &mut Vec<i32>) -> bool {
-        debug_assert!(target >= 0);
+    pub fn _combination_sum(
+        candidates: &[i32],
+        target: i32,
+        result: &mut Vec<Vec<i32>>,
+        attempt: Vec<i32>,
+    ) {
         if target == 0 {
-            return true;
+            return result.push(attempt);
         }
-        if candidates.is_empty() {
-            return false;
-        }
-        let first_element = candidates[0];
-
-        if first_element <= target {
-            attempt.push(first_element);
-            if Self::_combination_sum(candidates, target - first_element, attempt) {
-                return true;
-            } else {
-                attempt.pop(); // Remove value added
-            }
-        }
-
-        // If this first value was too big or didn't work skip it
-        Self::_combination_sum(&candidates[1..], target, attempt)
+        candidates
+            .iter()
+            .enumerate()
+            .take_while(|(_, &val)| val <= target)
+            .for_each(|(i, &val)| {
+                let mut new = attempt.clone();
+                new.push(val);
+                Self::_combination_sum(&candidates[i..], target - val, result, new)
+            })
     }
 }
 
@@ -58,12 +38,15 @@ mod tests {
     #[case(vec![2,3,5], 8, vec![vec![2,2,2,2],vec![2,3,3],vec![3,5]])]
     #[case(vec![2], 1, vec![])]
     #[case(vec![3,5,8], 11, vec![vec![3,3,5],vec![3,8]])]
+    #[case(vec![8,7,4,3], 11, vec![vec![8,3],vec![7,4],vec![4,4,3]])]
     fn case(
         #[case] candidates: Vec<i32>,
         #[case] target: i32,
         #[case] mut expected: Vec<Vec<i32>>,
     ) {
         let mut actual = Solution::combination_sum(candidates, target);
+        actual.iter_mut().for_each(|x| x.sort_unstable());
+        expected.iter_mut().for_each(|x| x.sort_unstable());
         actual.sort_unstable();
         expected.sort_unstable();
         assert_eq!(actual, expected);
