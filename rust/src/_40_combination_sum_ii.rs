@@ -2,28 +2,18 @@ impl Solution {
     pub fn combination_sum2(mut candidates: Vec<i32>, target: i32) -> Vec<Vec<i32>> {
         let mut result = vec![];
         candidates.sort_unstable();
-        Self::_combination_sum2(
-            &candidates,
-            target,
-            candidates.iter().sum(),
-            &mut result,
-            vec![],
-        );
+        Self::_combination_sum2(&candidates, target, &mut result, vec![]);
         result
     }
 
     fn _combination_sum2(
         candidates: &[i32],
         target: i32,
-        remaining_sum: i32,
         result: &mut Vec<Vec<i32>>,
         attempt: Vec<i32>,
     ) {
         if target == 0 {
             result.push(attempt);
-            return;
-        }
-        if target > remaining_sum {
             return;
         }
         let mut last_val = None;
@@ -36,13 +26,7 @@ impl Solution {
                     last_val = Some(val);
                     let mut new = attempt.clone();
                     new.push(val);
-                    Self::_combination_sum2(
-                        &candidates[i + 1..],
-                        target - val,
-                        remaining_sum - val,
-                        result,
-                        new,
-                    )
+                    Self::_combination_sum2(&candidates[i + 1..], target - val, result, new)
                 }
             })
     }
