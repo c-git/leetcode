@@ -28,20 +28,24 @@ impl Solution {
         if target > remaining_sum {
             return;
         }
+        let mut last_val = None;
         candidates
             .iter()
             .enumerate()
             .take_while(|(_, &val)| val <= target)
             .for_each(|(i, &val)| {
-                let mut new = attempt.clone();
-                new.push(val);
-                Self::_combination_sum2(
-                    &candidates[i + 1..],
-                    target - val,
-                    remaining_sum - val,
-                    result,
-                    new,
-                )
+                if Some(val) != last_val {
+                    last_val = Some(val);
+                    let mut new = attempt.clone();
+                    new.push(val);
+                    Self::_combination_sum2(
+                        &candidates[i + 1..],
+                        target - val,
+                        remaining_sum - val,
+                        result,
+                        new,
+                    )
+                }
             })
     }
 }
@@ -66,6 +70,13 @@ mod tests {
             vec![5]
             ])]
     #[case(vec![1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1], 27, vec![])]
+    #[case(vec![
+         1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
+         1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
+         1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
+         1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1], 30,
+        vec![vec![1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
+         1,1,1,1,1,1,1,1,1,1]])]
     fn case(
         #[case] candidates: Vec<i32>,
         #[case] target: i32,
