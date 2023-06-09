@@ -49,6 +49,7 @@ mod tests {
             vec![1,2,2],
             vec![5]
             ])]
+    #[case(vec![1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1], 27, vec![])]
     fn case(
         #[case] candidates: Vec<i32>,
         #[case] target: i32,
