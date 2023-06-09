@@ -1,8 +1,6 @@
-use std::collections::HashSet;
-
 impl Solution {
     pub fn combination_sum2(mut candidates: Vec<i32>, target: i32) -> Vec<Vec<i32>> {
-        let mut result = HashSet::new();
+        let mut result = vec![];
         candidates.sort_unstable();
         Self::_combination_sum2(
             &candidates,
@@ -11,18 +9,18 @@ impl Solution {
             &mut result,
             vec![],
         );
-        result.into_iter().collect()
+        result
     }
 
     fn _combination_sum2(
         candidates: &[i32],
         target: i32,
         remaining_sum: i32,
-        result: &mut HashSet<Vec<i32>>,
+        result: &mut Vec<Vec<i32>>,
         attempt: Vec<i32>,
     ) {
         if target == 0 {
-            result.insert(attempt);
+            result.push(attempt);
             return;
         }
         if target > remaining_sum {
