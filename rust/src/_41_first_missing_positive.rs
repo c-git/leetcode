@@ -1,12 +1,23 @@
-use std::{mem::swap, ops::Add};
+use std::{
+    mem::swap,
+    ops::{Add, Sub},
+};
 
 impl Solution {
     pub fn first_missing_positive(mut nums: Vec<i32>) -> i32 {
         let n = nums.len();
+        let n_i32 = n as i32;
         for i in 0..n {
-            let val = nums[i];
-            if val.saturating_sub(1) != i as i32 {
-                Self::swap_sort(&mut nums, val);
+            let mut curr_value = nums[i];
+            while 1 <= curr_value
+                && curr_value <= n_i32
+                && nums[curr_value.sub(1) as usize] != curr_value
+            {
+                // LI:
+                //  - curr_value-1 is a valid index into nums because it is 1 <= curr_value <= n implies 0 <= curr_value-1 < n
+                //  - curr_value has somewhere else in the array it belongs
+                let target_index = curr_value.saturating_sub(1) as usize;
+                swap(&mut curr_value, &mut nums[target_index]);
             }
         }
 
@@ -18,23 +29,6 @@ impl Solution {
 
         // None missing must be n
         (n + 1) as i32
-    }
-
-    /// Take the curr_value and set the matching position if it is
-    /// a positive integer within the size of the array and repeating this on the value
-    /// at the location that it is swapped with
-    fn swap_sort(nums: &mut [i32], mut curr_value: i32) {
-        let n = nums.len() as i32;
-        while 0 < curr_value
-            && curr_value <= n
-            && nums[curr_value.saturating_sub(1) as usize] != curr_value
-        {
-            // LI:
-            //  - curr_value-1 is a valid index into nums because it is 0 < curr_value <= n implies 0 <= curr_value-1 < n
-            //  - curr_value has somewhere else in the array it belongs
-            let target_index = curr_value.saturating_sub(1) as usize;
-            swap(&mut curr_value, &mut nums[target_index]);
-        }
     }
 }
 
