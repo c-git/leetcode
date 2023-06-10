@@ -19,7 +19,7 @@
 use std::cell::RefCell;
 use std::rc::Rc;
 
-use crate::helper::TreeNode;
+use cargo_leet::TreeNode;
 
 type Node = Option<Rc<RefCell<TreeNode>>>;
 
@@ -75,7 +75,7 @@ struct Solution;
 
 #[cfg(test)]
 mod tests {
-    use crate::helper::TreeRoot;
+    use cargo_leet::TreeRoot;
 
     use super::*;
 

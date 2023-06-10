@@ -19,7 +19,6 @@ use std::rc::Rc;
 //     }
 //   }
 // }
-use crate::helper::TreeNode;
 
 impl Solution {
     pub fn inorder_traversal(root: Option<Rc<RefCell<TreeNode>>>) -> Vec<i32> {
@@ -49,11 +48,12 @@ impl Solution {
     }
 }
 
+use cargo_leet::TreeNode;
 struct Solution;
 
 #[cfg(test)]
 mod tests {
-    use crate::helper::TreeRoot;
+    use cargo_leet::TreeRoot;
 
     use super::*;
 

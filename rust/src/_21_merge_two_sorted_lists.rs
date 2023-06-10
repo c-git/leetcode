@@ -1,4 +1,4 @@
-use crate::helper::ListNode;
+use cargo_leet::ListNode;
 
 // Definition for singly-linked list.
 // #[derive(PartialEq, Eq, Clone, Debug)]
@@ -74,9 +74,9 @@ impl Solution {
 
 #[test]
 fn case1() {
-    let l1: crate::helper::ListHead = vec![1, 2, 4].into();
-    let l2: crate::helper::ListHead = vec![1, 3, 4].into();
-    let expected: crate::helper::ListHead = vec![1, 1, 2, 3, 4, 4].into();
+    let l1: cargo_leet::ListHead = vec![1, 2, 4].into();
+    let l2: cargo_leet::ListHead = vec![1, 3, 4].into();
+    let expected: cargo_leet::ListHead = vec![1, 1, 2, 3, 4, 4].into();
 
     let actual = Solution::merge_two_lists(l1.into(), l2.into());
     assert_eq!(actual, expected.into());
@@ -84,9 +84,9 @@ fn case1() {
 
 #[test]
 fn case2() {
-    let l1: crate::helper::ListHead = vec![].into();
-    let l2: crate::helper::ListHead = vec![].into();
-    let expected: crate::helper::ListHead = vec![].into();
+    let l1: cargo_leet::ListHead = vec![].into();
+    let l2: cargo_leet::ListHead = vec![].into();
+    let expected: cargo_leet::ListHead = vec![].into();
 
     let actual = Solution::merge_two_lists(l1.into(), l2.into());
     assert_eq!(actual, expected.into());
@@ -94,9 +94,9 @@ fn case2() {
 
 #[test]
 fn case3() {
-    let l1: crate::helper::ListHead = vec![].into();
-    let l2: crate::helper::ListHead = vec![0].into();
-    let expected: crate::helper::ListHead = vec![0].into();
+    let l1: cargo_leet::ListHead = vec![].into();
+    let l2: cargo_leet::ListHead = vec![0].into();
+    let expected: cargo_leet::ListHead = vec![0].into();
 
     let actual = Solution::merge_two_lists(l1.into(), l2.into());
     assert_eq!(actual, expected.into());

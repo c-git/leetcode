@@ -66,11 +66,11 @@ impl Solution {
     }
 }
 
-use crate::helper::ListNode;
+use cargo_leet::ListNode;
 struct Solution;
 #[cfg(test)]
 mod tests {
-    use crate::helper::ListHead;
+    use cargo_leet::ListHead;
 
     use super::*;
 

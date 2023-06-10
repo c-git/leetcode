@@ -1,7 +1,7 @@
 use std::cell::RefCell;
 use std::rc::Rc;
 
-use crate::helper::TreeNode;
+use cargo_leet::TreeNode;
 
 // Definition for a binary tree node.
 // #[derive(Debug, PartialEq, Eq)]
@@ -91,7 +91,7 @@ impl BSTIterator {
 
 #[cfg(test)]
 mod tests {
-    use crate::helper::TreeRoot;
+    use cargo_leet::TreeRoot;
 
     use super::*;
 

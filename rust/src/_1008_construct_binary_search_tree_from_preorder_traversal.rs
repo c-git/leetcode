@@ -67,11 +67,11 @@ impl Solution {
     }
 }
 
-use crate::helper::TreeNode;
+use cargo_leet::TreeNode;
 struct Solution;
 #[cfg(test)]
 mod tests {
-    use crate::helper::TreeRoot;
+    use cargo_leet::TreeRoot;
 
     use super::*;
 
