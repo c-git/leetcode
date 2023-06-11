@@ -7,6 +7,6 @@ edition = "2021"
 
 [dependencies]
 cargo-leet = { git = "https://github.com/rust-practice/cargo-leet.git", branch = "main" }
+#Old versions used because or old version of rust on leetcode
 rand = "0.6"
-#Old version used because or old version of rust on leetcode
 rstest = "0.12.0"
