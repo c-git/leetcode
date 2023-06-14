@@ -1,37 +1,40 @@
+use std::collections::{HashSet, VecDeque};
+
 impl Solution {
     /// Intuition - Any vertex: with a parent is not a root. Doesn't matter how many nodes point to it.
     pub fn find_smallest_set_of_vertices(n: i32, edges: Vec<Vec<i32>>) -> Vec<i32> {
-        // usize in this code is assumed to be u64
-        assert_eq!(usize::max_value() as u64, u64::max_value());
-        let mut result = vec![];
-        let num_bit_groups = (n as usize + 64 - 1) / 64; // Divide by 64 rounding up to get how many u64's we need to store all the values seen
-        let mut seen = vec![0; num_bit_groups];
+        let n = n as usize;
+        let mut result = HashSet::new();
+        let mut is_visited = vec![false; n];
 
-        // Check which vertices have edges leading to them
+        // Create graph
+        let mut graph = vec![vec![]; n];
         for edge in edges {
-            let to_vertex = edge[1] as usize;
-            let group_index = to_vertex / 64;
-            let bit_index = to_vertex as u32 % 64;
-            let or_val = usize::pow(2, bit_index);
-            seen[group_index] |= or_val;
+            graph[edge[0] as usize].push(edge[1] as usize);
         }
 
-        // Check which vertices were not seen. These are the roots as they don't have a parent
-        let mut group_index = 0;
-        let mut and_val = 1;
-        for _ in 0..n {
-            if seen[group_index] & and_val == 0 {
-                let vertex_number = group_index as i32 * 64 + and_val.trailing_zeros() as i32;
-                result.push(vertex_number)
+        // Do BFS from each node to see who can be reached
+        let mut queue = VecDeque::new();
+        for i in 0..n {
+            if is_visited[i] {
+                continue;
             }
-            and_val <<= 1;
-            if and_val == 0 {
-                and_val = 1;
-                group_index += 1;
+            result.insert(i);
+            queue.push_back(i);
+            is_visited[i] = true;
+            while let Some(node) = queue.pop_front() {
+                for &neighbour in graph[node].iter() {
+                    if !is_visited[neighbour] {
+                        is_visited[neighbour] = true;
+                        queue.push_back(neighbour);
+                    } else {
+                        result.remove(&neighbour);
+                    }
+                }
             }
         }
 
-        result
+        result.into_iter().map(|x| x as i32).collect()
     }
 }
 
