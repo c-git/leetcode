@@ -1,7 +1,10 @@
 impl Solution {
+    /// Intuition - Any vertex: with a parent is not a root. Doesn't matter how many nodes point to it.
     pub fn find_smallest_set_of_vertices(n: i32, edges: Vec<Vec<i32>>) -> Vec<i32> {
+        // usize in this code is assumed to be u64
+        assert_eq!(usize::max_value() as u64, u64::max_value());
         let mut result = vec![];
-        let num_bit_groups = (n as usize + 64 - 1) / 64; // Divide by 64 rounding up to get how man u64's we need to store all the values seen
+        let num_bit_groups = (n as usize + 64 - 1) / 64; // Divide by 64 rounding up to get how many u64's we need to store all the values seen
         let mut seen = vec![0; num_bit_groups];
 
         // Check which vertices have edges leading to them
@@ -13,7 +16,7 @@ impl Solution {
             seen[group_index] |= or_val;
         }
 
-        // Check which veracities were not seen
+        // Check which vertices were not seen. These are the roots as they don't have a parent
         let mut group_index = 0;
         let mut and_val = 1;
         for _ in 0..n {
