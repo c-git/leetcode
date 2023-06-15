@@ -22,18 +22,28 @@ use std::rc::Rc;
 impl Solution {
     pub fn min_diff_in_bst(root: Option<Rc<RefCell<TreeNode>>>) -> i32 {
         let mut result = i32::MAX;
-        if let Some(node) = root.as_ref() {
-            let node = node.borrow();
-            if let Some(left) = &node.left {
-                result = result
-                    .min(node.val - left.borrow().val)
-                    .min(Self::min_diff_in_bst(node.left.clone()));
+        let mut last_value = None;
+        let mut current_node = root;
+        let mut stack = vec![];
+        while !stack.is_empty() || current_node.is_some() {
+            // Go to leftmost node
+            while current_node.is_some() {
+                stack.push(current_node.clone());
+                current_node = current_node.unwrap().as_ref().borrow().left.clone();
             }
-            if let Some(right) = &node.right {
-                result = result
-                    .min(right.borrow().val - node.val)
-                    .min(Self::min_diff_in_bst(node.right.clone()));
+            current_node = stack
+                .pop()
+                .expect("Only Some(_) should have been added to stack");
+
+            // Perform action
+            let curr_val = current_node.as_ref().unwrap().borrow().val;
+            if let Some(last_val) = last_value {
+                result = result.min(curr_val - last_val);
             }
+            last_value = Some(curr_val);
+
+            // Check if this node has a right subtree
+            current_node = current_node.unwrap().as_ref().borrow().right.clone();
         }
         result
     }
