@@ -2,55 +2,54 @@
 //! 1569. Number of Ways to Reorder Array to Get Same BST
 
 impl Solution {
+    // Based on sak96's approach and editorial
     const MOD_BASE: u64 = 1_000_000_007;
 
-    pub fn num_of_ways(nums: Vec<i32>) -> i32 {
+    pub fn num_of_ways(mut nums: Vec<i32>) -> i32 {
+        let n = nums.len();
+        Self::num_of_ways_helper(&mut nums, &Self::generate_pascal_triangle(n)) as i32 - 1
+    }
+
+    /// This function returns the number of ways this tree can be built (including the starting way)
+    pub fn num_of_ways_helper(nums: &mut [i32], pascal_triangle: &[Vec<i32>]) -> u64 {
         if nums.len() <= 2 {
-            return 0;
-        }
-
-        let root = nums[0];
-        let mut left = vec![];
-        let mut right = vec![];
-        let n = nums.len() as u64;
-        for num in nums.into_iter().skip(1) {
-            debug_assert_ne!(root, num);
-            if num < root {
-                left.push(num)
-            } else {
-                right.push(num)
-            }
-        }
-
-        if left.is_empty() {
-            Self::num_of_ways(right)
-        } else if right.is_empty() {
-            Self::num_of_ways(left)
+            // For a array of size 2 or less there are no changes that can be made because
+            // the root if fixed and the root of the child will also be fixed and there will
+            // can be no other child
+            1
         } else {
-            let mut result = Self::choose(n - 1, left.len() as u64) - 1;
-            let left_subtree = Self::num_of_ways(left) as u64;
-            let right_subtree = Self::num_of_ways(right) as u64;
-            if left_subtree > 0 {
-                result = (result * left_subtree) % Self::MOD_BASE;
-            }
-            if right_subtree > 0 {
-                result = (result * right_subtree) % Self::MOD_BASE;
-            }
-            result as i32
+            let (root, rest) = nums.split_at_mut(1); // Get rest of array less root (first node)
+            let n = rest.len();
+            rest.sort_by_key(|i| root[0] < *i); //Use stable sort to split values less than root for left and right child
+            let (left, right) = rest.split_at_mut(rest.partition_point(|i| root[0] > *i));
+            let mut result = pascal_triangle[n][left.len()] as u64;
+            result *= Self::num_of_ways_helper(left, pascal_triangle);
+            result %= Self::MOD_BASE;
+            result *= Self::num_of_ways_helper(right, pascal_triangle);
+            result % Self::MOD_BASE
         }
     }
 
-    /// Source: https://en.wikipedia.org/wiki/Combination#Example_of_counting_combinations
-    fn choose(n: u64, r: u64) -> u64 {
-        debug_assert!(n >= r);
-        let mut numerator = 1;
-        let mut denominator = 1;
-        for x in 0..r {
-            numerator = (numerator * (n - x)) % Self::MOD_BASE;
-            denominator = (denominator * (x + 1)) % Self::MOD_BASE;
+    fn generate_pascal_triangle(size: usize) -> Vec<Vec<i32>> {
+        // This function is mostly here to make testing easy
+        let mut result = vec![vec![0; size + 1]; size + 1];
+
+        for (row_index, row) in result.iter_mut().enumerate() {
+            row[0] = 1;
+            row[row_index] = 1;
         }
-        debug_assert_eq!(numerator % denominator, 0);
-        numerator / denominator
+
+        for row in 2..=size {
+            for col in 1..row {
+                result[row][col] =
+                    (result[row - 1][col - 1] + result[row - 1][col]) % Self::MOD_BASE as i32;
+            }
+        }
+        result
+    }
+
+    fn choose(n: usize, r: usize, pascal_triangle: &[Vec<i32>]) -> i32 {
+        pascal_triangle[n][r]
     }
 }
 
@@ -82,7 +81,8 @@ mod tests {
     #[case(100, 5, 75287520)]
     #[case(200, 5, 535650026)]
     #[case(200, 10, 151856252)]
-    fn choose(#[case] n: u64, #[case] r: u64, #[case] expected: u64) {
-        assert_eq!(Solution::choose(n, r), expected);
+    fn choose(#[case] n: usize, #[case] r: usize, #[case] expected: i32) {
+        let table = Solution::generate_pascal_triangle(n);
+        assert_eq!(Solution::choose(n, r, &table), expected);
     }
 }
