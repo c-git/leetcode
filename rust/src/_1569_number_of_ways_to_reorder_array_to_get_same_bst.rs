@@ -43,11 +43,14 @@ impl Solution {
     /// Source: https://en.wikipedia.org/wiki/Combination#Example_of_counting_combinations
     fn choose(n: u64, r: u64) -> u64 {
         debug_assert!(n >= r);
-        let mut result = 1;
+        let mut numerator = 1;
+        let mut denominator = 1;
         for x in 0..r {
-            result = ((result * (n - x)) / (x + 1)) % Self::MOD_BASE;
+            numerator = (numerator * (n - x)) % Self::MOD_BASE;
+            denominator = (denominator * (x + 1)) % Self::MOD_BASE;
         }
-        result
+        debug_assert_eq!(numerator % denominator, 0);
+        numerator / denominator
     }
 }
 
@@ -80,7 +83,6 @@ mod tests {
     #[case(200, 5, 535650026)]
     #[case(200, 10, 151856252)]
     fn choose(#[case] n: u64, #[case] r: u64, #[case] expected: u64) {
-        dbg!(Solution::MOD_BASE);
         assert_eq!(Solution::choose(n, r), expected);
     }
 }
