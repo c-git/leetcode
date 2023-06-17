@@ -73,16 +73,14 @@ mod tests {
         assert_eq!(actual, expected);
     }
 
-    #[test]
-    fn choose() {
+    #[rstest]
+    #[case(10, 2, 45)]
+    #[case(52, 5, 2598960)]
+    #[case(100, 5, 75287520)]
+    #[case(200, 5, 535650026)]
+    #[case(200, 10, 151856252)]
+    fn choose(#[case] n: u64, #[case] r: u64, #[case] expected: u64) {
         dbg!(Solution::MOD_BASE);
-        assert_eq!(Solution::choose(52, 5), 2598960);
-        assert_eq!(Solution::choose(100, 5), 75287520);
-        assert_eq!(Solution::choose(200, 5), 535650026);
-    }
-
-    #[test]
-    fn choose_big() {
-        assert_eq!(Solution::choose(200, 10), 151856252);
+        assert_eq!(Solution::choose(n, r), expected);
     }
 }
