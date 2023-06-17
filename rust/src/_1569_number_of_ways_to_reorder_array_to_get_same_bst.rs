@@ -32,14 +32,14 @@ impl Solution {
 
     fn generate_pascal_triangle(size: usize) -> Vec<Vec<i32>> {
         // This function is mostly here to make testing easy
-        let mut result = vec![vec![0; size + 1]; size + 1];
+        let mut result = vec![vec![0; size]; size];
 
         for (row_index, row) in result.iter_mut().enumerate() {
             row[0] = 1;
             row[row_index] = 1;
         }
 
-        for row in 2..=size {
+        for row in 2..size {
             for col in 1..row {
                 result[row][col] =
                     (result[row - 1][col - 1] + result[row - 1][col]) % Self::MOD_BASE as i32;
@@ -82,7 +82,7 @@ mod tests {
     #[case(200, 5, 535650026)]
     #[case(200, 10, 151856252)]
     fn choose(#[case] n: usize, #[case] r: usize, #[case] expected: i32) {
-        let table = Solution::generate_pascal_triangle(n);
+        let table = Solution::generate_pascal_triangle(n + 1);
         assert_eq!(Solution::choose(n, r, &table), expected);
     }
 }
