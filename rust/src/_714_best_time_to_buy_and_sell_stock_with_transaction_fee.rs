@@ -6,19 +6,16 @@ use std::cmp::max;
 impl Solution {
     pub fn max_profit(prices: Vec<i32>, fee: i32) -> i32 {
         // Based on editorial
-        let n = prices.len();
-        let mut hold = vec![0; n];
-        let mut free = vec![0; n];
+        let mut last_hold = -prices[0]; // In order to hold a stock on day 0, we have no other choice but to buy it for prices[0].
+        let mut last_free = 0;
 
-        // In order to hold a stock on day 0, we have no other choice but to buy it for prices[0].
-        hold[0] = -prices[0];
-
-        for (i, price) in prices.iter().enumerate().skip(1) {
-            hold[i] = max(hold[i - 1], free[i - 1] - price);
-            free[i] = max(free[i - 1], hold[i - 1] + price - fee);
+        for price in prices.iter().skip(1) {
+            let new_hold = max(last_hold, last_free - price);
+            last_free = max(last_free, last_hold + price - fee);
+            last_hold = new_hold;
         }
 
-        free[n - 1]
+        last_free
     }
 }
 
