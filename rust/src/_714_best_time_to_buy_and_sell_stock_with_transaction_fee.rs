@@ -13,9 +13,9 @@ impl Solution {
         // In order to hold a stock on day 0, we have no other choice but to buy it for prices[0].
         hold[0] = -prices[0];
 
-        for i in 1..n {
-            hold[i] = max(hold[i - 1], free[i - 1] - prices[i]);
-            free[i] = max(free[i - 1], hold[i - 1] + prices[i] - fee);
+        for (i, price) in prices.iter().enumerate().skip(1) {
+            hold[i] = max(hold[i - 1], free[i - 1] - price);
+            free[i] = max(free[i - 1], hold[i - 1] + price - fee);
         }
 
         free[n - 1]
