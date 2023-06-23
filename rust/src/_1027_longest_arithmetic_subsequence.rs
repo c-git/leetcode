@@ -1,21 +1,24 @@
 //! Solution for https://leetcode.com/problems/longest-arithmetic-subsequence
 //! 1027. Longest Arithmetic Subsequence
 
-// From solutions (showed 37ms running to compare and get memory usage)
 impl Solution {
     pub fn longest_arith_seq_length(nums: Vec<i32>) -> i32 {
+        // From fastest solutions (showed 37ms, ran it and got 33ms)
+        // And 2MB memory which beats 100%
+        // After thinking about it and looking at the constraints it uses memory
+        // proportional to the max value which is 500 while the other one uses n^2 memory
+        // where max n is 1000
         let max = *nums.iter().max().unwrap();
-        (-max..=max)
-            .map(|step| {
-                let mut dp = vec![0_i32; max as usize + 1];
-                for &x in &nums {
-                    dp[x as usize] =
-                        dp[x as usize].max(dp.get((x - step) as usize).copied().unwrap_or(0) + 1);
-                }
-                *dp.iter().max().unwrap()
-            })
-            .max()
-            .unwrap()
+        let mut result = Vec::with_capacity(max as usize * 2 + 1);
+        for step in -max..=max {
+            let mut dp = vec![0_i32; max as usize + 1];
+            for &x in &nums {
+                dp[x as usize] =
+                    dp[x as usize].max(dp.get((x - step) as usize).copied().unwrap_or(0) + 1);
+            }
+            result.push(*dp.iter().max().unwrap());
+        }
+        *result.iter().max().unwrap()
     }
 }
 
