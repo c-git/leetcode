@@ -25,9 +25,13 @@ impl Solution {
             return true;
         }
 
-        for i in 1..len - 1 {
+        let mut i = 1;
+        while i < len - 1 {
             if flowerbed[i - 1] == 0 && flowerbed[i] == 0 && flowerbed[i + 1] == 0 {
                 available_spots += 1;
+                i += 2; // Skip the next spot it can no longer be used
+            } else {
+                i += 1; // Check if next spot works
             }
             if available_spots >= n {
                 return true;
@@ -49,6 +53,7 @@ mod tests {
     #[case(vec![1,0,0,0,1], 1, true)]
     #[case(vec![1,0,0,0,1], 2,false)]
     #[case(vec![0,1,0], 1,false)]
+    #[case(vec![1,0,0,0,0,1], 2, false)]
     fn case(#[case] flowerbed: Vec<i32>, #[case] n: i32, #[case] expected: bool) {
         let actual = Solution::can_place_flowers(flowerbed, n);
         assert_eq!(actual, expected);
