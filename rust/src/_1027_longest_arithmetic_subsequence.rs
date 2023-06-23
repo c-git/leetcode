@@ -10,11 +10,12 @@ impl Solution {
         // where max n is 1000
         let max = *nums.iter().max().unwrap();
         let mut result = Vec::with_capacity(max as usize * 2 + 1);
+        let mut dp = vec![0_i32; max as usize + 1]; // Pull out creation here to reuse allocation
         for step in -max..=max {
-            let mut dp = vec![0_i32; max as usize + 1];
+            dp.iter_mut().for_each(|x| *x = 0); // Reset all values to 0
             for &x in &nums {
-                dp[x as usize] =
-                    dp[x as usize].max(dp.get((x - step) as usize).copied().unwrap_or(0) + 1);
+                let idx = x as usize;
+                dp[idx] = dp[idx].max(dp.get((x - step) as usize).copied().unwrap_or(0) + 1);
             }
             result.push(*dp.iter().max().unwrap());
         }
