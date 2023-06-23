@@ -24,8 +24,8 @@ impl Solution {
             dp.iter_mut().for_each(|x| *x = 0); // Reset all values to 0
             for &x in &nums {
                 let idx = x as usize;
-                let diff = x - step;
-                let prev_len = dp.get(diff as usize);
+                let previous_number_in_seq = x - step;
+                let prev_len = dp.get(previous_number_in_seq as usize);
                 dp[idx] = dp[idx].max(prev_len.copied().unwrap_or(0) + 1);
             }
             result = result.max(*dp.iter().max().unwrap());
