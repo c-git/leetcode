@@ -3,11 +3,11 @@
 
 impl Solution {
     pub fn reverse_vowels(mut s: String) -> String {
-        let vowels = "aeiouAEIOU";
+        let vowels = vec!['a', 'e', 'i', 'o', 'u', 'A', 'E', 'I', 'O', 'U'];
         let vowels_indices: Vec<usize> = s
             .chars()
             .enumerate()
-            .filter_map(|(i, c)| if vowels.contains(c) { Some(i) } else { None })
+            .filter_map(|(i, c)| if vowels.contains(&c) { Some(i) } else { None })
             .collect();
         if vowels_indices.len() > 1 {
             let s_vec = unsafe { s.as_mut_vec() };
