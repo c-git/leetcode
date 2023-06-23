@@ -7,7 +7,15 @@ impl Solution {
             return true;
         }
 
+        debug_assert_ne!(flowerbed.len(), 0);
+
         let len = flowerbed.len();
+        if len == 1 {
+            if n <= 1 && flowerbed[0] == 0 {
+                return true;
+            }
+            return false;
+        }
 
         let mut available_spots = 0;
 
@@ -52,6 +60,7 @@ mod tests {
     #[case(vec![0,1,0], 1,false)]
     #[case(vec![1,0,0,0,0,1], 2, false)]
     #[case(vec![0], 1, true)]
+    #[case(vec![0,1,0], 0, true)]
     fn case(#[case] flowerbed: Vec<i32>, #[case] n: i32, #[case] expected: bool) {
         let actual = Solution::can_place_flowers(flowerbed, n);
         assert_eq!(actual, expected);
