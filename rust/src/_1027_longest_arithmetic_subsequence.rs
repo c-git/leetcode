@@ -2,12 +2,16 @@
 //! 1027. Longest Arithmetic Subsequence
 
 impl Solution {
+    /// From fastest solutions (showed 37ms, ran it and got 33ms)
+    /// And 2MB memory which beats 100%
+    /// After thinking about it and looking at the constraints it uses memory
+    /// proportional to the max value which is 500 while the other one uses n^2 memory
+    /// where max n is 1000
+    ///
+    /// let n <= 1000, let val <= 500
+    /// Editorial runtime was O(n^2)
+    /// Runtime for the fastest solution is O(n * val) so it is faster because of the restriction on val
     pub fn longest_arith_seq_length(nums: Vec<i32>) -> i32 {
-        // From fastest solutions (showed 37ms, ran it and got 33ms)
-        // And 2MB memory which beats 100%
-        // After thinking about it and looking at the constraints it uses memory
-        // proportional to the max value which is 500 while the other one uses n^2 memory
-        // where max n is 1000
         let max = *nums.iter().max().unwrap();
         let mut result = Vec::with_capacity(max as usize * 2 + 1);
         let mut dp = vec![0_i32; max as usize + 1]; // Pull out creation here to reuse allocation
