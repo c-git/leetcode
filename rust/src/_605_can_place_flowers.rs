@@ -9,9 +9,6 @@ impl Solution {
 
         let len = flowerbed.len();
 
-        // Check constraints used
-        debug_assert!(flowerbed.len() >= 2);
-
         let mut available_spots = 0;
 
         // Check if ends are available
@@ -54,6 +51,7 @@ mod tests {
     #[case(vec![1,0,0,0,1], 2,false)]
     #[case(vec![0,1,0], 1,false)]
     #[case(vec![1,0,0,0,0,1], 2, false)]
+    #[case(vec![0], 1, true)]
     fn case(#[case] flowerbed: Vec<i32>, #[case] n: i32, #[case] expected: bool) {
         let actual = Solution::can_place_flowers(flowerbed, n);
         assert_eq!(actual, expected);
