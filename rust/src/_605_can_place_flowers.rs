@@ -32,9 +32,6 @@ impl Solution {
             available_spots += 1;
             flowerbed[len - 1] = 1;
         }
-        if available_spots >= n {
-            return true;
-        }
 
         let mut i = 1;
         while i < len - 1 {
@@ -48,11 +45,8 @@ impl Solution {
             } else {
                 i += 1; // Check if next spot works
             }
-            if available_spots >= n {
-                return true;
-            }
         }
-        false
+        available_spots >= n
     }
 }
 
