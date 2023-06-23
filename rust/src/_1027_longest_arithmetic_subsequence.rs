@@ -1,23 +1,21 @@
 //! Solution for https://leetcode.com/problems/longest-arithmetic-subsequence
 //! 1027. Longest Arithmetic Subsequence
 
-use std::collections::HashMap;
-
+// From solutions (showed 37ms running to compare and get memory usage)
 impl Solution {
     pub fn longest_arith_seq_length(nums: Vec<i32>) -> i32 {
-        // After reading editorial
-        let mut dp = HashMap::new();
-
-        for right in 1..nums.len() {
-            for left in 0..right {
-                let diff = nums[right] - nums[left];
-                dp.insert((right, diff), dp.get(&(left, diff)).unwrap_or(&1) + 1);
-            }
-        }
-
-        *dp.values()
+        let max = *nums.iter().max().unwrap();
+        (-max..=max)
+            .map(|step| {
+                let mut dp = vec![0_i32; max as usize + 1];
+                for &x in &nums {
+                    dp[x as usize] =
+                        dp[x as usize].max(dp.get((x - step) as usize).copied().unwrap_or(0) + 1);
+                }
+                *dp.iter().max().unwrap()
+            })
             .max()
-            .expect("By constraint there are at least 2 items in input")
+            .unwrap()
     }
 }
 
