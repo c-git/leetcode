@@ -13,7 +13,7 @@ impl Solution {
     /// Runtime for the fastest solution is O(n * val) so it is faster because of the restriction on val
     pub fn longest_arith_seq_length(nums: Vec<i32>) -> i32 {
         let max = *nums.iter().max().unwrap();
-        let mut result = Vec::with_capacity(max as usize * 2 + 1);
+        let mut result = 2;
         let mut dp = vec![0_i32; max as usize + 1]; // Pull out creation here to reuse allocation
         for step in -max..=max {
             dp.iter_mut().for_each(|x| *x = 0); // Reset all values to 0
@@ -23,9 +23,9 @@ impl Solution {
                 let prev_len = dp.get(diff as usize);
                 dp[idx] = dp[idx].max(prev_len.copied().unwrap_or(0) + 1);
             }
-            result.push(*dp.iter().max().unwrap());
+            result = result.max(*dp.iter().max().unwrap());
         }
-        *result.iter().max().unwrap()
+        result
     }
 }
 
