@@ -12,10 +12,15 @@ impl Solution {
     /// Editorial runtime was O(n^2)
     /// Runtime for the fastest solution is O(n * val) so it is faster because of the restriction on val
     pub fn longest_arith_seq_length(nums: Vec<i32>) -> i32 {
-        let max = *nums.iter().max().unwrap();
+        let (min, max) = nums
+            .iter()
+            .fold((i32::MAX, i32::MIN), |(min_val, max_val), &val| {
+                (min_val.min(val), max_val.max(val))
+            });
+        let max_diff = max - min;
         let mut result = 2;
         let mut dp = vec![0_i32; max as usize + 1]; // Pull out creation here to reuse allocation
-        for step in -max..=max {
+        for step in -max_diff..=max_diff {
             dp.iter_mut().for_each(|x| *x = 0); // Reset all values to 0
             for &x in &nums {
                 let idx = x as usize;
@@ -41,6 +46,7 @@ mod tests {
     #[case(vec![3,6,9,12], 4)]
     #[case(vec![9,4,7,2,10], 3)]
     #[case(vec![20,1,15,3,10,5,8], 4)]
+    #[case(vec![0,500,0], 2)]
     fn case(#[case] nums: Vec<i32>, #[case] expected: i32) {
         let actual = Solution::longest_arith_seq_length(nums);
         assert_eq!(actual, expected);
