@@ -23,7 +23,10 @@ impl Solution {
         if flowerbed[0] == 0 && flowerbed[1] == 0 {
             available_spots += 1;
         }
-        if flowerbed[len - 1] == 0 && flowerbed[len - 2] == 0 {
+        if len > 2 && flowerbed[len - 1] == 0 && flowerbed[len - 2] == 0 {
+            // len must be greater than 2 for this to matter because if it is 2 then
+            // it can either be the other spot or this one and if this one if full
+            // it's not this one, and if we counted the other one then it's still not this one
             available_spots += 1;
         }
         if available_spots >= n {
@@ -61,6 +64,7 @@ mod tests {
     #[case(vec![1,0,0,0,0,1], 2, false)]
     #[case(vec![0], 1, true)]
     #[case(vec![0,1,0], 0, true)]
+    #[case(vec![0,0], 2, false)]
     fn case(#[case] flowerbed: Vec<i32>, #[case] n: i32, #[case] expected: bool) {
         let actual = Solution::can_place_flowers(flowerbed, n);
         assert_eq!(actual, expected);
