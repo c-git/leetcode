@@ -7,14 +7,33 @@ impl Solution {
             return true;
         }
 
-        // Check constraints used
-        debug_assert!(!flowerbed.is_empty());
-        debug_assert!(flowerbed.iter().all(|x| (0..=1).contains(x)));
+        let len = flowerbed.len();
 
-        let max_flowers = (flowerbed.len() + 1) / 2; //Plus 1 to round up
-        let planted_flowers = flowerbed.iter().sum::<i32>() as usize;
-        debug_assert!(max_flowers >= planted_flowers);
-        max_flowers - planted_flowers >= n as usize
+        // Check constraints used
+        debug_assert!(flowerbed.len() >= 2);
+
+        let mut available_spots = 0;
+
+        // Check if ends are available
+        if flowerbed[0] == 0 && flowerbed[1] == 0 {
+            available_spots += 1;
+        }
+        if flowerbed[len - 1] == 0 && flowerbed[len - 2] == 0 {
+            available_spots += 1;
+        }
+        if available_spots >= n {
+            return true;
+        }
+
+        for i in 1..len - 1 {
+            if flowerbed[i - 1] == 0 && flowerbed[i] == 0 && flowerbed[i + 1] == 0 {
+                available_spots += 1;
+            }
+            if available_spots >= n {
+                return true;
+            }
+        }
+        false
     }
 }
 
