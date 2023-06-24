@@ -26,7 +26,7 @@ checksum = "bef38d45163c2f1dde094a7dfd33ccf595c92905c8f8f4fdc18d06fb1037718a"
 [[package]]
 name = "cargo-leet"
 version = "0.1.0"
-source = "git+https://github.com/rust-practice/cargo-leet.git?branch=code_restructure#ccfca010f80a26efa582827198a4fa6c9b311296"
+source = "git+https://github.com/rust-practice/cargo-leet.git?branch=develop#7e2b733b502b03acaad2d776d303c9f632ccb73c"
 
 [[package]]
 name = "cfg-if"
