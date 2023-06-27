@@ -9,8 +9,14 @@ impl Solution {
         let k = k as usize;
         let candidates = candidates as usize;
         let n = costs.len();
-        let mut left = candidates; // Next index to take from the left side
-        let mut right = (n.checked_sub(1 - candidates).unwrap_or_default()).max(left); // Next index used on the right side
+
+        // Next index to take from the left side
+        let mut left = candidates;
+
+        // Next index used on the right side
+        let mut right = (n.checked_sub(1 + candidates).unwrap_or_default())
+            .max(left) // Use same next as left if bigger
+            .min(n - 1); // Max value is last position
 
         let mut candidate_pool = BinaryHeap::with_capacity(n.min(k * 2));
 
@@ -61,6 +67,8 @@ mod tests {
     #[case(vec![1,2,4,1], 3, 3, 4)]
     #[case(vec![1,2,4,1], 4, 3, 8)]
     #[case(vec![1,2,4,1], 3, 4, 4)]
+    #[case(vec![1,2,4,1], 4, 4, 8)]
+    #[case(vec![31,25,72,79,74,65,84,91,18,59,27,9,81,33,17,58], 11, 2, 423)]
     fn case(
         #[case] costs: Vec<i32>,
         #[case] k: i32,
