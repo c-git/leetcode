@@ -1,52 +1,38 @@
 //! Solution for https://leetcode.com/problems/total-cost-to-hire-k-workers
 //! 2462. Total Cost to Hire K Workers
 
-use std::{cmp::Reverse, collections::BinaryHeap};
+use std::{
+    cmp::Reverse,
+    collections::{BinaryHeap, VecDeque},
+    iter::Rev,
+};
 
 impl Solution {
     pub fn total_cost(costs: Vec<i32>, k: i32, candidates: i32) -> i64 {
+        // Using VecDeque idea from sak96
         let mut result = 0;
-        let k = k as usize;
         let candidates = candidates as usize;
         let n = costs.len();
-
-        // Next index to take from the left side
-        let mut left = candidates;
-
-        // Next index used on the right side
-        let mut right = (n.checked_sub(1 + candidates).unwrap_or_default())
-            .max(left) // Use same next as left if bigger
-            .min(n - 1); // Max value is last position
+        let mut costs = VecDeque::from(costs);
 
         let mut candidate_pool = BinaryHeap::with_capacity(n.min(candidates * 2));
-
-        // Add candidates from the left
-        costs
-            .iter()
-            .enumerate()
-            .take(left)
-            .for_each(|(i, &x)| candidate_pool.push(Reverse((x, i))));
-
-        // Add candidates from the right
-        costs
-            .iter()
-            .enumerate()
-            .skip(right + 1)
-            .for_each(|(i, &x)| candidate_pool.push(Reverse((x, i))));
+        for _ in 0..candidates {
+            if let Some(cost) = costs.pop_front() {
+                candidate_pool.push(Reverse((cost, true)))
+            }
+            if let Some(cost) = costs.pop_back() {
+                candidate_pool.push(Reverse((cost, false)))
+            }
+        }
 
         for _ in 0..k {
-            let Reverse((cost, index)) = candidate_pool.pop().unwrap();
+            let Reverse((cost, is_left)) = candidate_pool.pop().unwrap();
             result += cost as i64;
-            if left <= right {
-                // Add more candidates to the pool
-                if index < left {
-                    // Candidate came from left get next from left
-                    candidate_pool.push(Reverse((costs[left], left)));
-                    left += 1;
+            if !costs.is_empty() {
+                if is_left {
+                    candidate_pool.push(Reverse((costs.pop_front().unwrap(), true)));
                 } else {
-                    // Candidate came from right get next from right
-                    candidate_pool.push(Reverse((costs[right], right)));
-                    right -= 1;
+                    candidate_pool.push(Reverse((costs.pop_back().unwrap(), false)));
                 }
             }
         }
