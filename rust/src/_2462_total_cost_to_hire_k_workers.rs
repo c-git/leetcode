@@ -1,7 +1,7 @@
 //! Solution for https://leetcode.com/problems/total-cost-to-hire-k-workers
 //! 2462. Total Cost to Hire K Workers
 
-use std::{cmp::Reverse, collections::BinaryHeap, iter::Rev};
+use std::{cmp::Reverse, collections::BinaryHeap};
 
 impl Solution {
     pub fn total_cost(costs: Vec<i32>, k: i32, candidates: i32) -> i64 {
@@ -18,46 +18,37 @@ impl Solution {
             .max(left) // Use same next as left if bigger
             .min(n - 1); // Max value is last position
 
-        let mut candidate_pool_left = BinaryHeap::with_capacity(left);
-        let mut candidate_pool_right = BinaryHeap::with_capacity(n - right);
+        let mut candidate_pool = BinaryHeap::with_capacity(n.min(candidates * 2));
 
         // Add candidates from the left
         costs
             .iter()
+            .enumerate()
             .take(left)
-            .for_each(|&x| candidate_pool_left.push(Reverse(x)));
+            .for_each(|(i, &x)| candidate_pool.push(Reverse((x, i))));
 
         // Add candidates from the right
         costs
             .iter()
+            .enumerate()
             .skip(right + 1)
-            .for_each(|&x| candidate_pool_right.push(Reverse(x)));
+            .for_each(|(i, &x)| candidate_pool.push(Reverse((x, i))));
 
         for _ in 0..k {
-            let left_opt = candidate_pool_left.peek();
-            let right_opt = candidate_pool_right.peek();
-            let cost = match left_opt.cmp(&right_opt) {
-                std::cmp::Ordering::Greater | std::cmp::Ordering::Equal if left_opt.is_some() => {
-                    let Reverse(val) = candidate_pool_left.pop().unwrap();
-                    if left <= right {
-                        candidate_pool_left.push(Reverse(costs[left]));
-                        left += 1;
-                    }
-                    val
-                }
-                std::cmp::Ordering::Less if right_opt.is_some() => {
-                    let Reverse(val) = candidate_pool_right.pop().unwrap();
-                    if left <= right {
-                        candidate_pool_right.push(Reverse(costs[right]));
-                        right -= 1;
-                    }
-                    val
-                }
-                _ => unreachable!(
-                    "Never expect execution to get here. This would mean both ran empty, left_opt {left_opt:?} right_opt {right_opt:?}"
-                ),
-            };
+            let Reverse((cost, index)) = candidate_pool.pop().unwrap();
             result += cost as i64;
+            if left <= right {
+                // Add more candidates to the pool
+                if index < left {
+                    // Candidate came from left get next from left
+                    candidate_pool.push(Reverse((costs[left], left)));
+                    left += 1;
+                } else {
+                    // Candidate came from right get next from right
+                    candidate_pool.push(Reverse((costs[right], right)));
+                    right -= 1;
+                }
+            }
         }
         result
     }
