@@ -17,21 +17,21 @@ impl Solution {
         let mut candidate_pool = BinaryHeap::with_capacity(n.min(candidates * 2));
         for _ in 0..candidates {
             if let Some(cost) = costs.pop_front() {
-                candidate_pool.push(Reverse((cost, true)))
+                candidate_pool.push(Reverse((cost, false)))
             }
             if let Some(cost) = costs.pop_back() {
-                candidate_pool.push(Reverse((cost, false)))
+                candidate_pool.push(Reverse((cost, true)))
             }
         }
 
         for _ in 0..k {
-            let Reverse((cost, is_left)) = candidate_pool.pop().unwrap();
+            let Reverse((cost, is_right)) = candidate_pool.pop().unwrap();
             result += cost as i64;
             if !costs.is_empty() {
-                if is_left {
-                    candidate_pool.push(Reverse((costs.pop_front().unwrap(), true)));
+                if is_right {
+                    candidate_pool.push(Reverse((costs.pop_back().unwrap(), true)));
                 } else {
-                    candidate_pool.push(Reverse((costs.pop_back().unwrap(), false)));
+                    candidate_pool.push(Reverse((costs.pop_front().unwrap(), false)));
                 }
             }
         }
@@ -54,6 +54,7 @@ mod tests {
     #[case(vec![1,2,4,1], 3, 4, 4)]
     #[case(vec![1,2,4,1], 4, 4, 8)]
     #[case(vec![31,25,72,79,74,65,84,91,18,59,27,9,81,33,17,58], 11, 2, 423)]
+    #[case(vec![10,1,11,10], 2, 1, 11)]
     fn case(
         #[case] costs: Vec<i32>,
         #[case] k: i32,
