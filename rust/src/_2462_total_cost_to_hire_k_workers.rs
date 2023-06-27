@@ -18,7 +18,7 @@ impl Solution {
             .max(left) // Use same next as left if bigger
             .min(n - 1); // Max value is last position
 
-        let mut candidate_pool = BinaryHeap::with_capacity(n.min(k * 2));
+        let mut candidate_pool = BinaryHeap::with_capacity(n.min(candidates * 2));
 
         // Add candidates from the left
         costs
