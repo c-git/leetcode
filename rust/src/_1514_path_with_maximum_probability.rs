@@ -92,17 +92,17 @@ impl Graph {
     fn find_path(&self, start: usize, end: usize) -> f64 {
         let mut heap = BinaryHeap::from([(FloatNonNAN::new(1.0), start)]);
         let mut visited = vec![false; self.edges.len()];
-        visited[start] = true;
         while let Some((running_prob, node)) = heap.pop() {
             if node == end {
                 return running_prob.into();
             }
+            if visited[node] {
+                continue;
+            }
+            visited[node] = true;
             for edge in self.edges[node].iter() {
-                if !visited[edge.dst] || edge.dst == end {
-                    let new_prob = edge.succ_prob * running_prob;
-                    visited[edge.dst] = true;
-                    heap.push((new_prob, edge.dst));
-                }
+                let new_prob = edge.succ_prob * running_prob;
+                heap.push((new_prob, edge.dst));
             }
         }
         0.0 // Not able to reach end
