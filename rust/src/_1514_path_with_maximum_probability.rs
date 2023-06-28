@@ -94,7 +94,6 @@ impl Graph {
         let mut visited = vec![false; self.edges.len()];
         visited[start] = true;
         while let Some((running_prob, node)) = heap.pop() {
-            dbg!(node, running_prob, &heap);
             if node == end {
                 return running_prob.into();
             }
