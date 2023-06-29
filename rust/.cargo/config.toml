@@ -1,3 +1,2 @@
 [alias]
-lg = "leet -l warn generate -n"
-lgl = "leet -l info generate -n"
+g = "leet generate -n"
