@@ -10,9 +10,7 @@ impl Solution {
         let n = n as usize;
         let mut uglys = vec![1];
         // p2, p3 & p5 share the same queue: uglys
-        let mut p2 = 0;
-        let mut p3 = 0;
-        let mut p5 = 0;
+        let (mut p2, mut p3, mut p5) = (0, 0, 0);
         for i in 1..n {
             let last_number = uglys[i - 1];
             while uglys[p2] * 2 <= last_number {
