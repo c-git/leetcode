@@ -1,25 +1,17 @@
 //! Solution for https://leetcode.com/problems/maximum-subarray
 //! 53. Maximum Subarray
 
+use std::cmp::max;
+
 impl Solution {
     pub fn max_sub_array(nums: Vec<i32>) -> i32 {
-        let n = nums.len();
-        let mut cumulative_sums = Vec::with_capacity(n);
-        cumulative_sums.push(nums[0]);
-        for i in 1..n {
-            let last_sum = cumulative_sums[i - 1];
-            cumulative_sums.push(last_sum + nums[i]);
-        }
-
-        let mut result = cumulative_sums[0];
-        for right in 1..n {
-            result = result.max(cumulative_sums[right]);
-            for left in 0..right {
-                result = result.max(cumulative_sums[right] - cumulative_sums[left]);
-            }
-        }
-
-        result
+        // Source: https://leetcode.com/problems/maximum-subarray/solutions/3315652/rust-dynamic-programming-kadane-s-algorithm-concise-solution/
+        nums.iter()
+            .fold((i32::MIN, 0), |(max_sum, current_sum), &num| {
+                let new_sum = max(current_sum + num, num);
+                (max(max_sum, new_sum), new_sum)
+            })
+            .0
     }
 }
 
