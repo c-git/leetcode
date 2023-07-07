@@ -18,23 +18,19 @@ impl Solution {
         println!("a: {a:?}, b: {b:?}, k: {k}");
         // Switch if a is longer than b
         if a.len() > b.len() {
-            return Self::get_k_th(b, a, k);
-        }
-
-        if a.is_empty() {
-            return b[k - 1];
-        }
-
-        if k == 1 {
-            return a[0].min(b[0]);
-        }
-
-        let mid1 = a.len().min(k / 2) - 1;
-        let mid2 = b.len().min(k / 2) - 1;
-        if a[mid1] > b[mid2] {
-            Self::get_k_th(a, &b[mid2 + 1..], k - (mid2 + 1))
+            Self::get_k_th(b, a, k)
+        } else if a.is_empty() {
+            b[k - 1]
+        } else if k == 1 {
+            a[0].min(b[0])
         } else {
-            Self::get_k_th(&a[mid1 + 1..], b, k - (mid1 + 1))
+            let mid1 = a.len().min(k / 2) - 1;
+            let mid2 = b.len().min(k / 2) - 1;
+            if a[mid1] > b[mid2] {
+                Self::get_k_th(a, &b[mid2 + 1..], k - (mid2 + 1))
+            } else {
+                Self::get_k_th(&a[mid1 + 1..], b, k - (mid1 + 1))
+            }
         }
     }
 }
