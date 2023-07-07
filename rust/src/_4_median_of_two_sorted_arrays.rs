@@ -15,7 +15,6 @@ impl Solution {
     }
 
     fn get_k_th(a: &[i32], b: &[i32], k: usize) -> i32 {
-        println!("a: {a:?}, b: {b:?}, k: {k}");
         // Switch if a is longer than b
         if a.len() > b.len() {
             Self::get_k_th(b, a, k)
