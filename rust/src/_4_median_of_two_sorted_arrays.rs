@@ -6,15 +6,15 @@ impl Solution {
         // Testing lint code solution
         let total = nums1.len() + nums2.len();
         if total % 2 == 1 {
-            Self::get_k_th(&nums1, &nums2, total / 2 + 1)
+            Self::get_k_th(&nums1, &nums2, total / 2 + 1) as f64
         } else {
             let left = Self::get_k_th(&nums1, &nums2, total / 2);
             let right = Self::get_k_th(&nums1, &nums2, total / 2 + 1);
-            (left + right) / 2.0
+            (left + right) as f64 / 2f64
         }
     }
 
-    fn get_k_th(a: &[i32], b: &[i32], k: usize) -> f64 {
+    fn get_k_th(a: &[i32], b: &[i32], k: usize) -> i32 {
         println!("a: {a:?}, b: {b:?}, k: {k}");
         // Switch if a is longer than b
         if a.len() > b.len() {
@@ -22,11 +22,11 @@ impl Solution {
         }
 
         if a.is_empty() {
-            return b[k - 1] as f64;
+            return b[k - 1];
         }
 
         if k == 1 {
-            return a[0].min(b[0]) as f64;
+            return a[0].min(b[0]);
         }
 
         let mid1 = a.len().min(k / 2) - 1;
