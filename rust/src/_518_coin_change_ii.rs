@@ -2,29 +2,29 @@
 //! 518. Coin Change II
 
 impl Solution {
-    pub fn change(amount: i32, mut coins: Vec<i32>) -> i32 {
-        coins.sort_unstable();
-        Self::change_(amount, &coins)
-    }
-    pub fn change_(amount: i32, coins: &[i32]) -> i32 {
-        if amount == 0 {
-            return 1;
+    pub fn change(amount: i32, coins: Vec<i32>) -> i32 {
+        // Solution from editorial
+        let amount = amount as usize;
+        let coins: Vec<usize> = coins.into_iter().map(|x| x as usize).collect();
+        let n = coins.len();
+
+        // Each row is indexed by the starting index of the coins you can use, each column is indexed by a target amount
+        let mut dp = vec![vec![0; amount + 1]; n + 1];
+        for row in dp.iter_mut() {
+            row[0] = 1;
         }
 
-        if coins.is_empty() {
-            return 0;
+        for start_coin_idx in (0..n).rev() {
+            for target_val in 1..=amount {
+                if coins[start_coin_idx] > target_val {
+                    dp[start_coin_idx][target_val] = dp[start_coin_idx + 1][target_val]
+                } else {
+                    dp[start_coin_idx][target_val] = dp[start_coin_idx + 1][target_val]
+                        + dp[start_coin_idx][target_val - coins[start_coin_idx]]
+                }
+            }
         }
-
-        let mut result = 0;
-
-        let largest_val = coins.last().expect("Checked for empty above");
-        let max_supported = amount / largest_val;
-        let other_coins = &coins[..coins.len() - 1];
-        for i in 1..=max_supported {
-            result += Self::change_(amount - largest_val * i, other_coins)
-        }
-
-        result + Self::change_(amount, other_coins)
+        dp[0][amount]
     }
 }
 
@@ -42,6 +42,7 @@ mod tests {
     #[case(5, vec![1,2,5], 4)]
     #[case(3, vec![2], 0)]
     #[case(10, vec![10], 1)]
+    #[case(500, vec![3,5,7,8,9,10,11], 35_502_874)]
     fn case(#[case] amount: i32, #[case] coins: Vec<i32>, #[case] expected: i32) {
         let actual = Solution::change(amount, coins);
         assert_eq!(actual, expected);
