@@ -16,12 +16,41 @@ impl Solution {
 
         for start_coin_idx in (0..n).rev() {
             for target_val in 1..=amount {
+                println!(
+                    "{start_coin_idx} ({}) - {target_val}",
+                    coins[start_coin_idx]
+                );
                 if coins[start_coin_idx] > target_val {
+                    println!(
+                        "Too big use {} = [{}][{}]",
+                        dp[start_coin_idx + 1][target_val],
+                        start_coin_idx + 1,
+                        target_val
+                    );
                     dp[start_coin_idx][target_val] = dp[start_coin_idx + 1][target_val]
                 } else {
+                    println!(
+                        "Add {} = [{}][{}] and {} = [{}][{}]",
+                        dp[start_coin_idx + 1][target_val],
+                        start_coin_idx + 1,
+                        target_val,
+                        dp[start_coin_idx][target_val - coins[start_coin_idx]],
+                        start_coin_idx,
+                        target_val - coins[start_coin_idx]
+                    );
                     dp[start_coin_idx][target_val] = dp[start_coin_idx + 1][target_val]
                         + dp[start_coin_idx][target_val - coins[start_coin_idx]]
                 }
+                for (i, row) in dp.iter().enumerate() {
+                    let value = coins.get(i).unwrap_or(&0);
+                    let value = if value == &0 {
+                        "-".to_string()
+                    } else {
+                        value.to_string()
+                    };
+                    println!("{} ({}) - {row:?}", i, value);
+                }
+                println!();
             }
         }
         dp[0][amount]
