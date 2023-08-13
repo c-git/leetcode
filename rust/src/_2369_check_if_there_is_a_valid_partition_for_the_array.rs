@@ -3,26 +3,30 @@
 
 impl Solution {
     pub fn valid_partition(nums: Vec<i32>) -> bool {
-        Self::valid_partition_(&nums)
+        let mut memo = vec![None; nums.len() + 1];
+        Self::valid_partition_(&nums, &mut memo)
     }
 
-    fn valid_partition_(nums: &[i32]) -> bool {
-        match nums.len() {
+    fn valid_partition_(nums: &[i32], memo: &mut Vec<Option<bool>>) -> bool {
+        if let Some(value) = memo[nums.len()] {
+            return value;
+        }
+        let result = match nums.len() {
             0 => true,  // Empty this is valid
             1 => false, // 1 element is never valid
             2 => nums[0] == nums[1],
             _ => {
-                if nums[0] == nums[1] && Self::valid_partition_(&nums[2..]) {
-                    return true;
+                if nums[0] == nums[1] && Self::valid_partition_(&nums[2..], memo) {
+                    true
+                } else {
+                    let three_equal = nums[0] == nums[1] && nums[1] == nums[2];
+                    let diff_one = nums[1] - nums[0] == 1 && nums[2] - nums[1] == 1;
+                    (three_equal || diff_one) && Self::valid_partition_(&nums[3..], memo)
                 }
-                let three_equal = nums[0] == nums[1] && nums[1] == nums[2];
-                let diff_one = nums[1] - nums[0] == 1 && nums[2] - nums[1] == 1;
-                if (three_equal || diff_one) && Self::valid_partition_(&nums[3..]) {
-                    return true;
-                }
-                false
             }
-        }
+        };
+        memo[nums.len()] = Some(result);
+        result
     }
 }
 
