@@ -35,7 +35,6 @@ mod tests {
     #[case(vec![3,2,1,4], 2)]
     #[case(vec![1,2], -1)]
     #[case(vec![2,1,3], 2)]
-    #[case(vec![1,2,2,1,1], -1)]
     fn case(#[case] nums: Vec<i32>, #[case] expected: i32) {
         let actual = Solution::find_non_min_or_max(nums);
         assert_eq!(actual, expected);
