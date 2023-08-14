@@ -12,16 +12,34 @@ impl Solution {
         for &num in nums.iter() {
             set.insert(num);
             if set.len() > k {
-                set.pop_first();
+                Self::pop_first(&mut set);
             }
         }
 
         match set.len() {
             0 => unreachable!("Constraint guarantees there is at least 1 value"),
-            1..=2 => set.pop_last().unwrap(), // No third return the last
-            3 => set.pop_first().unwrap(),
+            1..=2 => Self::pop_last(&mut set), // No third return the last (largest value)
+            3 => Self::pop_first(&mut set),    // The only three left the smallest is the third
             _ => unreachable!("Loop should keep value at max 3"),
         }
+    }
+
+    fn pop_first(set: &mut BTreeSet<i32>) -> i32 {
+        let first = *set
+            .iter()
+            .next()
+            .expect("Only expected to be called if the set is non-empty");
+        set.remove(&first);
+        first
+    }
+
+    fn pop_last(set: &mut BTreeSet<i32>) -> i32 {
+        let last = *set
+            .iter()
+            .next_back()
+            .expect("Only expected to be called if the set is non-empty");
+        set.remove(&last);
+        last
     }
 }
 
