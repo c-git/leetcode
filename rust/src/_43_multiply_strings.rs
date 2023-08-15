@@ -19,7 +19,9 @@ impl Solution {
         result
             .iter()
             .rev()
-            .map(|&x| char::from_u32((x + b'0') as u32).expect("Should be single digit"))
+            .enumerate()
+            .skip_while(|(i, x)| **x == 0 && *i < result.len() - 1)
+            .map(|(_, &x)| char::from_u32((x + b'0') as u32).expect("Should be single digit"))
             .collect()
     }
 
@@ -79,6 +81,7 @@ mod tests {
     #[rstest]
     #[case("2", "3", "6")]
     #[case("123", "456", "56088")]
+    #[case("9133", "0", "0")]
     fn case(#[case] num1: String, #[case] num2: String, #[case] expected: String) {
         let actual = Solution::multiply(num1, num2);
         assert_eq!(actual, expected);
