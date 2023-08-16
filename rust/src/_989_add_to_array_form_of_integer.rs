@@ -12,6 +12,12 @@ impl Solution {
             carry = val / 10; // Store val without last digit in carry
             k /= 10; // Drop last digit
         }
+        while k > 0 {
+            let val = k % 10 + carry; // Calculate sum for this position
+            num.insert(0, val % 10); // Insert last digit of sum at front of number
+            carry = val / 10; // Store val without last digit in carry
+            k /= 10; // Drop last digit
+        }
         if carry > 0 {
             num.insert(0, carry);
         }
@@ -33,6 +39,7 @@ mod tests {
     #[case(vec![1,2,0,0], 34, vec![1,2,3,4])]
     #[case(vec![2,7,4], 181, vec![4,5,5])]
     #[case(vec![2,1,5], 806, vec![1,0,2,1])]
+    #[case(vec![0], 23, vec![2,3])]
     fn case(#[case] num: Vec<i32>, #[case] k: i32, #[case] expected: Vec<i32>) {
         let actual = Solution::add_to_array_form(num, k);
         assert_eq!(actual, expected);
