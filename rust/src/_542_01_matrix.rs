@@ -4,39 +4,37 @@
 use std::collections::VecDeque;
 
 impl Solution {
-    pub fn update_matrix(mat: Vec<Vec<i32>>) -> Vec<Vec<i32>> {
+    pub fn update_matrix(mut mat: Vec<Vec<i32>>) -> Vec<Vec<i32>> {
+        // Modified based on lower memory solution on leetcode
         let count_rows = mat.len();
         let count_cols = mat[0].len();
-        let mut result = vec![vec![None; count_cols]; count_rows];
 
         let mut queue = VecDeque::new();
 
-        // Find 0's
-        for (idx_row, row) in mat.iter().enumerate() {
-            for (idx_col, cell) in row.iter().enumerate() {
+        // Find all 0's and set all 1's to -1 to indicate they are not done yet
+        for (idx_row, row) in mat.iter_mut().enumerate() {
+            for (idx_col, cell) in row.iter_mut().enumerate() {
                 if *cell == 0 {
-                    result[idx_row][idx_col] = Some(0);
                     queue.push_back((idx_row, idx_col));
+                } else {
+                    *cell = -1;
                 }
             }
         }
 
         while let Some((idx_row, idx_col)) = queue.pop_front() {
-            let new_steps = result[idx_row][idx_col].unwrap() + 1;
+            let new_steps = mat[idx_row][idx_col] + 1;
             for (neighbour_row, neighbour_col) in
                 Self::neighbours(idx_row, idx_col, count_rows, count_cols)
             {
-                if result[neighbour_row][neighbour_col].is_none() {
-                    result[neighbour_row][neighbour_col] = Some(new_steps);
+                if mat[neighbour_row][neighbour_col] < 0 {
+                    mat[neighbour_row][neighbour_col] = new_steps;
                     queue.push_back((neighbour_row, neighbour_col));
                 }
             }
         }
 
-        result
-            .into_iter()
-            .map(|row| row.into_iter().map(|cell| cell.unwrap()).collect())
-            .collect()
+        mat
     }
 
     fn neighbours(
