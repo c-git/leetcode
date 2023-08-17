@@ -5,34 +5,46 @@ use std::collections::VecDeque;
 
 impl Solution {
     pub fn max_sliding_window(nums: Vec<i32>, k: i32) -> Vec<i32> {
+        // Changed to solution from editorial (Based on description not actual translation of the code)
         let k = k as usize;
 
         let mut result = Vec::with_capacity(nums.len() + 1 - k);
-        let mut window = VecDeque::with_capacity(k);
+        let mut relevant_window_items: VecDeque<(usize, i32)> = VecDeque::with_capacity(k); // Only the monotonically decreasing values from the current window
 
-        // Fill window with first k items
-        for &num in nums.iter().take(k) {
-            window.push_back(num);
+        // Fill with relevant items from the first k items
+        for (i, num) in nums.iter().enumerate().take(k) {
+            while let Some((_idx, last)) = relevant_window_items.back() {
+                if last < num {
+                    relevant_window_items.pop_back(); // Value in same window as num but it's smaller just remove it
+                } else {
+                    // Value bigger so it would be the max not this one so leave it in
+                    break;
+                }
+            }
+            relevant_window_items.push_back((i, *num));
         }
 
-        // Save max for first
-        let mut window_max = *window.iter().max().unwrap();
-        result.push(window_max);
+        // Save first max (the one at the front of the relevant window)
+        let &(_idx, max) = relevant_window_items.front().unwrap();
+        result.push(max);
 
         // Move windows to the right and find what is the newest value to add
-        for &num in nums.iter().skip(k) {
-            let oldest = window.pop_front().unwrap(); // Remove oldest
-            window.push_back(num); // Add next value
-            match (num >= window_max, window_max == oldest) {
-                (true, _) => {
-                    window_max = num;
-                }
-                (false, true) => {
-                    // Max moved out of window, find new max
-                    window_max = *window.iter().max().unwrap();
-                }
-                (false, false) => {} // Do nothing, the max is still in the window and nothing bigger has come along
+        for (i, num) in nums.iter().enumerate().skip(k) {
+            let (oldest_idx, _oldest_val) = relevant_window_items.front().unwrap();
+            if *oldest_idx <= i.saturating_sub(k) {
+                debug_assert_eq!(*oldest_idx, i.saturating_sub(k), "Only checked for less than to handle that case but should never happen as we check each iteration");
+                relevant_window_items.pop_front(); // Too old remove from window
             }
+            while let Some((_idx, last)) = relevant_window_items.back() {
+                if last < num {
+                    relevant_window_items.pop_back(); // Value in same window as num but it's smaller just remove it
+                } else {
+                    // Value bigger so it would be the max not this one so leave it in
+                    break;
+                }
+            }
+            relevant_window_items.push_back((i, *num)); // Add next value
+            let &(_idx, window_max) = relevant_window_items.front().unwrap();
             result.push(window_max);
         }
 
