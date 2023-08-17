@@ -37,7 +37,9 @@ impl Solution {
             (x, y) if x == y => Self::is_match_(&s[1..], &p[1..], memo),
             (_, '?') => Self::is_match_(&s[1..], &p[1..], memo),
             (_, '*') => {
-                Self::is_match_(&s[1..], &p[1..], memo) || Self::is_match_(&s[1..], p, memo)
+                Self::is_match_(&s[1..], &p[1..], memo)
+                    || Self::is_match_(&s[1..], p, memo)
+                    || Self::is_match_(s, &p[1..], memo)
             }
             _ => false,
         };
@@ -65,6 +67,7 @@ mod tests {
     #[case("aa", "aa*", true)]
     #[case("ab", "aa*", false)]
     #[case("hello", "h?*", true)]
+    #[case("adceb", "*a*b*", true)]
     fn case(#[case] s: String, #[case] p: String, #[case] expected: bool) {
         let actual = Solution::is_match(s, p);
         assert_eq!(actual, expected);
