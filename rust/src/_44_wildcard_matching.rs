@@ -1,14 +1,14 @@
 //! Solution for https://leetcode.com/problems/wildcard-matching
 //! 44. Wildcard Matching
 
-use std::collections::HashMap;
+use std::vec;
 
 impl Solution {
     pub fn is_match(s: String, p: String) -> bool {
-        let mut memo = HashMap::new();
+        let mut memo = vec![vec![None; p.len() + 1]; s.len() + 1];
         Self::is_match_(&s, &p, &mut memo)
     }
-    fn is_match_(s: &str, p: &str, memo: &mut HashMap<(usize, usize), bool>) -> bool {
+    fn is_match_(s: &str, p: &str, memo: &mut Vec<Vec<Option<bool>>>) -> bool {
         if s.is_empty() {
             if p.is_empty() {
                 return true;
@@ -25,9 +25,8 @@ impl Solution {
             return false;
         }
 
-        let key = (s.len(), p.len());
-        if let Some(result) = memo.get(&key) {
-            return *result;
+        if let Some(result) = memo[s.len()][p.len()] {
+            return result;
         }
 
         let s0 = s.chars().next().unwrap();
@@ -43,7 +42,7 @@ impl Solution {
             }
             _ => false,
         };
-        memo.insert(key, result);
+        memo[s.len()][p.len()] = Some(result);
         result
     }
 }
@@ -68,6 +67,7 @@ mod tests {
     #[case("ab", "aa*", false)]
     #[case("hello", "h?*", true)]
     #[case("adceb", "*a*b*", true)]
+    #[case("abcedefghijklmnopqrs", "**************a*g*s*", true)]
     fn case(#[case] s: String, #[case] p: String, #[case] expected: bool) {
         let actual = Solution::is_match(s, p);
         assert_eq!(actual, expected);
