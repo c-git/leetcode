@@ -6,15 +6,15 @@ use std::vec;
 impl Solution {
     pub fn is_match(s: String, p: String) -> bool {
         let mut memo = vec![vec![None; p.len() + 1]; s.len() + 1];
-        Self::is_match_(&s, &p, &mut memo)
+        Self::is_match_(s.as_bytes(), p.as_bytes(), &mut memo)
     }
-    fn is_match_(s: &str, p: &str, memo: &mut Vec<Vec<Option<bool>>>) -> bool {
+    fn is_match_(s: &[u8], p: &[u8], memo: &mut Vec<Vec<Option<bool>>>) -> bool {
         if s.is_empty() {
             if p.is_empty() {
                 return true;
             } else {
-                for c in p.chars() {
-                    if c != '*' {
+                for &c in p {
+                    if c != b'*' {
                         return false;
                     }
                 }
@@ -29,13 +29,10 @@ impl Solution {
             return result;
         }
 
-        let s0 = s.chars().next().unwrap();
-        let p0 = p.chars().next().unwrap();
-
-        let result = match (s0, p0) {
+        let result = match (s[0], p[0]) {
             (x, y) if x == y => Self::is_match_(&s[1..], &p[1..], memo),
-            (_, '?') => Self::is_match_(&s[1..], &p[1..], memo),
-            (_, '*') => {
+            (_, b'?') => Self::is_match_(&s[1..], &p[1..], memo),
+            (_, b'*') => {
                 Self::is_match_(&s[1..], &p[1..], memo)
                     || Self::is_match_(&s[1..], p, memo)
                     || Self::is_match_(s, &p[1..], memo)
