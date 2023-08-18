@@ -3,8 +3,9 @@
 
 impl Solution {
     pub fn maximal_network_rank(n: i32, roads: Vec<Vec<i32>>) -> i32 {
+        // Uses idea from editorial comments to sort by number of edges
         let n = n as usize;
-        let mut result = 0;
+        let mut result = None;
         let mut connected = vec![vec![false; n]; n];
 
         // Populate network
@@ -15,20 +16,39 @@ impl Solution {
             connected[c2][c1] = true;
         }
 
-        let road_counts: Vec<i32> = connected
+        let mut road_counts: Vec<(usize, i32)> = connected
             .iter()
-            .map(|x| x.iter().map(|&x| if x { 1 } else { 0 }).sum())
+            .enumerate()
+            .map(|(i, x)| (i, x.iter().map(|&x| if x { 1 } else { 0 }).sum()))
             .collect();
+        road_counts.sort_unstable_by_key(|(_, x)| -x);
 
         // Check size of pairs
         for c1 in 0..n {
             for c2 in c1 + 1..n {
-                result = result
-                    .max(road_counts[c1] + road_counts[c2] - if connected[c1][c2] { 1 } else { 0 });
+                let city1_idx = road_counts[c1].0;
+                let city2_idx = road_counts[c2].0;
+                let count = road_counts[c1].1 + road_counts[c2].1
+                    - if connected[city1_idx][city2_idx] {
+                        1
+                    } else {
+                        0
+                    };
+
+                if let Some(val) = result {
+                    if val < count {
+                        result = Some(count)
+                    } else if val > count + 1 {
+                        // It can never be bigger because cities are sorted by number of roads
+                        break;
+                    }
+                } else {
+                    result = Some(count);
+                }
             }
         }
 
-        result
+        result.unwrap()
     }
 }
 
