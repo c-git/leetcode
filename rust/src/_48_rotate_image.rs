@@ -23,12 +23,12 @@ impl Pos {
 
 impl Solution {
     pub fn rotate(matrix: &mut Vec<Vec<i32>>) {
-        // Used working https://docs.google.com/spreadsheets/d/1fpLqmffz_Z-sxSXOH5w6oB63piPJTRQl0c4sviRZ0hI/edit?usp=sharing
+        // Used working https://docs.google.com/spreadsheets/d/1fpLqmffz_Z-sxSXOH5w6oB63piPJTRQl0c4sviRZ0hI/
         // to figure out formula to go from one cell to the next (needed the 9xx because 01 is not a valid number on leetcode)
         let n = matrix.len();
-        let mut layer_pixels_per_row = n;
+        let mut last_pixel_for_row = n - 2;
         for layer in 0..n / 2 {
-            for col in layer..layer_pixels_per_row - 1 {
+            for col in layer..=last_pixel_for_row {
                 let mut pos = Pos::new(col, layer);
                 let mut temp = *Self::get_pos_in_matrix(&pos, matrix);
                 for _ in 0..4 {
@@ -37,7 +37,7 @@ impl Solution {
                     mem::swap(next_val, &mut temp);
                 }
             }
-            layer_pixels_per_row -= 1;
+            last_pixel_for_row -= 1;
         }
     }
 
