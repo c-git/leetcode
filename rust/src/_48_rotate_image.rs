@@ -23,6 +23,8 @@ impl Pos {
 
 impl Solution {
     pub fn rotate(matrix: &mut Vec<Vec<i32>>) {
+        // Used working https://docs.google.com/spreadsheets/d/1fpLqmffz_Z-sxSXOH5w6oB63piPJTRQl0c4sviRZ0hI/edit?usp=sharing
+        // to figure out formula to go from one cell to the next (needed the 9xx because 01 is not a valid number on leetcode)
         let n = matrix.len();
         let mut layer_pixels_per_row = n;
         for layer in 0..n / 2 {
