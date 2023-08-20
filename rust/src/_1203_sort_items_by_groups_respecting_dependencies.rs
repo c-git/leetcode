@@ -95,7 +95,8 @@ impl Solution {
         // [group 1, group 2, ... ] -> [(item 1, item 2, ...), (item 1, item 2, ...), ...]
         let mut answer = vec![];
         for group_index in group_order {
-            answer.append(ordered_groups.get_mut(&(group_index as i32)).unwrap());
+            let g = ordered_groups.entry(group_index as i32).or_default();
+            answer.append(g);
         }
         answer
     }
@@ -116,6 +117,7 @@ mod tests {
     // #[case(8, 2, vec![-1,-1,1,0,0,1,0,-1], vec![vec![],vec![6],vec![5],vec![6],vec![3,6],vec![],vec![],vec![]], vec![6,3,4,1,5,2,0,7])]
     #[case(8, 2, vec![-1,-1,1,0,0,1,0,-1], vec![vec![],vec![6],vec![5],vec![6],vec![3,6],vec![],vec![],vec![]], vec![7,0,5,2,6,3,4,1])]
     #[case(8, 2, vec![-1,-1,1,0,0,1,0,-1], vec![vec![],vec![6],vec![5],vec![6],vec![3],vec![],vec![4],vec![]], vec![])]
+    #[case(5, 5, vec![2,0,-1,3,0], vec![vec![2,1,3],vec![2,4],vec![],vec![],vec![]], vec![2, 4, 1, 3, 0])]
     fn case(
         #[case] n: i32,
         #[case] m: i32,
