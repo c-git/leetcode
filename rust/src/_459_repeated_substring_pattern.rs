@@ -3,16 +3,15 @@
 
 impl Solution {
     pub fn repeated_substring_pattern(s: String) -> bool {
-        let bytes = s.as_bytes();
-        let n = bytes.len();
+        let n = s.len();
         'outer: for i in 1..n {
             if n % i != 0 {
                 // Not a multiple of i, will not be able to be a solution
                 continue;
             }
-            let substring = &bytes[0..i];
+            let substring = &s[0..i];
             for compare_idx in (i..n).step_by(i) {
-                let candidate = &bytes[compare_idx..i + compare_idx];
+                let candidate = &s[compare_idx..i + compare_idx];
                 if candidate != substring {
                     continue 'outer;
                 }
