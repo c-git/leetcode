@@ -4,7 +4,7 @@
 impl Solution {
     pub fn repeated_substring_pattern(s: String) -> bool {
         let n = s.len();
-        'outer: for i in 1..n {
+        'outer: for i in 1..=n / 2 {
             if n % i != 0 {
                 // Not a multiple of i, will not be able to be a solution
                 continue;
