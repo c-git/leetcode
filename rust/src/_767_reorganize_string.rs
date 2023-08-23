@@ -41,7 +41,11 @@ impl Solution {
         remaining_chars.sort_unstable();
         let mut result = String::with_capacity(s.len());
         let mut last_seen = remaining_chars.last().unwrap().c;
-        remaining_chars.last_mut().unwrap().count -= 1;
+        if remaining_chars.last().unwrap().count == 1 {
+            remaining_chars.pop();
+        } else {
+            remaining_chars.last_mut().unwrap().count -= 1;
+        }
         remaining_chars.sort_unstable();
         result.push(last_seen);
         while !remaining_chars.is_empty() {
@@ -87,6 +91,7 @@ mod tests {
     #[rstest]
     #[case("aab", "aba")]
     #[case("aaab", "")]
+    #[case("zhmyo", "zyomh")]
     fn case(#[case] s: String, #[case] expected: String) {
         let actual = Solution::reorganize_string(s);
         assert_eq!(actual, expected);
