@@ -5,7 +5,7 @@ impl Solution {
     pub fn find_longest_chain(mut pairs: Vec<Vec<i32>>) -> i32 {
         // Sort pairs by ending time so that if a pair is able to join to another one then the other one comes before it
         pairs.sort_by_key(|x| x[1]);
-        let mut result = 0;
+        let mut result = 1;
         let mut dp = vec![0; pairs.len()];
         debug_assert!(
             !pairs.is_empty(),
@@ -40,6 +40,7 @@ mod tests {
     #[rstest]
     #[case(vec![vec![1,2],vec![2,3],vec![3,4]], 2)]
     #[case(vec![vec![1,2],vec![7,8],vec![4,5]], 3)]
+    #[case(vec![vec![1,2]], 1)]
     fn case(#[case] pairs: Vec<Vec<i32>>, #[case] expected: i32) {
         let actual = Solution::find_longest_chain(pairs);
         assert_eq!(actual, expected);
