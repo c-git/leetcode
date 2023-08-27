@@ -12,27 +12,37 @@ impl Solution {
             return false;
         }
         let mut memo = HashMap::new();
-        Self::can_cross_(&stones[1..], 1, 0, &mut memo)
+        let result = Self::can_cross_(&stones[1..], 1, 0, &mut memo);
+        println!("{result:?}");
+        result.is_some()
     }
 
     fn can_cross_(
         stones: &[i32],
         jump_size: i32,
         last_stone: i32,
-        memo: &mut HashMap<(i32, i32), bool>,
-    ) -> bool {
+        memo: &mut HashMap<(i32, i32), Option<Vec<i32>>>,
+    ) -> Option<Vec<i32>> {
         let key = (jump_size, last_stone);
-        if let Some(&result) = memo.get(&key) {
-            return result;
+        if let Some(result) = memo.get(&key) {
+            return result.clone();
         }
         if stones.is_empty() {
             // You can only get an empty list if you're about to jump off the last stone
-            return true;
+            return Some(vec![]);
         }
         let next_middle_stone = last_stone + jump_size;
 
         let result = if stones.len() == 1 {
-            (next_middle_stone - 1..=next_middle_stone + 1).contains(&stones[0])
+            if next_middle_stone - 1 == stones[0] {
+                Some(vec![next_middle_stone - 1])
+            } else if next_middle_stone == stones[0] {
+                Some(vec![next_middle_stone])
+            } else if next_middle_stone + 1 == stones[0] {
+                Some(vec![next_middle_stone + 1])
+            } else {
+                None
+            }
         } else {
             match stones.binary_search(&next_middle_stone) {
                 Ok(middle_idx) => {
@@ -44,15 +54,34 @@ impl Solution {
                             next_middle_stone - 1,
                             memo,
                         )
+                        .is_some()
                     {
-                        true
+                        let mut prev = Self::can_cross_(
+                            &stones[middle_idx..],
+                            jump_size - 1,
+                            next_middle_stone - 1,
+                            memo,
+                        )
+                        .unwrap();
+                        prev.push(next_middle_stone - 1);
+                        Some(prev)
                     } else if Self::can_cross_(
                         &stones[middle_idx + 1..],
                         jump_size,
                         next_middle_stone,
                         memo,
-                    ) {
-                        true
+                    )
+                    .is_some()
+                    {
+                        let mut prev = Self::can_cross_(
+                            &stones[middle_idx + 1..],
+                            jump_size,
+                            next_middle_stone,
+                            memo,
+                        )
+                        .unwrap();
+                        prev.push(next_middle_stone);
+                        Some(prev)
                     } else if middle_idx + 1 < stones.len()
                         && stones[middle_idx + 1] == next_middle_stone + 1
                         && Self::can_cross_(
@@ -61,10 +90,19 @@ impl Solution {
                             next_middle_stone + 1,
                             memo,
                         )
+                        .is_some()
                     {
-                        true
+                        let mut prev = Self::can_cross_(
+                            &stones[middle_idx + 2..],
+                            jump_size + 1,
+                            next_middle_stone + 1,
+                            memo,
+                        )
+                        .unwrap();
+                        prev.push(next_middle_stone + 1);
+                        Some(prev)
                     } else {
-                        false
+                        None
                     }
                 }
                 Err(after_middle_idx) => {
@@ -76,8 +114,17 @@ impl Solution {
                             next_middle_stone - 1,
                             memo,
                         )
+                        .is_some()
                     {
-                        true
+                        let mut prev = Self::can_cross_(
+                            &stones[after_middle_idx..],
+                            jump_size - 1,
+                            next_middle_stone - 1,
+                            memo,
+                        )
+                        .unwrap();
+                        prev.push(next_middle_stone - 1);
+                        Some(prev)
                     } else if after_middle_idx < stones.len()
                         && stones[after_middle_idx] == next_middle_stone + 1
                         && Self::can_cross_(
@@ -86,15 +133,24 @@ impl Solution {
                             next_middle_stone + 1,
                             memo,
                         )
+                        .is_some()
                     {
-                        true
+                        let mut prev = Self::can_cross_(
+                            &stones[after_middle_idx + 1..],
+                            jump_size + 1,
+                            next_middle_stone + 1,
+                            memo,
+                        )
+                        .unwrap();
+                        prev.push(next_middle_stone + 1);
+                        Some(prev)
                     } else {
-                        false
+                        None
                     }
                 }
             }
         };
-        memo.insert(key, result);
+        memo.insert(key, result.clone());
         result
     }
 }
