@@ -12,7 +12,7 @@ impl Solution {
             return false;
         }
         let mut memo = HashMap::new();
-        Self::can_cross_(&stones[1..], 1, 0, &mut memo)
+        Self::can_cross_(&stones[2..], 1, 1, &mut memo)
     }
 
     fn can_cross_(
