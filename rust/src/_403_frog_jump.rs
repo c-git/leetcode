@@ -12,7 +12,8 @@ impl Solution {
 
     fn can_cross_(stones: &[i32], jump_size: i32, last_stone: i32) -> bool {
         if stones.is_empty() {
-            return false;
+            // You can only get an empty list if you're about to jump off the last stone
+            return true;
         }
         let next_middle_stone = last_stone + jump_size;
 
@@ -80,6 +81,7 @@ mod tests {
     #[case(vec![0,1,2,3,4,8,9,11], false)]
     #[case(vec![0,2,3,5,6,8,12,17], false)]
     #[case(vec![0,1], true)]
+    #[case(vec![0,1,3,6,10,13,14], true)]
     fn case(#[case] stones: Vec<i32>, #[case] expected: bool) {
         let actual = Solution::can_cross(stones);
         assert_eq!(actual, expected);
