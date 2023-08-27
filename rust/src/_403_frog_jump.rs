@@ -3,6 +3,8 @@
 
 use std::collections::HashMap;
 
+#[allow(clippy::needless_bool)]
+#[allow(clippy::if_same_then_else)]
 impl Solution {
     pub fn can_cross(stones: Vec<i32>) -> bool {
         debug_assert_eq!(stones[0], 0);
@@ -34,46 +36,61 @@ impl Solution {
         } else {
             match stones.binary_search(&next_middle_stone) {
                 Ok(middle_idx) => {
-                    (middle_idx > 0
+                    if middle_idx > 0
                         && stones[middle_idx] == next_middle_stone - 1
                         && Self::can_cross_(
                             &stones[middle_idx..],
                             jump_size - 1,
                             next_middle_stone - 1,
                             memo,
-                        ))
-                        || Self::can_cross_(
-                            &stones[middle_idx + 1..],
-                            jump_size,
-                            next_middle_stone,
+                        )
+                    {
+                        true
+                    } else if Self::can_cross_(
+                        &stones[middle_idx + 1..],
+                        jump_size,
+                        next_middle_stone,
+                        memo,
+                    ) {
+                        true
+                    } else if middle_idx + 1 < stones.len()
+                        && stones[middle_idx + 1] == next_middle_stone + 1
+                        && Self::can_cross_(
+                            &stones[middle_idx + 2..],
+                            jump_size + 1,
+                            next_middle_stone + 1,
                             memo,
                         )
-                        || (middle_idx + 1 < stones.len()
-                            && stones[middle_idx + 1] == next_middle_stone + 1
-                            && Self::can_cross_(
-                                &stones[middle_idx + 2..],
-                                jump_size + 1,
-                                next_middle_stone + 1,
-                                memo,
-                            ))
+                    {
+                        true
+                    } else {
+                        false
+                    }
                 }
                 Err(after_middle_idx) => {
-                    (after_middle_idx > 0
+                    if after_middle_idx > 0
                         && stones[after_middle_idx - 1] == next_middle_stone - 1
                         && Self::can_cross_(
                             &stones[after_middle_idx..],
                             jump_size - 1,
                             next_middle_stone - 1,
                             memo,
-                        ))
-                        || (after_middle_idx < stones.len()
-                            && stones[after_middle_idx] == next_middle_stone + 1
-                            && Self::can_cross_(
-                                &stones[after_middle_idx + 1..],
-                                jump_size + 1,
-                                next_middle_stone + 1,
-                                memo,
-                            ))
+                        )
+                    {
+                        true
+                    } else if after_middle_idx < stones.len()
+                        && stones[after_middle_idx] == next_middle_stone + 1
+                        && Self::can_cross_(
+                            &stones[after_middle_idx + 1..],
+                            jump_size + 1,
+                            next_middle_stone + 1,
+                            memo,
+                        )
+                    {
+                        true
+                    } else {
+                        false
+                    }
                 }
             }
         };
@@ -98,6 +115,7 @@ mod tests {
     #[case(vec![0,2,3,5,6,8,12,17], false)]
     #[case(vec![0,1], true)]
     #[case(vec![0,1,3,6,10,13,14], true)]
+    #[case(vec![0,1,2,5,6,9,10,12,13,14,17,19,20,21,26,27,28,29,30], false)]
     fn case(#[case] stones: Vec<i32>, #[case] expected: bool) {
         let actual = Solution::can_cross(stones);
         assert_eq!(actual, expected);
