@@ -3,11 +3,10 @@
 
 #![allow(dead_code)]
 
-use std::{collections::VecDeque, mem};
+use std::collections::VecDeque;
 
 struct MyStack {
-    emptying_queue: VecDeque<i32>,
-    fill_queue: VecDeque<i32>,
+    queue: VecDeque<i32>,
     top: i32, // Only valid if queue is not empty
 }
 
@@ -18,32 +17,30 @@ struct MyStack {
 impl MyStack {
     fn new() -> Self {
         Self {
-            emptying_queue: Default::default(),
-            fill_queue: Default::default(),
+            queue: Default::default(),
             top: Default::default(),
         }
     }
 
     fn push(&mut self, x: i32) {
-        self.fill_queue.push_back(x);
+        self.queue.push_back(x);
         self.top = x;
     }
 
     fn pop(&mut self) -> i32 {
-        let n = self.fill_queue.len();
+        let n = self.queue.len();
         debug_assert!(n > 0);
         let mut result = Default::default();
         for i in 0..n {
-            let val = self.fill_queue.pop_front().unwrap();
+            let val = self.queue.pop_front().unwrap();
 
             if i < n - 1 {
                 self.top = val;
-                self.emptying_queue.push_back(val);
+                self.queue.push_back(val);
             } else {
                 result = val;
             }
         }
-        mem::swap(&mut self.emptying_queue, &mut self.fill_queue);
         result
     }
 
@@ -53,7 +50,7 @@ impl MyStack {
     }
 
     fn empty(&self) -> bool {
-        self.fill_queue.is_empty()
+        self.queue.is_empty()
     }
 }
 
