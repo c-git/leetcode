@@ -35,13 +35,11 @@ impl MyStack {
         let mut result = Default::default();
         for i in 0..n {
             let val = self.fill_queue.pop_front().unwrap();
-            self.emptying_queue.push_back(val);
 
-            if n > 1 && i == n - 2 {
+            if i < n - 1 {
                 self.top = val;
-            }
-
-            if i == n - 1 {
+                self.emptying_queue.push_back(val);
+            } else {
                 result = val;
             }
         }
@@ -81,6 +79,14 @@ mod tests {
         my_stack.push(2);
         assert_eq!(my_stack.top(), 2);
         assert_eq!(my_stack.pop(), 2);
-        assert!(!my_stack.empty()); // return False
+        assert!(!my_stack.empty());
+    }
+
+    #[test]
+    fn example12() {
+        let mut my_stack = MyStack::new();
+        my_stack.push(1);
+        assert_eq!(my_stack.pop(), 1);
+        assert!(my_stack.empty());
     }
 }
