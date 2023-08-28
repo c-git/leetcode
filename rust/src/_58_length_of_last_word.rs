@@ -21,13 +21,13 @@ impl Solution {
             .skip(word_end_from_back as usize)
         {
             if c == ' ' {
-                word_start = i as i32 + 1;
+                word_start = i as i32 - 1;
                 break;
             }
         }
 
         // answer is difference in value
-        word_start - word_end_from_back - 1
+        word_start - word_end_from_back + 1
     }
 }
 
@@ -45,6 +45,7 @@ mod tests {
     #[case("Hello World", 5)]
     #[case("   fly me   to   the moon  ", 4)]
     #[case("luffy is still joyboy", 6)]
+    #[case("a", 1)]
     fn case(#[case] s: String, #[case] expected: i32) {
         let actual = Solution::length_of_last_word(s);
         assert_eq!(actual, expected);
