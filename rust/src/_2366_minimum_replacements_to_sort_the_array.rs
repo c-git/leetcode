@@ -10,10 +10,12 @@ impl Solution {
                 let min_splits = num / max;
                 result += min_splits as i64;
                 if num % max != 0 {
-                    max = num / (min_splits + 1);
+                    max = num / (min_splits + 1); // Fixed this line after reading editorial
                 } else {
                     result -= 1;
                 }
+            } else {
+                max = num;
             }
         }
         result
@@ -31,6 +33,7 @@ mod tests {
     use rstest::rstest;
 
     #[rstest]
+    #[case(vec![19,7,2,24,11,16,1,11,23], 73)]
     #[case(vec![3,9,3], 2)]
     #[case(vec![1,2,3,4,5], 0)]
     #[case(vec![50,9,3], 18)]
