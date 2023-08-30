@@ -10,7 +10,7 @@ impl Solution {
                 let min_splits = num / max;
                 result += min_splits as i64;
                 if num % max != 0 {
-                    max = (num % max + max) / 2;
+                    max = num / (min_splits + 1);
                 } else {
                     result -= 1;
                 }
