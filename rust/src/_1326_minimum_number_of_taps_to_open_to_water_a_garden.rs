@@ -31,7 +31,15 @@ impl Solution {
         // Find minimal required ranges
         let mut current = *ranges.first()?; // If ranges is empty then no solution possible
         result = 1;
+        if current[0] > 0 {
+            // No ranges cover 0
+            return None;
+        }
         for range in ranges {
+            if current[1] >= n {
+                // All ranges already covered
+                return Some(result);
+            }
             match (range[0] == current[0], range[1] > current[1]) {
                 (true, true) => unreachable!(
                     "This should never happen because we sorted by reversing ending boundary"
@@ -70,6 +78,7 @@ mod tests {
     #[rstest]
     #[case(5, vec![3,4,1,1,0,0], 1)]
     #[case(3, vec![0,0,0,0], -1)]
+    #[case(8, vec![4,0,0,0,4,0,0,0,4], 1)]
     fn case(#[case] n: i32, #[case] ranges: Vec<i32>, #[case] expected: i32) {
         let actual = Solution::min_taps(n, ranges);
         assert_eq!(actual, expected);
