@@ -63,15 +63,11 @@ impl Solution {
                 }
                 (false, true, true) => {
                     // Covers more than current and starts after the previous so we need to keep the current to cover that partial range
-                    if range[0] > current[1] + 1 {
+                    if range[0] > current[1] {
                         // There is now a gap that cannot be covered
                         return None;
                     }
                     result += 1;
-                    debug_assert!(
-                        previously_covered < current[1],
-                        "Must be grater otherwise wouldn't have become current"
-                    );
                     previously_covered = current[1];
                     current = range;
                 }
@@ -109,6 +105,7 @@ mod tests {
     #[case(8, vec![4,0,0,0,4,0,0,0,4], 1)]
     #[case(9, vec![0,5,0,3,3,3,1,4,0,4], 2)]
     #[case(9, vec![3,0,0,0,0,0,0,0,0,4], -1)]
+    #[case(3, vec![1,0,0,1], -1)]
     fn case(#[case] n: i32, #[case] ranges: Vec<i32>, #[case] expected: i32) {
         let actual = Solution::min_taps(n, ranges);
         assert_eq!(actual, expected);
