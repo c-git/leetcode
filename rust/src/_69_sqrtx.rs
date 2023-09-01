@@ -3,6 +3,9 @@
 
 impl Solution {
     pub fn my_sqrt(x: i32) -> i32 {
+        // Drop x by 1 if it's the max, the answer is the same but the solution is easier
+        let x = if x == i32::MAX { x - 1 } else { x };
+
         if x <= 1 {
             return x;
         }
@@ -42,6 +45,8 @@ mod tests {
     #[case(625, 25)]
     #[case(1, 1)]
     #[case(2147395599, 46339)]
+    #[case(2147483647, 46340)]
+    #[case(i32::MAX, 46340)]
     fn case(#[case] x: i32, #[case] expected: i32) {
         let actual = Solution::my_sqrt(x);
         assert_eq!(actual, expected);
