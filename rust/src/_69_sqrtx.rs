@@ -3,6 +3,9 @@
 
 impl Solution {
     pub fn my_sqrt(x: i32) -> i32 {
+        if x <= 1 {
+            return x;
+        }
         let mut lower = 0;
         let mut upper = x / 2;
         while upper * upper > x {
@@ -37,6 +40,7 @@ mod tests {
     #[case(50, 7)]
     #[case(500, 22)]
     #[case(625, 25)]
+    #[case(1, 1)]
     fn case(#[case] x: i32, #[case] expected: i32) {
         let actual = Solution::my_sqrt(x);
         assert_eq!(actual, expected);
