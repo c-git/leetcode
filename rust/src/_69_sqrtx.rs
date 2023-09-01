@@ -8,9 +8,9 @@ impl Solution {
         }
         let mut lower = 0;
         let mut upper = x / 2;
-        while upper * upper > x {
+        while upper.saturating_mul(upper) > x {
             let mid = (lower + upper) / 2;
-            if mid * mid > x {
+            if mid.saturating_mul(mid) > x {
                 upper = mid;
             } else {
                 if lower == mid {
@@ -41,6 +41,7 @@ mod tests {
     #[case(500, 22)]
     #[case(625, 25)]
     #[case(1, 1)]
+    #[case(2147395599, 46339)]
     fn case(#[case] x: i32, #[case] expected: i32) {
         let actual = Solution::my_sqrt(x);
         assert_eq!(actual, expected);
