@@ -4,21 +4,24 @@
 use std::collections::{HashMap, HashSet};
 
 struct Trie {
+    id: usize,
     children: HashMap<char, Trie>,
     is_end_of_word: bool,
 }
 
 impl Trie {
-    fn new() -> Self {
+    fn new(id: usize) -> Self {
         Self {
+            id,
             children: Default::default(),
             is_end_of_word: Default::default(),
         }
     }
-    fn add_word(&mut self, word: &str) {
+    fn add_word(&mut self, word: &str, next_id: &mut usize) {
         let mut curr = self;
         for c in word.chars() {
-            curr = curr.children.entry(c).or_insert(Trie::new());
+            curr = curr.children.entry(c).or_insert(Trie::new(*next_id));
+            *next_id += 1;
         }
         curr.is_end_of_word = true;
     }
@@ -28,8 +31,12 @@ impl Solution {
     pub fn min_extra_char(s: String, dictionary: Vec<String>) -> i32 {
         let mut result = i32::MAX;
 
-        let mut full_trie = Trie::new();
-        dictionary.iter().for_each(|x| full_trie.add_word(x));
+        let mut next_id = 0usize;
+        let mut full_trie = Trie::new(next_id);
+        next_id += 1;
+        dictionary
+            .iter()
+            .for_each(|x| full_trie.add_word(x, &mut next_id));
 
         let s: Vec<char> = s.chars().collect();
         let n = s.len();
@@ -41,7 +48,7 @@ impl Solution {
             //    - unused holds how many letters have been skipped so far
             //    - letters_matched is how many letters have been matched so far in this current word
             //    - trie is the part of the try remaining after matching previous letters in s[..i]
-            let key = (idx, unused, is_at_top_of_trie);
+            let key = (idx, unused, is_at_top_of_trie, trie.id);
             if seen.contains(&key) {
                 continue;
             } else {
@@ -116,6 +123,7 @@ mod tests {
     #[case("eeeeee", vec!["e".into()], 0)]
     #[case("eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee", vec!["e".into()], 0)]
     #[case("tyepjjzouutdpglkwicituzpwgwtwrvuyodexpzivrfot", vec!["mbddl".into(),"zpwg".into(),"obkds".into(),"vmbyln".into(),"o".into(),"w".into(),"lkwic".into(),"rkbfvk".into(),"qdfvai".into(),"z".into(),"wtw".into(),"ou".into(),"tdpg".into(),"wa".into(),"lepgn".into(),"it".into(),"chks".into(),"zqev".into(),"bsoer".into(),"m".into(),"cvwzf".into(),"dexp".into(),"jz".into(),"szrt".into(),"yarce".into(),"vsnig".into(),"u".into(),"ot".into(),"rvu".into(),"tzps".into(),"mryosk".into(),"zlogj".into(),"tyep".into(),"q".into(),"gup".into(),"rf".into(),"j".into()], 3)]
+    #[case("tpqojlnhenbzmqkqnxohmzakm", vec!["enbzm".into(),"yy".into(),"xqnjw".into(),"cxwgv".into(),"q".into(),"ras".into(),"ezc".into(),"nt".into(),"eq".into(),"j".into(),"chfw".into(),"v".into(),"ebh".into(),"tvwk".into(),"we".into(),"xhk".into(),"bumlw".into(),"czgy".into(),"njrml".into(),"pl".into(),"cxg".into(),"ztg".into(),"mnvi".into(),"k".into(),"hslr".into(),"fwhrj".into(),"h".into(),"yqro".into(),"vpxyf".into(),"bps".into(),"nhuv".into(),"w".into(),"m".into(),"ln".into(),"nxoh".into(),"skiun".into(),"qnqc".into(),"wtrwp".into(),"hl".into(),"ydbv".into(),"cv".into(),"a".into(),"tpqoj".into(),"umrj".into(),"nq".into(),"xadnx".into(),"emwv".into(),"dmuuw".into()], 1)]
     fn case(#[case] s: String, #[case] dictionary: Vec<String>, #[case] expected: i32) {
         let actual = Solution::min_extra_char(s, dictionary);
         assert_eq!(actual, expected);
