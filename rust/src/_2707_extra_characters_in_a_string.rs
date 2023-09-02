@@ -1,7 +1,7 @@
 //! Solution for https://leetcode.com/problems/extra-characters-in-a-string
 //! 2707. Extra Characters in a String
 
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 
 struct Trie {
     children: HashMap<char, Trie>,
@@ -33,16 +33,22 @@ impl Solution {
 
         let s: Vec<char> = s.chars().collect();
         let n = s.len();
-        let mut stack = vec![(0, 0, 0, &full_trie)];
-        while let Some((idx, unused, letters_matched, trie)) = stack.pop() {
+        let mut seen = HashSet::new();
+        let mut stack = vec![(0, 0, true, &full_trie)];
+        while let Some((idx, unused, is_at_top_of_trie, trie)) = stack.pop() {
             // LI:
             //    - idx is a valid index into s
             //    - unused holds how many letters have been skipped so far
             //    - letters_matched is how many letters have been matched so far in this current word
             //    - trie is the part of the try remaining after matching previous letters in s[..i]
+            let key = (idx, unused, is_at_top_of_trie);
+            if seen.contains(&key) {
+                continue;
+            } else {
+                seen.insert(key);
+            }
 
             let is_last_letter = idx + 1 >= n;
-            let is_at_top_of_trie = letters_matched == 0;
 
             if is_at_top_of_trie {
                 // Consider the option of skipping this letter
@@ -51,7 +57,7 @@ impl Solution {
                     result = result.min(unused + 1);
                 } else {
                     // Try skipping and continuing
-                    stack.push((idx + 1, unused + 1, 0, &full_trie));
+                    stack.push((idx + 1, unused + 1, true, &full_trie));
                 }
             }
 
@@ -69,13 +75,13 @@ impl Solution {
                         // This is a word but there are more letters keep
                         // Both keep on trying to match
                         // and consider starting from the beginning again
-                        stack.push((idx + 1, unused, 0, &full_trie));
-                        stack.push((idx + 1, unused, letters_matched + 1, child));
+                        stack.push((idx + 1, unused, true, &full_trie));
+                        stack.push((idx + 1, unused, false, child));
                     }
                     (false, true) => (), // letters finished but not the end of a word, unusable path
                     (false, false) => {
                         // Not the end of a word, only option is to move forward
-                        stack.push((idx + 1, unused, letters_matched + 1, child));
+                        stack.push((idx + 1, unused, false, child));
                     }
                 }
             }
@@ -109,6 +115,7 @@ mod tests {
     #[case("e", vec!["a".into()], 1)]
     #[case("eeeeee", vec!["e".into()], 0)]
     #[case("eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee", vec!["e".into()], 0)]
+    #[case("tyepjjzouutdpglkwicituzpwgwtwrvuyodexpzivrfot", vec!["mbddl".into(),"zpwg".into(),"obkds".into(),"vmbyln".into(),"o".into(),"w".into(),"lkwic".into(),"rkbfvk".into(),"qdfvai".into(),"z".into(),"wtw".into(),"ou".into(),"tdpg".into(),"wa".into(),"lepgn".into(),"it".into(),"chks".into(),"zqev".into(),"bsoer".into(),"m".into(),"cvwzf".into(),"dexp".into(),"jz".into(),"szrt".into(),"yarce".into(),"vsnig".into(),"u".into(),"ot".into(),"rvu".into(),"tzps".into(),"mryosk".into(),"zlogj".into(),"tyep".into(),"q".into(),"gup".into(),"rf".into(),"j".into()], 3)]
     fn case(#[case] s: String, #[case] dictionary: Vec<String>, #[case] expected: i32) {
         let actual = Solution::min_extra_char(s, dictionary);
         assert_eq!(actual, expected);
