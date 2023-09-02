@@ -55,8 +55,8 @@ impl Solution {
                 }
             }
 
-            match trie.children.get(&s[idx]) {
-                Some(child) => match (child.is_end_of_word, is_last_letter) {
+            if let Some(child) = trie.children.get(&s[idx]) {
+                match (child.is_end_of_word, is_last_letter) {
                     (true, true) => {
                         // End of the input letters this is one way to use all the letters
                         if unused == 0 {
@@ -76,15 +76,6 @@ impl Solution {
                     (false, false) => {
                         // Not the end of a word, only option is to move forward
                         stack.push((idx + 1, unused, letters_matched + 1, child));
-                    }
-                },
-                None => {
-                    // Unable to match the next letter
-                    if is_last_letter {
-                        // One more letter that can't be used
-                        result = result.min(unused + 1);
-                    } else {
-                        // Failed path do nothing
                     }
                 }
             }
@@ -106,6 +97,8 @@ mod tests {
     #[rstest]
     #[case("leetscode", vec!["leet".into(),"code".into(),"leetcode".into()], 1)]
     #[case("sayhelloworld", vec!["hello".into(),"world".into()], 3)]
+    #[case("nwlztjn", vec!["jm".into(),"z".into(),"l".into(),"w".into()], 4)]
+    // #[case("nwlztjn", vec!["a".into(),"f".into(),"v".into(),"me".into(),"m".into(),"bv".into(),"g".into(),"ss".into(),"tu".into(),"jm".into(),"z".into(),"kg".into(),"l".into(),"go".into(),"cn".into(),"uj".into(),"kx".into(),"w".into(),"qz".into(),"e".into(),"ut".into(),"tf".into(),"zn".into(),"ha".into(),"ke".into(),"af".into(),"aj".into(),"ls".into(),"r".into(),"no".into(),"pm".into(),"qn".into(),"yw".into(),"cs".into(),"oz".into(),"b".into()], 4)]
     #[case("dwmodizxvvbosxxw", vec!["ox".into(),"lb".into(),"diz".into(),"gu".into(),"v".into(),"ksv".into(),"o".into(),"nuq".into(),"r".into(),"txhe".into(),"e".into(),"wmo".into(),"cehy".into(),"tskz".into(),"ds".into(),"kzbu".into()], 7)]
     #[case("leetsleet", vec!["leet".into()], 1)]
     #[case("leetleeleet", vec!["leet".into(), "lee".into()], 0)]
