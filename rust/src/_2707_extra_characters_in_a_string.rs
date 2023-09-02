@@ -44,9 +44,15 @@ impl Solution {
             let is_last_letter = idx + 1 >= n;
             let is_at_top_of_trie = letters_matched == 0;
 
-            if !is_last_letter && is_at_top_of_trie {
-                // Always consider the option of skipping when starting a new match
-                stack.push((idx + 1, unused + 1, 0, &full_trie));
+            if is_at_top_of_trie {
+                // Consider the option of skipping this letter
+                if is_last_letter {
+                    // Try just skipping as unused
+                    result = result.min(unused + 1);
+                } else {
+                    // Try skipping and continuing
+                    stack.push((idx + 1, unused + 1, 0, &full_trie));
+                }
             }
 
             match trie.children.get(&s[idx]) {
@@ -100,6 +106,7 @@ mod tests {
     #[rstest]
     #[case("leetscode", vec!["leet".into(),"code".into(),"leetcode".into()], 1)]
     #[case("sayhelloworld", vec!["hello".into(),"world".into()], 3)]
+    #[case("dwmodizxvvbosxxw", vec!["ox".into(),"lb".into(),"diz".into(),"gu".into(),"v".into(),"ksv".into(),"o".into(),"nuq".into(),"r".into(),"txhe".into(),"e".into(),"wmo".into(),"cehy".into(),"tskz".into(),"ds".into(),"kzbu".into()], 7)]
     #[case("leetsleet", vec!["leet".into()], 1)]
     #[case("leetleeleet", vec!["leet".into(), "lee".into()], 0)]
     #[case("leetleet", vec!["leet".into()], 0)]
