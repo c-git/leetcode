@@ -2,13 +2,16 @@
 //! 51. N-Queens
 
 // Source: https://leetcode.com/problems/n-queens/solutions/3459335/rust-recursive-backtracking-with-bitsets-beats-100/
-// Modified slightly for ease of readability
+// Modified for ease of readability and removal of redundancy
+// Removed row_bitset because it wasn't actually doing anything
+// The algorithm goes from the first row to the last and trying
+// to find a place to place a queen on each thus it will never
+// be on the same row
 
 struct Solver {
     result: Vec<Vec<String>>,
     board: Vec<String>,
     n: i32,
-    row_bitset: u32,
     col_bitset: u32,
     diag_sum_bitset: u32,
     diag_sub_bitset: u32,
@@ -21,7 +24,6 @@ impl Solver {
             result: Vec::new(),
             board: vec![".".repeat(n as usize); n as usize],
             n,
-            row_bitset: 0,
             col_bitset: 0,
             diag_sum_bitset: 0,
             diag_sub_bitset: 0,
@@ -29,9 +31,6 @@ impl Solver {
         }
     }
     fn can_be_queen(&self, row: i32, col: i32) -> bool {
-        if self.row_bitset & (1 << row) != 0 {
-            return false;
-        }
         if self.col_bitset & (1 << col) != 0 {
             return false;
         }
@@ -45,14 +44,12 @@ impl Solver {
     }
     fn set_elem(&mut self, row: i32, col: i32, c: u8) {
         if c == b'.' {
-            self.row_bitset &= !(1 << row);
             self.col_bitset &= !(1 << col);
             self.diag_sum_bitset &= !(1 << (row + col));
             self.diag_sub_bitset &= !(1 << (row - col + self.n));
             self.count -= 1;
         } else {
             debug_assert_eq!(c, b'Q');
-            self.row_bitset |= 1 << row;
             self.col_bitset |= 1 << col;
             self.diag_sum_bitset |= 1 << (row + col);
             self.diag_sub_bitset |= 1 << (row - col + self.n);
@@ -84,7 +81,6 @@ impl Solver {
             println!("{row}");
         }
         println!();
-        println!("row {:b}", self.row_bitset);
         println!("col {:b}", self.col_bitset);
         println!("sum {:b}", self.diag_sum_bitset);
         println!("sub {:b}", self.diag_sub_bitset);
