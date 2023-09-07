@@ -24,28 +24,37 @@ impl Solution {
         right: i32,
     ) -> Option<Box<ListNode>> {
         // Taken from https://leetcode.com/problems/reverse-linked-list-ii/solutions/4011862/92-40-two-pointers-stack-recursion/
+        println!("At start: {head:?} left: {left} right: {right}");
         let mut dummy = Some(Box::new(ListNode { val: 0, next: head }));
         let mut before = &mut dummy;
-        for _ in 1..left {
+        for i in 1..left {
+            println!("i={i} before = {before:?}");
             before = &mut before.as_mut()?.next;
         }
+        println!("After 1st loop. before: {before:?}");
 
         let mut node = before.as_mut()?.next.take();
         let mut node2 = node.as_mut()?.next.take();
+        println!("node: {node:?} node2: {node2:?}");
         for _ in left..right {
             let node3 = node2.as_mut()?.next.take();
+            println!("node: {node:?} node2: {node2:?} node3: {node3:?}");
             node2.as_mut()?.next = node;
             node = node2;
             node2 = node3;
         }
+        println!("After 2nd loop. node: {node:?} node2: {node2:?}");
 
         let mut rev_tail = &mut node;
         for _ in left..right {
+            println!("rev_tail: {rev_tail:?}");
             rev_tail = &mut rev_tail.as_mut()?.next;
         }
+        println!("After 3rd loop. rev_tail: {rev_tail:?} node2: {node2:?} ");
         rev_tail.as_mut()?.next = node2;
         before.as_mut()?.next = node;
 
+        println!("dummy: {dummy:?}");
         dummy.unwrap().next
     }
 }
