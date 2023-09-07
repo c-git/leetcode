@@ -19,34 +19,34 @@
 // }
 impl Solution {
     pub fn reverse_between(
-        mut head: Option<Box<ListNode>>,
+        head: Option<Box<ListNode>>,
         left: i32,
         right: i32,
     ) -> Option<Box<ListNode>> {
-        // Used a vec to simplify implementation got stuck walking the list mutably to be able to do the split
-        if left == right {
-            return head;
+        // Taken from https://leetcode.com/problems/reverse-linked-list-ii/solutions/4011862/92-40-two-pointers-stack-recursion/
+        let mut dummy = Some(Box::new(ListNode { val: 0, next: head }));
+        let mut before = &mut dummy;
+        for _ in 1..left {
+            before = &mut before.as_mut()?.next;
         }
 
-        let mut values = Vec::with_capacity(right as usize);
-        for _ in 1..=right {
-            values.push(head.as_ref().unwrap().val);
-            head = head.unwrap().next;
+        let mut node = before.as_mut()?.next.take();
+        let mut node2 = node.as_mut()?.next.take();
+        for _ in left..right {
+            let node3 = node2.as_mut()?.next.take();
+            node2.as_mut()?.next = node;
+            node = node2;
+            node2 = node3;
         }
 
-        // rebuild list
-        for idx in left - 1..right {
-            let mut node = ListNode::new(values[idx as usize]);
-            node.next = head;
-            head = Some(Box::new(node));
+        let mut rev_tail = &mut node;
+        for _ in left..right {
+            rev_tail = &mut rev_tail.as_mut()?.next;
         }
-        for idx in (0..left - 1).rev() {
-            let mut node = ListNode::new(values[idx as usize]);
-            node.next = head;
-            head = Some(Box::new(node));
-        }
+        rev_tail.as_mut()?.next = node2;
+        before.as_mut()?.next = node;
 
-        head
+        dummy.unwrap().next
     }
 }
 
