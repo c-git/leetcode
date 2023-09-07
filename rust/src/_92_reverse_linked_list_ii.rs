@@ -24,6 +24,7 @@ impl Solution {
         right: i32,
     ) -> Option<Box<ListNode>> {
         // Taken from https://leetcode.com/problems/reverse-linked-list-ii/solutions/4011862/92-40-two-pointers-stack-recursion/
+        // See prev commit that has debug lines to understand algorithm
         let mut dummy = Some(Box::new(ListNode { val: 0, next: head }));
         let mut before = &mut dummy;
         for _ in 1..left {
