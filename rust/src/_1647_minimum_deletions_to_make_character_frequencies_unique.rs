@@ -34,10 +34,12 @@ impl Solution {
             freq_dist.remove(&count);
             if excess >= 1 {
                 result += excess;
-                freq_dist
-                    .entry(count - 1)
-                    .and_modify(|x| *x += excess)
-                    .or_insert(excess);
+                if count > 1 {
+                    freq_dist
+                        .entry(count - 1)
+                        .and_modify(|x| *x += excess)
+                        .or_insert(excess);
+                }
             }
         }
 
