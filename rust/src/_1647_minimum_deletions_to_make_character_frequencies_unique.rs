@@ -23,6 +23,24 @@ impl Solution {
         }
 
         // Incrementally make the largest frequencies "good" by removing all but 1
+        loop {
+            let max_key = if let Some(max_key) = freq_dist.keys().last() {
+                *max_key
+            } else {
+                break;
+            };
+            let (count, multiplicity) = freq_dist.remove_entry(&max_key).unwrap();
+            let excess = multiplicity - 1;
+            freq_dist.remove(&count);
+            if excess >= 1 {
+                result += excess;
+                freq_dist
+                    .entry(count - 1)
+                    .and_modify(|x| *x += excess)
+                    .or_insert(excess);
+            }
+        }
+
         result
     }
 }
