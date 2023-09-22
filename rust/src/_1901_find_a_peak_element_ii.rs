@@ -75,7 +75,7 @@ impl Solution {
 
         let idx_to_check = idx_to_check as usize;
         if should_split_vertical {
-            if idx_to_check >= mat.len() {
+            if idx_to_check >= mat[0].len() {
                 return result;
             };
             result = (mat[bounds.top][idx_to_check], Some(bounds.top));
@@ -85,7 +85,7 @@ impl Solution {
                 }
             }
         } else {
-            if idx_to_check >= mat[0].len() {
+            if idx_to_check >= mat.len() {
                 return result;
             };
             result = (mat[idx_to_check][bounds.left], Some(bounds.left));
@@ -114,6 +114,7 @@ mod tests {
     #[case(vec![vec![10,20,15],vec![21,30,14],vec![7,16,32]])]
     #[case(vec![vec![1,4],vec![4,2]])]
     #[case(vec![vec![10,20,15],vec![21,30,20],vec![20,16,32]])]
+    #[case(vec![vec![25,37,23,37,19],vec![45,19,2,43,26],vec![18,1,37,44,50]])]
     fn case(#[case] mat: Vec<Vec<i32>>) {
         // Custom validator written as multiple answers can be the correct answer and
         let input = mat.clone();
