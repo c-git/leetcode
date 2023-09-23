@@ -9,8 +9,12 @@ impl Solution {
         for (idx_curr, word) in words.iter().enumerate().skip(1) {
             let curr_len = word.len();
             for idx_prev in (0..idx_curr).rev() {
-                if words[idx_prev].len() != curr_len - 1 {
-                    break;
+                match (words[idx_prev].len(), curr_len) {
+                    (prev, curr) if prev == curr => continue,
+                    (prev, curr) if prev == curr-1 => (),
+                    (prev, curr) if prev < curr-1 => break,
+                    _ => unreachable!("Should be walking backward through sorted values all cases should be covered"),
+                    
                 }
                 if Self::is_predecessor(&words[idx_prev], word) {
                     let new_chain_len = dp[idx_prev] + 1;
@@ -66,6 +70,7 @@ mod tests {
     #[case(vec!["a".into(),"b".into(),"ba".into(),"bca".into(),"bda".into(),"bdca".into()], 4)]
     #[case(vec!["xbc".into(),"pcxbcf".into(),"xb".into(),"cxbc".into(),"pcxbc".into()], 5)]
     #[case(vec!["abcd".into(),"dbqca".into()], 1)]
+    #[case(vec!["bdca".into(),"bda".into(),"ca".into(),"dca".into(),"a".into()], 4)]
     fn case(#[case] words: Vec<String>, #[case] expected: i32) {
         let actual = Solution::longest_str_chain(words);
         assert_eq!(actual, expected);
