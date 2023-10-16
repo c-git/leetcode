@@ -2,49 +2,55 @@
 //! 57. Insert Interval
 
 enum MergeStatus {
+    /// Before starting to merge
     Before,
+    /// During the process of merging
     During([i32; 2]),
-    After,
+    /// New point either merged already inserted
+    Completed,
 }
 
 impl Solution {
     pub fn insert(intervals: Vec<Vec<i32>>, new_interval: Vec<i32>) -> Vec<Vec<i32>> {
         let mut result = Vec::with_capacity(intervals.len() + 1);
         let mut merge_status = MergeStatus::Before;
-        for interval in intervals {
+        for current_interval in intervals {
             match merge_status {
                 MergeStatus::Before => {
-                    if new_interval[1] < interval[0] {
-                        // This interval just fits here te current one starts are the one to insert starts
+                    if new_interval[1] < current_interval[0] {
+                        // The new_interval just fits here before current_interval starts
                         result.push(new_interval.clone());
-                        result.push(interval);
-                        merge_status = MergeStatus::After;
-                    } else if new_interval[0] <= interval[1] {
+                        result.push(current_interval);
+                        merge_status = MergeStatus::Completed;
+                    } else if new_interval[0] <= current_interval[1] {
+                        // The new_interval and the current_interval overlap, start the merge
                         merge_status = MergeStatus::During([
-                            new_interval[0].min(interval[0]),
-                            interval[1].max(new_interval[1]),
+                            new_interval[0].min(current_interval[0]),
+                            current_interval[1].max(new_interval[1]),
                         ]);
                     } else {
-                        result.push(interval);
+                        result.push(current_interval);
                     }
                 }
                 MergeStatus::During(current) => {
-                    if interval[0] <= current[1] {
+                    if current_interval[0] <= current[1] {
+                        // Another overlap detected, continue merging
                         merge_status =
-                            MergeStatus::During([current[0], current[1].max(interval[1])]);
+                            MergeStatus::During([current[0], current[1].max(current_interval[1])]);
                     } else {
+                        // No more overlap insert the merged one and then the current_interval
                         result.push(current.to_vec());
-                        result.push(interval);
-                        merge_status = MergeStatus::After;
+                        result.push(current_interval);
+                        merge_status = MergeStatus::Completed;
                     }
                 }
-                MergeStatus::After => result.push(interval),
+                MergeStatus::Completed => result.push(current_interval),
             }
         }
         match merge_status {
             MergeStatus::Before => result.push(new_interval),
             MergeStatus::During(merged_interval) => result.push(merged_interval.to_vec()),
-            MergeStatus::After => {}
+            MergeStatus::Completed => {}
         }
 
         result
