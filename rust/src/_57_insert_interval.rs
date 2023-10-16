@@ -2,7 +2,7 @@
 //! 57. Insert Interval
 
 enum MergeStatus {
-    Before(i32),
+    Before,
     During([i32; 2]),
     After,
 }
@@ -10,13 +10,18 @@ enum MergeStatus {
 impl Solution {
     pub fn insert(intervals: Vec<Vec<i32>>, new_interval: Vec<i32>) -> Vec<Vec<i32>> {
         let mut result = Vec::with_capacity(intervals.len() + 1);
-        let mut merge_status = MergeStatus::Before(new_interval[0]);
+        let mut merge_status = MergeStatus::Before;
         for interval in intervals {
             match merge_status {
-                MergeStatus::Before(start) => {
-                    if start <= interval[1] {
+                MergeStatus::Before => {
+                    if new_interval[1] < interval[0] {
+                        // This interval just fits here te current one starts are the one to insert starts
+                        result.push(new_interval.clone());
+                        result.push(interval);
+                        merge_status = MergeStatus::After;
+                    } else if new_interval[0] <= interval[1] {
                         merge_status = MergeStatus::During([
-                            start.min(interval[0]),
+                            new_interval[0].min(interval[0]),
                             interval[1].max(new_interval[1]),
                         ]);
                     } else {
@@ -37,7 +42,7 @@ impl Solution {
             }
         }
         match merge_status {
-            MergeStatus::Before(_) => result.push(new_interval),
+            MergeStatus::Before => result.push(new_interval),
             MergeStatus::During(merged_interval) => result.push(merged_interval.to_vec()),
             MergeStatus::After => {}
         }
@@ -59,6 +64,7 @@ mod tests {
     #[rstest]
     #[case(vec![vec![1,3],vec![6,9]], vec![2,5], vec![vec![1,5],vec![6,9]])]
     #[case(vec![vec![1,2],vec![3,5],vec![6,7],vec![8,10],vec![12,16]], vec![4,8], vec![vec![1,2],vec![3,10],vec![12,16]])]
+    #[case(vec![vec![1,5]], vec![0,0], vec![vec![0,0],vec![1,5]])]
     fn case(
         #[case] intervals: Vec<Vec<i32>>,
         #[case] new_interval: Vec<i32>,
