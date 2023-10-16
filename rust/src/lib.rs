@@ -5,3 +5,4 @@
 // stubs for new problems. Will update readme and notes here after cargo leet stabilizes a bit. Feel free
 // to reach out if you want to make use of my setup before I document it. (Opening an issue on github is a
 // fine way to get in touch)
+pub mod _57_insert_interval;

@@ -32,14 +32,14 @@ impl Solution {
                         result.push(current_interval);
                     }
                 }
-                MergeStatus::During(current) => {
-                    if current_interval[0] <= current[1] {
+                MergeStatus::During(merging) => {
+                    if current_interval[0] <= merging[1] {
                         // Another overlap detected, continue merging
                         merge_status =
-                            MergeStatus::During([current[0], current[1].max(current_interval[1])]);
+                            MergeStatus::During([merging[0], merging[1].max(current_interval[1])]);
                     } else {
                         // No more overlap insert the merged one and then the current_interval
-                        result.push(current.to_vec());
+                        result.push(merging.to_vec());
                         result.push(current_interval);
                         merge_status = MergeStatus::Completed;
                     }
