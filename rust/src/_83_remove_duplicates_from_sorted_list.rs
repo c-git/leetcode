@@ -19,23 +19,20 @@
 // }
 impl Solution {
     pub fn delete_duplicates(mut head: Option<Box<ListNode>>) -> Option<Box<ListNode>> {
+        head.as_ref()?; // Exits early if head is none
+
         let mut current = &mut head;
-        while let Some(node) = current {
-            let next_val = node.as_mut().next.as_mut().map(|x| x.val);
-            if let Some(val) = next_val {
-                if node.as_ref().val == val {
-                    // Same value skip next node
-                    node.next = node
-                        .as_mut()
-                        .next
-                        .as_mut()
-                        .expect("Should only have value if it exists")
-                        .as_mut()
-                        .next
-                        .take();
-                }
+        let mut last_val = current.as_mut().unwrap().val;
+        current = &mut current.as_mut().unwrap().next;
+        while current.is_some() {
+            let this_value = current.as_ref().unwrap().as_ref().val;
+            if this_value == last_val {
+                // Same value skip next node
+                *current = current.as_mut().unwrap().as_mut().next.take();
+            } else {
+                current = &mut current.as_mut().unwrap().as_mut().next;
             }
-            current = &mut node.as_mut().next;
+            last_val = this_value;
         }
         head
     }
@@ -56,6 +53,7 @@ mod tests {
     #[rstest]
     #[case(ListHead::from(vec![1,1,2]).into(), ListHead::from(vec![1,2]).into())]
     #[case(ListHead::from(vec![1,1,2,3,3]).into(), ListHead::from(vec![1,2,3]).into())]
+    #[case(ListHead::from(vec![1,1,1]).into(), ListHead::from(vec![1]).into())]
     fn case(#[case] head: Option<Box<ListNode>>, #[case] expected: Option<Box<ListNode>>) {
         let actual = Solution::delete_duplicates(head);
         assert_eq!(actual, expected);
