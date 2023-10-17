@@ -19,23 +19,25 @@
 // }
 impl Solution {
     pub fn delete_duplicates(mut head: Option<Box<ListNode>>) -> Option<Box<ListNode>> {
-        let mut result: Option<Box<ListNode>> = None;
-        let mut tail = &mut result;
-        while let Some(mut node) = head {
-            head = node.next.take();
-            let last_value = tail.as_ref().map(|last_node| last_node.as_ref().val);
-            match last_value {
-                Some(val) if val != node.val => {
-                    tail.as_mut()
-                        .expect("Should only have value if tail was some")
-                        .next = Some(node);
-                    tail = &mut tail.as_mut().unwrap().next;
+        let mut current = &mut head;
+        while let Some(node) = current {
+            let next_val = node.as_mut().next.as_mut().map(|x| x.val);
+            if let Some(val) = next_val {
+                if node.as_ref().val == val {
+                    // Same value skip next node
+                    node.next = node
+                        .as_mut()
+                        .next
+                        .as_mut()
+                        .expect("Should only have value if it exists")
+                        .as_mut()
+                        .next
+                        .take();
                 }
-                Some(_) => {} // Drop value as it's same as the previous
-                None => *tail = Some(node),
             }
+            current = &mut node.as_mut().next;
         }
-        result
+        head
     }
 }
 
