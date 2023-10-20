@@ -11,6 +11,7 @@ pub struct NestedIterator {
  * If you need a mutable reference, change it to `&mut self` instead.
  */
 impl NestedIterator {
+    // Simplified using https://leetcode.com/problems/flatten-nested-list-iterator/solutions/4187840/95-83-recursive-flattening-stack/?envType=daily-question&envId=2023-10-20
     pub fn new(nested_list: Vec<NestedInteger>) -> Self {
         let mut list = vec![];
         Self::get_values(nested_list, &mut list);
@@ -25,48 +26,10 @@ impl NestedIterator {
     }
 
     fn get_values(nested_list: Vec<NestedInteger>, result: &mut Vec<i32>) {
-        let mut pending: Vec<Vec<usize>> = nested_list
-            .iter()
-            .enumerate()
-            .rev()
-            .map(|(i, _)| vec![i])
-            .collect();
-        while let Some(mut path) = pending.pop() {
-            debug_assert!(
-                !path.is_empty(),
-                "There should not be empty vectors in the pending list"
-            );
-
-            let mut element = &nested_list[path[0]];
-
-            for (path_idx, &list_idx) in path.iter().enumerate().skip(1) {
-                let is_last = path_idx == path.len() - 1;
-                element = match element {
-                    NestedInteger::Int(_) => {
-                        unreachable!("Everything but the last must be a List")
-                    }
-                    NestedInteger::List(inner) => {
-                        if is_last && list_idx < inner.len() - 1 {
-                            // Queue up next item to be checked
-                            let mut new_path = path.clone();
-                            *new_path.last_mut().unwrap() += 1;
-                            pending.push(new_path);
-                        }
-
-                        // Return next item in path
-                        &inner[list_idx]
-                    }
-                }
-            }
-
-            match element {
-                NestedInteger::Int(val) => result.push(*val),
-                NestedInteger::List(inner) => {
-                    if !inner.is_empty() {
-                        path.push(0);
-                        pending.push(path);
-                    }
-                }
+        for item in nested_list {
+            match item {
+                NestedInteger::Int(val) => result.push(val),
+                NestedInteger::List(inner) => Self::get_values(inner, result),
             }
         }
     }
