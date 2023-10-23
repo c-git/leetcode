@@ -3,7 +3,10 @@
 
 impl Solution {
     pub fn is_power_of_four(mut n: i32) -> bool {
-        while n >= 4 && n % 4 == 0 {
+        if n.count_ones() != 1 {
+            return false;
+        }
+        while n >= 4 {
             n >>= 2;
         }
         n == 1
