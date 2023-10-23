@@ -2,14 +2,14 @@
 //! 342. Power of Four
 
 impl Solution {
-    pub fn is_power_of_four(mut n: i32) -> bool {
+    pub fn is_power_of_four(n: i32) -> bool {
+        // Realized could just count the 0's to see if the 1 is in an odd position from
+        // https://leetcode.com/problems/power-of-four/solutions/4197440/100-power-of-two-check-masking/
+        // Knew I wanted to check where the one was but ignored the fact that directly says how many zeros
         if n.count_ones() != 1 {
             return false;
         }
-        while n >= 4 {
-            n >>= 2;
-        }
-        n == 1
+        n.count_zeros() % 2 == 1
     }
 }
 
