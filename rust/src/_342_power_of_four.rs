@@ -6,10 +6,7 @@ impl Solution {
         // Realized could just count the 0's to see if the 1 is in an odd position from
         // https://leetcode.com/problems/power-of-four/solutions/4197440/100-power-of-two-check-masking/
         // Knew I wanted to check where the one was but ignored the fact that directly says how many zeros
-        if n.count_ones() != 1 {
-            return false;
-        }
-        n.count_zeros() % 2 == 1
+        n > 0 && n.count_ones() == 1 && n.count_zeros() % 2 == 1
     }
 }
 
