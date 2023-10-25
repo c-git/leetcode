@@ -3,24 +3,17 @@
 
 impl Solution {
     pub fn kth_grammar(n: i32, k: i32) -> i32 {
-        let cap = 2usize.pow(n as u32);
-        let mut row = Vec::with_capacity(cap);
-        row.push(0);
-        for _ in 2..=n {
-            let curr_size = row.len();
-            for i in 0..curr_size {
-                match row[i] {
-                    0 => {
-                        row.push(1);
-                    }
-                    1 => {
-                        row.push(0);
-                    }
-                    _ => unreachable!(),
-                }
-            }
+        // Based on Beixuan's solution
+        if n == 1 {
+            debug_assert!(k == 1);
+            return 0;
         }
-        row[k as usize - 1]
+        let parent = Self::kth_grammar(n - 1, (k + 1) / 2);
+        if k % 2 == 1 {
+            parent
+        } else {
+            1 - parent
+        }
     }
 }
 
