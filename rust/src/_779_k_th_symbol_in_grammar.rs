@@ -4,28 +4,23 @@
 impl Solution {
     pub fn kth_grammar(n: i32, k: i32) -> i32 {
         let cap = 2usize.pow(n as u32);
-        let mut last_row = Vec::with_capacity(cap);
-        let mut new_row = Vec::with_capacity(cap);
-        last_row.push(0);
+        let mut row = Vec::with_capacity(cap);
+        row.push(0);
         for _ in 2..=n {
-            // println!("\n{last_row:?}");
-            for element in last_row.iter() {
-                match element {
+            let curr_size = row.len();
+            for i in 0..curr_size {
+                match row[i] {
                     0 => {
-                        new_row.push(0);
-                        new_row.push(1);
+                        row.push(1);
                     }
                     1 => {
-                        new_row.push(1);
-                        new_row.push(0);
+                        row.push(0);
                     }
                     _ => unreachable!(),
                 }
             }
-            last_row.clear();
-            std::mem::swap(&mut last_row, &mut new_row);
         }
-        last_row[k as usize - 1]
+        row[k as usize - 1]
     }
 }
 
