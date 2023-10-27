@@ -32,7 +32,8 @@ impl Solution {
             }
 
             if i + P[i] > R {
-                (C, R) = (i, i + P[i]);
+                C = i;
+                R = i + P[i];
             }
         }
 
