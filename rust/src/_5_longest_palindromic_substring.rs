@@ -2,37 +2,42 @@
 //! 5. Longest Palindromic Substring
 
 impl Solution {
+    #[allow(non_snake_case)]
     pub fn longest_palindrome(s: String) -> String {
-        // The cases didn't seem to be able to build upon each other so read the editorial
-        // and decided to use the expand from all possible centers solution as it's simple
-        // and not slower than the best alternative except for Manacher's Algorithm
-        if cfg!(debug_assertions) {
-            println!("{s}");
-        }
-        let s = s.chars().collect::<Vec<char>>();
-        let mut start = 0;
-        let mut longest = 0;
-        for i in 0..s.len() {
-            let len1 = Self::expand_around_center(&s[..], i, i);
-            let len2 = Self::expand_around_center(&s[..], i, i + 1);
-            let len = len1.max(len2);
-            if len > longest {
-                start = i - (len - 1) / 2;
-                longest = len;
+        // Implement Manacher's Algorithm based on https://leetcode.com/problems/longest-palindromic-substring/solutions/4212241/98-55-manacher-s-algorithm/
+        // See previous commit for simpler solution of expanding around each center
+        let mut T = Vec::with_capacity(s.len() * 2 + 3);
+        T.push('^');
+        T.push('#');
+        s.chars().for_each(|c| {
+            T.push(c);
+            T.push('#')
+        });
+        T.push('$');
+
+        let n = T.len();
+        let mut P = vec![0; n];
+        let (mut C, mut R) = (0, 0);
+
+        for i in 1..n - 1 {
+            P[i] = if R > i {
+                #[allow(arithmetic_overflow)]
+                // Won't overflow cuz we only go into this branch if R > i
+                std::cmp::min(R - i, P[2 * C - 1])
+            } else {
+                0
+            };
+            while T[i + 1 + P[i]] == T[i - 1 - P[i]] {
+                P[i] += 1;
+            }
+
+            if i + P[i] > R {
+                (C, R) = (i, i + P[i]);
             }
         }
-        s.iter().skip(start).take(longest).collect()
-    }
 
-    fn expand_around_center(s: &[char], left: usize, right: usize) -> usize {
-        let mut left = left as i32;
-        let mut right = right as i32;
-        let n = s.len() as i32;
-        while left >= 0 && right < n && s[left as usize] == s[right as usize] {
-            left -= 1;
-            right += 1;
-        }
-        (right - left - 1) as usize
+        let (max_len, center_index) = P.iter().enumerate().map(|(i, x)| (x, i)).max().unwrap();
+        s[(center_index - max_len) / 2..(center_index + max_len) / 2].into()
     }
 }
 
