@@ -33,10 +33,28 @@ impl Solution {
     }
 }
 
-struct Solution;
+// << ---------------- Code below here is only for local use ---------------- >>
+
+pub struct Solution;
+
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    use rstest::rstest;
+
+    #[rstest]
+    #[case("babad", "bab")]
+    #[case("cbbd", "bb")]
+    #[case("ccc", "ccc")]
+    #[case("adcbaabcdf", "dcbaabcd")]
+    #[case("adcbabcdf", "dcbabcd")]
+    #[case("dcbabcd", "dcbabcd")]
+    #[case("bananas", "anana")]
+    fn case(#[case] s: String, #[case] expected: String) {
+        let actual = Solution::longest_palindrome(s.clone());
+        evaluator(&s, &actual, &expected);
+    }
 
     fn evaluator(input: &str, actual: &str, expected: &str) {
         if actual == expected
@@ -62,69 +80,5 @@ mod tests {
             }
         }
         true
-    }
-
-    #[test]
-    fn case1() {
-        let input = "babad".to_string();
-        let expected = "bab";
-        let actual = Solution::longest_palindrome(input.clone());
-        evaluator(&input, &actual, expected);
-    }
-
-    #[test]
-    fn case2() {
-        let input = "cbbd".to_string();
-        let expected = "bb";
-        let actual = Solution::longest_palindrome(input.clone());
-        evaluator(&input, &actual, expected);
-    }
-
-    #[test]
-    fn case3() {
-        let input = "ccc".to_string();
-        let expected = "ccc";
-        let actual = Solution::longest_palindrome(input.clone());
-        evaluator(&input, &actual, expected);
-    }
-
-    #[test]
-    fn case4() {
-        let input = "adcbaabcdf".to_string();
-        let expected = "dcbaabcd";
-        let actual = Solution::longest_palindrome(input.clone());
-        evaluator(&input, &actual, expected);
-    }
-
-    #[test]
-    fn case5() {
-        let input = "adcbabcdf".to_string();
-        let expected = "dcbabcd";
-        let actual = Solution::longest_palindrome(input.clone());
-        evaluator(&input, &actual, expected);
-    }
-
-    #[test]
-    fn case6() {
-        let input = "dcbabcd".to_string();
-        let expected = "dcbabcd";
-        let actual = Solution::longest_palindrome(input.clone());
-        evaluator(&input, &actual, expected);
-    }
-
-    #[test]
-    fn case7() {
-        let input = "aaaaaaa".to_string();
-        let expected = "aaaaaaa";
-        let actual = Solution::longest_palindrome(input.clone());
-        evaluator(&input, &actual, expected);
-    }
-
-    #[test]
-    fn case8() {
-        let input = "bananas".to_string();
-        let expected = "anana";
-        let actual = Solution::longest_palindrome(input.clone());
-        evaluator(&input, &actual, expected);
     }
 }
