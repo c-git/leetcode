@@ -21,9 +21,7 @@ impl Solution {
 
         for i in 1..n - 1 {
             P[i] = if R > i {
-                #[allow(arithmetic_overflow)]
-                // Won't overflow cuz we only go into this branch if R > i
-                std::cmp::min(R - i, P[2 * C - 1])
+                std::cmp::min(R - i, P[2 * C - i])
             } else {
                 0
             };
