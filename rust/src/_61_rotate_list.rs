@@ -32,17 +32,18 @@ impl Solution {
         }
 
         // Calculate how much we actually need to rotate
-        let mut shift = n - (k % n);
-        if shift == 0 {
+        let distance_from_front = k % n;
+        if distance_from_front == 0 {
             return head;
         }
+        let mut distance_from_back = n - distance_from_front;
 
         // Find new head for the list
         let mut new_head = &mut head;
         while let Some(node) = new_head {
             new_head = &mut node.as_mut().next;
-            shift -= 1;
-            if shift == 0 {
+            distance_from_back -= 1;
+            if distance_from_back == 0 {
                 break;
             }
         }
@@ -83,6 +84,7 @@ mod tests {
     #[rstest]
     #[case(ListHead::from(vec![1,2,3,4,5]).into(), 2, ListHead::from(vec![4,5,1,2,3]).into())]
     #[case(ListHead::from(vec![0,1,2]).into(), 4, ListHead::from(vec![2,0,1]).into())]
+    #[case(ListHead::from(vec![1]).into(), 1, ListHead::from(vec![1]).into())]
     fn case(
         #[case] head: Option<Box<ListNode>>,
         #[case] k: i32,
