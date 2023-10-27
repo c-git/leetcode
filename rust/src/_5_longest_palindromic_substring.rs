@@ -1,3 +1,6 @@
+//! Solution for https://leetcode.com/problems/longest-palindromic-substring
+//! 5. Longest Palindromic Substring
+
 impl Solution {
     pub fn longest_palindrome(s: String) -> String {
         // The cases didn't seem to be able to build upon each other so read the editorial
