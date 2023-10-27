@@ -60,6 +60,7 @@ mod tests {
     #[case("adcbabcdf", "dcbabcd")]
     #[case("dcbabcd", "dcbabcd")]
     #[case("bananas", "anana")]
+    #[case("abb", "bb")]
     fn case(#[case] s: String, #[case] expected: String) {
         let actual = Solution::longest_palindrome(s.clone());
         evaluator(&s, &actual, &expected);
