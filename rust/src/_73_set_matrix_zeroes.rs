@@ -16,7 +16,7 @@ impl Solution {
         let row_count = matrix.len();
         let col_count = matrix[0].len();
 
-        for row in 0..row_count {
+        for row in 1..row_count {
             for col in 0..col_count {
                 if matrix[row][col] == 0 {
                     matrix[row][0] = 0; // Set row to be zeroed
@@ -57,6 +57,7 @@ mod tests {
     #[case(vec![vec![1,1,1],vec![1,0,1],vec![1,1,1]], vec![vec![1,0,1],vec![0,0,0],vec![1,0,1]])]
     #[case(vec![vec![0,1,2,0],vec![3,4,5,2],vec![1,3,1,5]], vec![vec![0,0,0,0],vec![0,4,5,0],vec![0,3,1,0]])]
     #[case(vec![vec![1],vec![0]], vec![vec![0],vec![0]])]
+    #[case(vec![vec![-4,-2147483648,6,-7,0],vec![-8,6,-8,-6,0],vec![2147483647,2,-9,-6,-10]], vec![vec![0,0,0,0,0],vec![0,0,0,0,0],vec![2147483647,2,-9,-6,0]])]
     fn case(#[case] mut matrix: Vec<Vec<i32>>, #[case] expected: Vec<Vec<i32>>) {
         Solution::set_zeroes(&mut matrix);
         assert_eq!(matrix, expected);
