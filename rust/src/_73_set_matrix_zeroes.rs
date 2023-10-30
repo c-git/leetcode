@@ -1,33 +1,44 @@
 //! Solution for https://leetcode.com/problems/set-matrix-zeroes
 //! 73. Set Matrix Zeroes
 
-use std::collections::BTreeSet;
-
+#[allow(clippy::needless_range_loop)]
 impl Solution {
     pub fn set_zeroes(matrix: &mut Vec<Vec<i32>>) {
+        // Source: https://www.youtube.com/watch?v=T41rL0L3Pnw
+        // Constant space solution
+        // Solution idea.
+        //      - Use first row as indicator for columns to 0
+        //      - Use first column (less top cell) as indicator for rows to 0
+        //      - Track bool to see if first row should be zeroed
+
+        let should_0_first_row = matrix[0].iter().any(|&x| x == 0);
+
         let row_count = matrix.len();
         let col_count = matrix[0].len();
-        let mut rows_to_0: BTreeSet<usize> = BTreeSet::new();
-        let mut cols_to_0: BTreeSet<usize> = BTreeSet::new();
-        for (idx_row, row_values) in matrix.iter().enumerate() {
-            for (idx_col, cell_value) in row_values.iter().enumerate() {
-                if *cell_value == 0 {
-                    rows_to_0.insert(idx_row);
-                    cols_to_0.insert(idx_col);
+
+        for row in 1..row_count {
+            for col in 1..col_count {
+                if matrix[row][col] == 0 {
+                    matrix[row][0] = 0; // Set row to be zeroed
+                    matrix[0][col] = 0; // Set col to be zeroed
                 }
             }
         }
 
-        for row in rows_to_0 {
-            for col in 0..col_count {
-                matrix[row][col] = 0;
+        for row in 1..row_count {
+            if matrix[row][0] == 0 {
+                // row marked to be zeroed, set all values to 0
+                matrix[row].iter_mut().for_each(|x| *x = 0);
             }
         }
-        for col in cols_to_0 {
-            #[allow(clippy::needless_range_loop)]
-            for row in 0..row_count {
-                matrix[row][col] = 0;
+        for col in 0..col_count {
+            if matrix[0][col] == 0 {
+                // col marked to be zeroed, set all values to 0
+                matrix.iter_mut().for_each(|row_values| row_values[col] = 0);
             }
+        }
+        if should_0_first_row {
+            matrix[0].iter_mut().for_each(|x| *x = 0);
         }
     }
 }
