@@ -1,9 +1,21 @@
 //! Solution for https://leetcode.com/problems/two-sum
 //! 1. Two Sum
 
+use std::collections::HashMap;
+
 impl Solution {
     pub fn two_sum(nums: Vec<i32>, target: i32) -> Vec<i32> {
-        todo!("Fill in body")
+        let mut wanted = HashMap::new();
+        for (i, num) in nums.into_iter().enumerate() {
+            let i = i as i32;
+            let diff = target - num;
+            if let Some(other) = wanted.get(&diff) {
+                // We've seen that number we need before
+                return vec![*other, i];
+            }
+            wanted.insert(num, i); // Store this as a possibility
+        }
+        unreachable!("Problem guarantees a solution exists")
     }
 }
 
