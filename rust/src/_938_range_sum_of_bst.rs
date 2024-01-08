@@ -30,8 +30,16 @@ impl Solution {
                 let node = ref_cell.into_inner();
                 let TreeNode { val, left, right } = node;
                 (if val >= low && val <= high { val } else { 0 })
-                    + Self::range_sum_bst(left, low, high)
-                    + Self::range_sum_bst(right, low, high)
+                    + if val >= low {
+                        Self::range_sum_bst(left, low, high)
+                    } else {
+                        0
+                    }
+                    + if val <= high {
+                        Self::range_sum_bst(right, low, high)
+                    } else {
+                        0
+                    }
             }
             None => 0,
         }
