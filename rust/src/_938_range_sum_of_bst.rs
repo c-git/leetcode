@@ -25,12 +25,13 @@ impl Solution {
     pub fn range_sum_bst(root: Option<Rc<RefCell<TreeNode>>>, low: i32, high: i32) -> i32 {
         match root {
             Some(root) => {
-                (if root.borrow().val >= low && root.borrow().val <= high {
-                    root.borrow().val
-                } else {
-                    0
-                }) + Self::range_sum_bst(root.borrow().left.clone(), low, high)
-                    + Self::range_sum_bst(root.borrow().right.clone(), low, high)
+                let ref_cell = Rc::into_inner(root)
+                    .expect("We should only have one as we started from the root");
+                let node = ref_cell.into_inner();
+                let TreeNode { val, left, right } = node;
+                (if val >= low && val <= high { val } else { 0 })
+                    + Self::range_sum_bst(left, low, high)
+                    + Self::range_sum_bst(right, low, high)
             }
             None => 0,
         }
