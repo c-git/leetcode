@@ -56,7 +56,7 @@ impl Solution {
                 match (left.time, right.time) {
                 (None, None) => {
                     debug_assert!(node.val == start, "This case should only happen when we just found the start value");
-                    Some(0)
+                    Some(height-1) // Minus 1 because this node starts off infected
                 }, 
                 (None, Some(x)) => Some(x.max(left.height)+1),
                 (Some(x), None) => Some(x.max(right.height)+1),
@@ -95,6 +95,7 @@ mod tests {
     #[rstest]
     #[case(TreeRoot::from("[1,5,3,null,4,10,6,9,2]").into(), 3, 4)]
     #[case(TreeRoot::from("[1]").into(), 1, 0)]
+    #[case(TreeRoot::from("[1,2,null,3,null,4,null,5]").into(), 1, 4)]
     fn case(
         #[case] root: Option<Rc<RefCell<TreeNode>>>,
         #[case] start: i32,
