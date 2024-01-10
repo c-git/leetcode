@@ -58,8 +58,8 @@ impl Solution {
                     debug_assert!(node.val == start, "This case should only happen when we just found the start value");
                     Some(height-1) // Minus 1 because this node starts off infected
                 }, 
-                (None, Some(x)) => Some(x.max(left.height)+1),
-                (Some(x), None) => Some(x.max(right.height)+1),
+                (None, Some(x)) => Some(x.max(left.height+1).max(right.start_height_from_top.expect("If left time set so should start height"))),
+                (Some(x), None) => Some(x.max(right.height+1).max(left.start_height_from_top.expect("If left time set so should start height"))),
                 (Some(_), Some(_)) => unreachable!("Both sides should not have a time because time is only present when start is found"),
             }
             } else {
@@ -96,6 +96,7 @@ mod tests {
     #[case(TreeRoot::from("[1,5,3,null,4,10,6,9,2]").into(), 3, 4)]
     #[case(TreeRoot::from("[1]").into(), 1, 0)]
     #[case(TreeRoot::from("[1,2,null,3,null,4,null,5]").into(), 1, 4)]
+    #[case(TreeRoot::from("[1,2,null,3,null,4,null,5]").into(), 2, 3)]
     fn case(
         #[case] root: Option<Rc<RefCell<TreeNode>>>,
         #[case] start: i32,
