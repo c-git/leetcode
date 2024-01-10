@@ -20,11 +20,19 @@
 //   }
 // }
 use std::cell::RefCell;
+use std::fmt::Debug;
 use std::rc::Rc;
+
 struct ResultInfo {
     height: usize,
     start_height_from_top: Option<usize>,
     time: Option<usize>,
+}
+
+impl Debug for ResultInfo{
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{{h: {}, s: {:?} t: {:?}}}", self.height, self.start_height_from_top, self.time)
+    }
 }
 impl Solution {
     pub fn amount_of_time(root: Option<Rc<RefCell<TreeNode>>>, start: i32) -> i32 {
@@ -52,24 +60,29 @@ impl Solution {
                 (Some(x), None, false) | (None, Some(x), false) => Some(x + 1),
             };
 
-            let time = if start_height_from_top.is_some() {
+            let time = if let Some(distance_to_start) = start_height_from_top {
                 match (left.time, right.time) {
                 (None, None) => {
                     debug_assert!(node.val == start, "This case should only happen when we just found the start value");
                     Some(height-1) // Minus 1 because this node starts off infected
                 }, 
-                (None, Some(x)) => Some(x.max(left.height+1).max(right.start_height_from_top.expect("If left time set so should start height"))),
-                (Some(x), None) => Some(x.max(right.height+1).max(left.start_height_from_top.expect("If left time set so should start height"))),
+                (None, Some(x)) => Some(x.max(left.height+1).max(distance_to_start)),
+                (Some(x), None) => Some(x.max(right.height+1).max(distance_to_start)),
                 (Some(_), Some(_)) => unreachable!("Both sides should not have a time because time is only present when start is found"),
             }
             } else {
                 None
             };
-            ResultInfo {
+            let result = ResultInfo {
                 height,
                 start_height_from_top,
                 time,
-            }
+            };  
+            
+            #[cfg(debug_assertions)]
+            println!("node: {} result = {result:?} left_h: {:?} right_h: {:?}", node.val, left.height, right.height);
+            
+            result
         } else {
             ResultInfo {
                 height: 0,
@@ -97,6 +110,7 @@ mod tests {
     #[case(TreeRoot::from("[1]").into(), 1, 0)]
     #[case(TreeRoot::from("[1,2,null,3,null,4,null,5]").into(), 1, 4)]
     #[case(TreeRoot::from("[1,2,null,3,null,4,null,5]").into(), 2, 3)]
+    #[case(TreeRoot::from("[1,2,null,3,null,4,null,5]").into(), 4, 3)]
     fn case(
         #[case] root: Option<Rc<RefCell<TreeNode>>>,
         #[case] start: i32,
