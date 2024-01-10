@@ -25,13 +25,19 @@ use std::rc::Rc;
 
 struct ResultInfo {
     height: usize,
+    /// Height of start node if it exists
     start_height_from_top: Option<usize>,
+    /// If the start node exits max time for infection MUST also be known
     time: Option<usize>,
 }
 
-impl Debug for ResultInfo{
+impl Debug for ResultInfo {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{{h: {}, s: {:?} t: {:?}}}", self.height, self.start_height_from_top, self.time)
+        write!(
+            f,
+            "{{h: {}, s: {:?} t: {:?}}}",
+            self.height, self.start_height_from_top, self.time
+        )
     }
 }
 impl Solution {
@@ -62,14 +68,19 @@ impl Solution {
 
             let time = if let Some(distance_to_start) = start_height_from_top {
                 match (left.time, right.time) {
-                (None, None) => {
-                    debug_assert!(node.val == start, "This case should only happen when we just found the start value");
-                    Some(height-1) // Minus 1 because this node starts off infected
-                }, 
-                (None, Some(x)) => Some(x.max(left.height+distance_to_start)),
-                (Some(x), None) => Some(x.max(right.height+distance_to_start)),
-                (Some(_), Some(_)) => unreachable!("Both sides should not have a time because time is only present when start is found"),
-            }
+                    (None, None) => {
+                        debug_assert!(
+                            node.val == start,
+                            "This case should only happen when we just found the start value"
+                        );
+                        Some(height - 1) // Minus 1 because this node starts off infected
+                    }
+                    (None, Some(x)) => Some(x.max(left.height + distance_to_start)),
+                    (Some(x), None) => Some(x.max(right.height + distance_to_start)),
+                    (Some(_), Some(_)) => {
+                        unreachable!("Both sides should not have a time because time is only present when start is found")
+                    }
+                }
             } else {
                 None
             };
@@ -77,11 +88,14 @@ impl Solution {
                 height,
                 start_height_from_top,
                 time,
-            };  
-            
+            };
+
             #[cfg(debug_assertions)]
-            println!("node: {} result = {result:?} left_h: {:?} right_h: {:?}", node.val, left.height, right.height);
-            
+            println!(
+                "node: {} result = {result:?} left_h: {:?} right_h: {:?}",
+                node.val, left.height, right.height
+            );
+
             result
         } else {
             ResultInfo {
