@@ -60,10 +60,8 @@ impl Solution {
                     };
 
                     // Attach parents as right child
-                    new_root.right = Self::parent_with_relevant_ancestors_as_children(
-                        &parents[..],
-                        new_root.val,
-                    );
+                    new_root.right =
+                        Self::parent_with_relevant_ancestors_as_children(parents, new_root.val);
 
                     return Some(Rc::new(RefCell::new(new_root)));
                 } else {
@@ -94,51 +92,51 @@ impl Solution {
 
     /// Must be called from a child and will keep the other child as the left child and it's parent if any as the right child
     fn parent_with_relevant_ancestors_as_children(
-        parent_list: &[Rc<RefCell<TreeNode>>],
+        parent_list: Vec<Rc<RefCell<TreeNode>>>,
         child_to_drop_val: i32,
     ) -> Option<Rc<RefCell<TreeNode>>> {
-        let node = if let Some(last) = parent_list.last() {
-            Rc::clone(last)
-        } else {
-            return None;
-        };
-        let original_node = node.borrow();
-        let mut result = TreeNode::new(original_node.val);
+        let mut result = None;
 
-        // Determine which child to keep
-        match (&original_node.left, &original_node.right) {
-            (None, None) => unreachable!(
-                "How did we get here without a child. A child is supposed to call this function"
-            ),
-            (None, Some(child)) | (Some(child), None) => {
-                // We only have one child so we'll have no left child and put our parent on the right
-                debug_assert_eq!(
-                    child.borrow().val,
-                    child_to_drop_val,
-                    "Only one child must be the child that called this function"
-                )
-            }
-            (Some(left), Some(right)) => {
-                if left.borrow().val == child_to_drop_val {
-                    result.left = Some(Rc::clone(right));
-                } else {
+        for i in 0..parent_list.len() {
+            // There is always a next node because we stop one before the last
+            let curr_node = parent_list[i].borrow();
+            let mut new_node = TreeNode::new(curr_node.val);
+            let next_child_val = if i < parent_list.len() - 1 {
+                parent_list[i + 1].borrow().val
+            } else {
+                child_to_drop_val
+            };
+
+            // Determine which child to keep
+            match (&curr_node.left, &curr_node.right) {
+                (None, None) => unreachable!("How did we get here without a child"),
+                (None, Some(child)) | (Some(child), None) => {
+                    // We only have one child so we'll have no left child and put our parent on the right
                     debug_assert_eq!(
-                        right.borrow().val,
-                        child_to_drop_val,
-                        "Either left or right must be the calling child"
-                    );
-                    result.left = Some(Rc::clone(left));
+                        child.borrow().val,
+                        next_child_val,
+                        "Only one child must be the child that called this function"
+                    )
+                }
+                (Some(left), Some(right)) => {
+                    if left.borrow().val == next_child_val {
+                        new_node.left = Some(Rc::clone(right));
+                    } else {
+                        debug_assert_eq!(
+                            right.borrow().val,
+                            next_child_val,
+                            "Either left or right must be the calling child"
+                        );
+                        new_node.left = Some(Rc::clone(left));
+                    }
                 }
             }
+
+            new_node.right = result;
+            result = Some(Rc::new(RefCell::new(new_node)));
         }
 
-        // Attach parent
-        result.right = Self::parent_with_relevant_ancestors_as_children(
-            &parent_list[..parent_list.len() - 1],
-            result.val,
-        );
-
-        Some(Rc::new(RefCell::new(result)))
+        result
     }
 }
 
