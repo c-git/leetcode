@@ -155,4 +155,14 @@ mod tests {
         let actual = Solution::amount_of_time(root, start);
         assert_eq!(actual, expected);
     }
+
+    #[test]
+    fn large_input() {
+        let file_value = std::fs::read_to_string("large_inputs/2385_test_case 78.txt").unwrap();
+        let root = TreeRoot::from(&file_value[..]);
+        let start = 100000;
+        let expected = 1; // Not known yet
+        let actual = Solution::amount_of_time(root.into(), start);
+        assert_eq!(actual, expected);
+    }
 }
