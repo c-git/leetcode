@@ -23,11 +23,16 @@ use std::cell::RefCell;
 use std::rc::Rc;
 type NodeOpt = Option<Rc<RefCell<TreeNode>>>;
 
+#[derive(Debug, Clone)]
+struct ParentNode {
+    tree_node: Rc<RefCell<TreeNode>>,
+    parent: Option<Box<ParentNode>>,
+}
+
 impl Solution {
     pub fn amount_of_time(root: NodeOpt, start: i32) -> i32 {
         // SEE PREVIOUS VERSION OF THIS FILE AS THIS IS NOT THE MOST EFFICIENT WAY TO SOLVE JUST MORE INTERESTING
 
-        Self::height(root.clone());
         // Need to leak this memory because otherwise it will stack overflow trying to drop
         // NB: Could also have used forget just did two different ways to record both for future reference)
         let infected_root = Box::leak(Box::new(Self::make_infected_root(&root, start)));
@@ -36,8 +41,8 @@ impl Solution {
     }
 
     fn make_infected_root(root: &NodeOpt, val_infected: i32) -> NodeOpt {
-        let mut stack = vec![(root.clone(), vec![])];
-        while let Some((node, mut parents)) = stack.pop() {
+        let mut stack: Vec<(NodeOpt, Option<Box<ParentNode>>)> = vec![(root.clone(), None)];
+        while let Some((node, parent)) = stack.pop() {
             if let Some(node) = node {
                 let node_inner = node.borrow();
 
@@ -61,14 +66,17 @@ impl Solution {
 
                     // Attach parents as right child
                     new_root.right =
-                        Self::parent_with_relevant_ancestors_as_children(parents, new_root.val);
+                        Self::parent_with_relevant_ancestors_as_children(parent, new_root.val);
 
                     return Some(Rc::new(RefCell::new(new_root)));
                 } else {
                     // keep searching for the infected node
-                    parents.push(Rc::clone(&node));
-                    stack.push((node_inner.left.clone(), parents.clone()));
-                    stack.push((node_inner.right.clone(), parents.clone()));
+                    let ancestors_including_current = Some(Box::new(ParentNode {
+                        tree_node: Rc::clone(&node),
+                        parent,
+                    }));
+                    stack.push((node_inner.left.clone(), ancestors_including_current.clone()));
+                    stack.push((node_inner.right.clone(), ancestors_including_current));
                 }
             }
         }
@@ -92,40 +100,36 @@ impl Solution {
 
     /// Must be called from a child and will keep the other child as the left child and it's parent if any as the right child
     fn parent_with_relevant_ancestors_as_children(
-        parent_list: Vec<Rc<RefCell<TreeNode>>>,
-        child_to_drop_val: i32,
+        parent_list: Option<Box<ParentNode>>,
+        mut val_child_to_drop: i32,
     ) -> Option<Rc<RefCell<TreeNode>>> {
         let mut result = None;
 
-        for i in 0..parent_list.len() {
-            // There is always a next node because we stop one before the last
-            let curr_node = parent_list[i].borrow();
-            let mut new_node = TreeNode::new(curr_node.val);
-            let next_child_val = if i < parent_list.len() - 1 {
-                parent_list[i + 1].borrow().val
-            } else {
-                child_to_drop_val
-            };
+        let mut parent = &parent_list; // Get ref to most recent parent
+        while let Some(node) = parent {
+            let current_parent = node.tree_node.borrow();
+
+            let mut new_node = TreeNode::new(current_parent.val);
 
             // Determine which child to keep
-            match (&curr_node.left, &curr_node.right) {
+            match (&current_parent.left, &current_parent.right) {
                 (None, None) => unreachable!("How did we get here without a child"),
                 (None, Some(child)) | (Some(child), None) => {
                     // We only have one child so we'll have no left child and put our parent on the right
                     debug_assert_eq!(
                         child.borrow().val,
-                        next_child_val,
+                        val_child_to_drop,
                         "Only one child must be the child that called this function"
                     )
                 }
                 (Some(left), Some(right)) => {
-                    if left.borrow().val == next_child_val {
+                    if left.borrow().val == val_child_to_drop {
                         new_node.left = Some(Rc::clone(right));
                     } else {
                         debug_assert_eq!(
                             right.borrow().val,
-                            next_child_val,
-                            "Either left or right must be the calling child"
+                            val_child_to_drop,
+                            "Either left or right must be the child"
                         );
                         new_node.left = Some(Rc::clone(left));
                     }
@@ -133,6 +137,9 @@ impl Solution {
             }
 
             new_node.right = result;
+            val_child_to_drop = new_node.val;
+            parent = &node.parent;
+
             result = Some(Rc::new(RefCell::new(new_node)));
         }
 
