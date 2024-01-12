@@ -171,7 +171,7 @@ mod tests {
         let file_value = std::fs::read_to_string("large_inputs/2385_test_case 78.txt").unwrap();
         let root = TreeRoot::from(&file_value[..]);
         let start = 100000;
-        let expected = 1; // Not known yet
+        let expected = 99999;
         let actual = Solution::amount_of_time(root.into(), start);
         assert_eq!(actual, expected);
     }
