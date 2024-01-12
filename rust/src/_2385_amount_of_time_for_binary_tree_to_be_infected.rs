@@ -1,12 +1,8 @@
-//! Solution for https://leetcode.com/problems/amount-of-time-for-binary-tree-to-be-infected
-//! 2385. Amount of Time for Binary Tree to Be Infected
-
-// Definition for a binary tree node.
 // #[derive(Debug, PartialEq, Eq)]
 // pub struct TreeNode {
 //   pub val: i32,
-//   pub left: NodeOpt,
-//   pub right: NodeOpt,
+//   pub left: Option<Rc<RefCell<TreeNode>>>,
+//   pub right: Option<Rc<RefCell<TreeNode>>>,
 // }
 //
 // impl TreeNode {
@@ -20,123 +16,90 @@
 //   }
 // }
 use std::cell::RefCell;
+use std::fmt::Debug;
 use std::rc::Rc;
-type NodeOpt = Option<Rc<RefCell<TreeNode>>>;
 
+struct ResultInfo {
+    height: usize,
+    /// Height of start node if it exists
+    start_height_from_top: Option<usize>,
+    /// If the start node exits max time for infection MUST also be known
+    time: Option<usize>,
+}
+
+impl Debug for ResultInfo {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "{{h: {}, s: {:?} t: {:?}}}",
+            self.height, self.start_height_from_top, self.time
+        )
+    }
+}
 impl Solution {
-    pub fn amount_of_time(root: NodeOpt, start: i32) -> i32 {
-        // SEE PREVIOUS VERSION OF THIS FILE AS THIS IS NOT THE MOST EFFICIENT WAY TO SOLVE JUST MORE INTERESTING
-
-        Self::height(root.clone());
-        // Need to leak this memory because otherwise it will stack overflow trying to drop
-        // NB: Could also have used forget just did two different ways to record both for future reference)
-        let infected_root = Box::leak(Box::new(Self::make_infected_root(&root, start)));
-        std::mem::forget(root); // Don't need it anymore but cannot let drop run otherwise we get stack overflow
-        Self::height(infected_root.clone()) as i32 - 1
+    pub fn amount_of_time(root: Option<Rc<RefCell<TreeNode>>>, start: i32) -> i32 {
+        Self::check_node(&root, start)
+            .time
+            .expect("Constraints say start must exist so this must also exist") as i32
     }
 
-    fn make_infected_root(root: &NodeOpt, val_infected: i32) -> NodeOpt {
-        let mut stack = vec![(root.clone(), vec![])];
-        while let Some((node, mut parents)) = stack.pop() {
-            if let Some(node) = node {
-                let node_inner = node.borrow();
-
-                if node_inner.val == val_infected {
-                    // Found the infected node this needs to be the new root
-                    // To avoid complexity we are just going to take a copy of this node and
-                    // a copy of its taller child as the left child and put
-                    // the right child as it's parent with it's parents also inverted
-
-                    let mut new_root = TreeNode::new(node_inner.val);
-
-                    let left_height = Self::height(node_inner.left.clone());
-                    let right_height = Self::height(node_inner.right.clone());
-
-                    // Keep taller child as left
-                    if left_height > right_height {
-                        new_root.left = node_inner.left.clone();
-                    } else {
-                        new_root.left = node_inner.right.clone();
-                    };
-
-                    // Attach parents as right child
-                    new_root.right =
-                        Self::parent_with_relevant_ancestors_as_children(parents, new_root.val);
-
-                    return Some(Rc::new(RefCell::new(new_root)));
-                } else {
-                    // keep searching for the infected node
-                    parents.push(Rc::clone(&node));
-                    stack.push((node_inner.left.clone(), parents.clone()));
-                    stack.push((node_inner.right.clone(), parents.clone()));
+    fn check_node(root: &Option<Rc<RefCell<TreeNode>>>, start: i32) -> ResultInfo {
+        if let Some(node) = root {
+            let node = node.as_ref().borrow();
+            let left = Self::check_node(&node.left, start);
+            let right = Self::check_node(&node.right, start);
+            let height = left.height.max(right.height) + 1;
+            let start_height_from_top = match (
+                left.start_height_from_top,
+                right.start_height_from_top,
+                node.val == start,
+            ) {
+                (None, None, true) => Some(0),
+                (None, None, false) => None,
+                (Some(_), Some(_), false) | (_, _, true) => {
+                    unreachable!("All values in true should be unique")
                 }
-            }
-        }
-        unimplemented!("Should always find the infected node as it must exist by constraint");
-    }
-
-    fn height(root: NodeOpt) -> usize {
-        let mut result = 0;
-        let mut stack = vec![(root, 0)];
-        while let Some((node, height)) = stack.pop() {
-            if let Some(node) = node {
-                let node = node.borrow();
-                let new_height = height + 1;
-                result = result.max(new_height);
-                stack.push((node.left.clone(), new_height));
-                stack.push((node.right.clone(), new_height));
-            }
-        }
-        result
-    }
-
-    /// Must be called from a child and will keep the other child as the left child and it's parent if any as the right child
-    fn parent_with_relevant_ancestors_as_children(
-        parent_list: Vec<Rc<RefCell<TreeNode>>>,
-        child_to_drop_val: i32,
-    ) -> Option<Rc<RefCell<TreeNode>>> {
-        let mut result = None;
-
-        for i in 0..parent_list.len() {
-            // There is always a next node because we stop one before the last
-            let curr_node = parent_list[i].borrow();
-            let mut new_node = TreeNode::new(curr_node.val);
-            let next_child_val = if i < parent_list.len() - 1 {
-                parent_list[i + 1].borrow().val
-            } else {
-                child_to_drop_val
+                (Some(x), None, false) | (None, Some(x), false) => Some(x + 1),
             };
 
-            // Determine which child to keep
-            match (&curr_node.left, &curr_node.right) {
-                (None, None) => unreachable!("How did we get here without a child"),
-                (None, Some(child)) | (Some(child), None) => {
-                    // We only have one child so we'll have no left child and put our parent on the right
-                    debug_assert_eq!(
-                        child.borrow().val,
-                        next_child_val,
-                        "Only one child must be the child that called this function"
-                    )
-                }
-                (Some(left), Some(right)) => {
-                    if left.borrow().val == next_child_val {
-                        new_node.left = Some(Rc::clone(right));
-                    } else {
-                        debug_assert_eq!(
-                            right.borrow().val,
-                            next_child_val,
-                            "Either left or right must be the calling child"
+            let time = if let Some(distance_to_start) = start_height_from_top {
+                match (left.time, right.time) {
+                    (None, None) => {
+                        debug_assert!(
+                            node.val == start,
+                            "This case should only happen when we just found the start value"
                         );
-                        new_node.left = Some(Rc::clone(left));
+                        Some(height - 1) // Minus 1 because this node starts off infected
+                    }
+                    (None, Some(x)) => Some(x.max(left.height + distance_to_start)),
+                    (Some(x), None) => Some(x.max(right.height + distance_to_start)),
+                    (Some(_), Some(_)) => {
+                        unreachable!("Both sides should not have a time because time is only present when start is found")
                     }
                 }
+            } else {
+                None
+            };
+            let result = ResultInfo {
+                height,
+                start_height_from_top,
+                time,
+            };
+
+            #[cfg(debug_assertions)]
+            println!(
+                "node: {} result = {result:?} left_h: {:?} right_h: {:?}",
+                node.val, left.height, right.height
+            );
+
+            result
+        } else {
+            ResultInfo {
+                height: 0,
+                start_height_from_top: None,
+                time: None,
             }
-
-            new_node.right = result;
-            result = Some(Rc::new(RefCell::new(new_node)));
         }
-
-        result
     }
 }
 
@@ -160,13 +123,17 @@ mod tests {
     #[case(TreeRoot::from("[1,2,null,3,null,4,null,5]").into(), 4, 3)]
     #[case(TreeRoot::from("[1,2,null,3,null,4,null,5]").into(), 4, 3)]
     #[case(TreeRoot::from("[5,2,3,4,null,null,null,1]").into(), 4, 3)]
-    fn case(#[case] root: NodeOpt, #[case] start: i32, #[case] expected: i32) {
+    fn case(
+        #[case] root: Option<Rc<RefCell<TreeNode>>>,
+        #[case] start: i32,
+        #[case] expected: i32,
+    ) {
         let actual = Solution::amount_of_time(root, start);
         assert_eq!(actual, expected);
     }
 
     #[test]
-    #[ignore = "Still working on solution that is not recursive"]
+    #[ignore = "Cannot be solved with recursive solution as you'll get stack overflow, will also need to forget input otherwise std::mem::drop will stack overflow"]
     fn large_input() {
         let file_value = std::fs::read_to_string("large_inputs/2385_test_case 78.txt").unwrap();
         let root = TreeRoot::from(&file_value[..]);
