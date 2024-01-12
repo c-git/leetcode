@@ -30,52 +30,51 @@ impl Solution {
         Self::height(root.clone());
         // Need to leak this memory because otherwise it will stack overflow trying to drop
         // NB: Could also have used forget just did two different ways to record both for future reference)
-        let infected_root = Box::leak(Box::new(Self::make_infected_root(&root, start, vec![])));
+        let infected_root = Box::leak(Box::new(Self::make_infected_root(&root, start)));
         std::mem::forget(root); // Don't need it anymore but cannot let drop run otherwise we get stack overflow
         Self::height(infected_root.clone()) as i32 - 1
     }
 
-    fn make_infected_root<'a>(
-        root: &'a NodeOpt,
-        val_infected: i32,
-        mut parent_list: Vec<&'a NodeOpt>,
-    ) -> NodeOpt {
-        // Bug in clippy https://github.com/rust-lang/rust-clippy/issues/8281#issuecomment-1703932391
-        #[allow(clippy::question_mark)]
-        let Some(node) = root
-        else {
-            return None;
-        };
-        let node = node.borrow();
-        if node.val == val_infected {
-            // Found the infected node this needs to be the new root
-            // To avoid complexity we are just going to take a copy of this node and it shortest child the other child gets replaced with the parent of this node
-            let left_height = Self::height(node.left.clone());
-            let right_height = Self::height(node.right.clone());
+    fn make_infected_root(root: &NodeOpt, val_infected: i32) -> NodeOpt {
+        let mut stack = vec![(root.clone(), vec![])];
+        while let Some((node, mut parents)) = stack.pop() {
+            if let Some(node) = node {
+                let node_inner = node.borrow();
 
-            // For simplicity ensure to keep longer child on left in copy
-            let child = if left_height > right_height {
-                &node.left
-            } else {
-                &node.right
-            };
-            let mut new_root = TreeNode::new(node.val);
-            new_root.left = child.clone();
+                if node_inner.val == val_infected {
+                    // Found the infected node this needs to be the new root
+                    // To avoid complexity we are just going to take a copy of this node and
+                    // a copy of its taller child as the left child and put
+                    // the right child as it's parent with it's parents also inverted
 
-            // Attach parents as right child
-            new_root.right =
-                Self::parent_with_relevant_ancestors_as_children(&parent_list[..], new_root.val);
+                    let mut new_root = TreeNode::new(node_inner.val);
 
-            Some(Rc::new(RefCell::new(new_root)))
-        } else {
-            // keep searching for the infected node
-            parent_list.push(root);
-            let left = Self::make_infected_root(&node.left, val_infected, parent_list.clone());
-            if left.is_some() {
-                return left;
+                    let left_height = Self::height(node_inner.left.clone());
+                    let right_height = Self::height(node_inner.right.clone());
+
+                    // Keep taller child as left
+                    if left_height > right_height {
+                        new_root.left = node_inner.left.clone();
+                    } else {
+                        new_root.left = node_inner.right.clone();
+                    };
+
+                    // Attach parents as right child
+                    new_root.right = Self::parent_with_relevant_ancestors_as_children(
+                        &parents[..],
+                        new_root.val,
+                    );
+
+                    return Some(Rc::new(RefCell::new(new_root)));
+                } else {
+                    // keep searching for the infected node
+                    parents.push(Rc::clone(&node));
+                    stack.push((node_inner.left.clone(), parents.clone()));
+                    stack.push((node_inner.right.clone(), parents.clone()));
+                }
             }
-            Self::make_infected_root(&node.right, val_infected, parent_list)
         }
+        unimplemented!("Should always find the infected node as it must exist by constraint");
     }
 
     fn height(root: NodeOpt) -> usize {
@@ -95,11 +94,12 @@ impl Solution {
 
     /// Must be called from a child and will keep the other child as the left child and it's parent if any as the right child
     fn parent_with_relevant_ancestors_as_children(
-        parent_list: &[&Option<Rc<RefCell<TreeNode>>>],
+        parent_list: &[Rc<RefCell<TreeNode>>],
         child_to_drop_val: i32,
     ) -> Option<Rc<RefCell<TreeNode>>> {
-        let node = *(parent_list.last()?);
-        let Some(node) = node else {
+        let node = if let Some(last) = parent_list.last() {
+            Rc::clone(last)
+        } else {
             return None;
         };
         let original_node = node.borrow();
