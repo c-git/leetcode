@@ -5,8 +5,8 @@
 // #[derive(Debug, PartialEq, Eq)]
 // pub struct TreeNode {
 //   pub val: i32,
-//   pub left: Option<Rc<RefCell<TreeNode>>>,
-//   pub right: Option<Rc<RefCell<TreeNode>>>,
+//   pub left: NodeOpt,
+//   pub right: NodeOpt,
 // }
 //
 // impl TreeNode {
@@ -20,90 +20,114 @@
 //   }
 // }
 use std::cell::RefCell;
-use std::fmt::Debug;
 use std::rc::Rc;
+type NodeOpt = Option<Rc<RefCell<TreeNode>>>;
 
-struct ResultInfo {
-    height: usize,
-    /// Height of start node if it exists
-    start_height_from_top: Option<usize>,
-    /// If the start node exits max time for infection MUST also be known
-    time: Option<usize>,
-}
-
-impl Debug for ResultInfo {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(
-            f,
-            "{{h: {}, s: {:?} t: {:?}}}",
-            self.height, self.start_height_from_top, self.time
-        )
-    }
-}
 impl Solution {
-    pub fn amount_of_time(root: Option<Rc<RefCell<TreeNode>>>, start: i32) -> i32 {
-        Self::check_node(&root, start)
-            .time
-            .expect("Constraints say start must exist so this must also exist") as i32
+    pub fn amount_of_time(root: NodeOpt, start: i32) -> i32 {
+        let root = Self::make_infected_root(&root, start, vec![]).expect("Must exist");
+        let node = root.borrow();
+        Self::height(&node.left).max(Self::height(&node.right)) as _
     }
 
-    fn check_node(root: &Option<Rc<RefCell<TreeNode>>>, start: i32) -> ResultInfo {
-        if let Some(node) = root {
-            let node = node.as_ref().borrow();
-            let left = Self::check_node(&node.left, start);
-            let right = Self::check_node(&node.right, start);
-            let height = left.height.max(right.height) + 1;
-            let start_height_from_top = match (
-                left.start_height_from_top,
-                right.start_height_from_top,
-                node.val == start,
-            ) {
-                (None, None, true) => Some(0),
-                (None, None, false) => None,
-                (Some(_), Some(_), false) | (_, _, true) => {
-                    unreachable!("All values in true should be unique")
-                }
-                (Some(x), None, false) | (None, Some(x), false) => Some(x + 1),
-            };
+    fn make_infected_root<'a>(
+        root: &'a NodeOpt,
+        val_infected: i32,
+        mut parent_list: Vec<&'a NodeOpt>,
+    ) -> NodeOpt {
+        // Bug in clippy https://github.com/rust-lang/rust-clippy/issues/8281#issuecomment-1703932391
+        #[allow(clippy::question_mark)]
+        let Some(node) = root
+        else {
+            return None;
+        };
+        let node = node.borrow();
+        if node.val == val_infected {
+            // Found the infected node this needs to be the new root
+            // To avoid complexity we are just going to take a copy of this node and it shortest child the other child gets replaced with the parent of this node
+            let left_height = Self::height(&node.left);
+            let right_height = Self::height(&node.right);
 
-            let time = if let Some(distance_to_start) = start_height_from_top {
-                match (left.time, right.time) {
-                    (None, None) => {
-                        debug_assert!(
-                            node.val == start,
-                            "This case should only happen when we just found the start value"
-                        );
-                        Some(height - 1) // Minus 1 because this node starts off infected
-                    }
-                    (None, Some(x)) => Some(x.max(left.height + distance_to_start)),
-                    (Some(x), None) => Some(x.max(right.height + distance_to_start)),
-                    (Some(_), Some(_)) => {
-                        unreachable!("Both sides should not have a time because time is only present when start is found")
-                    }
-                }
+            // For simplicity ensure to keep longer child on left in copy
+            let child = if left_height > right_height {
+                &node.left
             } else {
-                None
+                &node.right
             };
-            let result = ResultInfo {
-                height,
-                start_height_from_top,
-                time,
-            };
+            let mut new_root = TreeNode::new(node.val);
+            new_root.left = child.clone();
 
-            #[cfg(debug_assertions)]
-            println!(
-                "node: {} result = {result:?} left_h: {:?} right_h: {:?}",
-                node.val, left.height, right.height
-            );
+            // Attach parents as right child
+            new_root.right =
+                Self::parent_with_relevant_ancestors_as_children(&parent_list[..], new_root.val);
 
-            result
+            Some(Rc::new(RefCell::new(new_root)))
         } else {
-            ResultInfo {
-                height: 0,
-                start_height_from_top: None,
-                time: None,
+            // keep searching for the infected node
+            parent_list.push(root);
+            let left = Self::make_infected_root(&node.left, val_infected, parent_list.clone());
+            if left.is_some() {
+                return left;
+            }
+            Self::make_infected_root(&node.right, val_infected, parent_list)
+        }
+    }
+
+    fn height(root: &NodeOpt) -> usize {
+        if let Some(root) = root {
+            let node = root.borrow();
+            Self::height(&node.left).max(Self::height(&node.right)) + 1
+        } else {
+            0
+        }
+    }
+
+    /// Must be called from a child and will keep the other child as the left child and it's parent if any as the right child
+    fn parent_with_relevant_ancestors_as_children(
+        parent_list: &[&Option<Rc<RefCell<TreeNode>>>],
+        child_to_drop_val: i32,
+    ) -> Option<Rc<RefCell<TreeNode>>> {
+        let node = *(parent_list.last()?);
+        let Some(node) = node else {
+            return None;
+        };
+        let original_node = node.borrow();
+        let mut result = TreeNode::new(original_node.val);
+
+        // Determine which child to keep
+        match (&original_node.left, &original_node.right) {
+            (None, None) => unreachable!(
+                "How did we get here without a child. A child is supposed to call this function"
+            ),
+            (None, Some(child)) | (Some(child), None) => {
+                // We only have one child so we'll have no left child and put our parent on the right
+                debug_assert_eq!(
+                    child.borrow().val,
+                    child_to_drop_val,
+                    "Only one child must be the child that called this function"
+                )
+            }
+            (Some(left), Some(right)) => {
+                if left.borrow().val == child_to_drop_val {
+                    result.left = Some(Rc::clone(right));
+                } else {
+                    debug_assert_eq!(
+                        right.borrow().val,
+                        child_to_drop_val,
+                        "Either left or right must be the calling child"
+                    );
+                    result.left = Some(Rc::clone(left));
+                }
             }
         }
+
+        // Attach parent
+        result.right = Self::parent_with_relevant_ancestors_as_children(
+            &parent_list[..parent_list.len() - 1],
+            result.val,
+        );
+
+        Some(Rc::new(RefCell::new(result)))
     }
 }
 
@@ -127,11 +151,7 @@ mod tests {
     #[case(TreeRoot::from("[1,2,null,3,null,4,null,5]").into(), 4, 3)]
     #[case(TreeRoot::from("[1,2,null,3,null,4,null,5]").into(), 4, 3)]
     #[case(TreeRoot::from("[5,2,3,4,null,null,null,1]").into(), 4, 3)]
-    fn case(
-        #[case] root: Option<Rc<RefCell<TreeNode>>>,
-        #[case] start: i32,
-        #[case] expected: i32,
-    ) {
+    fn case(#[case] root: NodeOpt, #[case] start: i32, #[case] expected: i32) {
         let actual = Solution::amount_of_time(root, start);
         assert_eq!(actual, expected);
     }
