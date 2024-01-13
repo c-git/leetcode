@@ -102,49 +102,62 @@ impl Solution {
     fn parent_with_relevant_ancestors_as_children(
         parent_list: Option<Box<ParentNode>>,
         mut val_child_to_drop: i32,
-    ) -> Option<Rc<RefCell<TreeNode>>> {
-        let mut result = None;
+    ) -> NodeOpt {
+        let mut result: NodeOpt = None;
+        let mut current_result: NodeOpt = result.clone();
 
         let mut parent = &parent_list; // Get ref to most recent parent
         while let Some(node) = parent {
             let current_parent = node.tree_node.borrow();
 
-            let mut new_node = TreeNode::new(current_parent.val);
+            let new_node = create_node_with_longer_child(current_parent, val_child_to_drop);
 
-            // Determine which child to keep
-            match (&current_parent.left, &current_parent.right) {
-                (None, None) => unreachable!("How did we get here without a child"),
-                (None, Some(child)) | (Some(child), None) => {
-                    // We only have one child so we'll have no left child and put our parent on the right
-                    debug_assert_eq!(
-                        child.borrow().val,
-                        val_child_to_drop,
-                        "Only one child must be the child that called this function"
-                    )
-                }
-                (Some(left), Some(right)) => {
-                    if left.borrow().val == val_child_to_drop {
-                        new_node.left = Some(Rc::clone(right));
-                    } else {
-                        debug_assert_eq!(
-                            right.borrow().val,
-                            val_child_to_drop,
-                            "Either left or right must be the child"
-                        );
-                        new_node.left = Some(Rc::clone(left));
-                    }
-                }
-            }
-
-            new_node.right = result;
             val_child_to_drop = new_node.val;
+            if let Some(prev_node) = current_result {
+                prev_node.borrow_mut().right = Some(Rc::new(RefCell::new(new_node)));
+                current_result = prev_node.borrow().right.clone();
+            } else {
+                result = Some(Rc::new(RefCell::new(new_node)));
+                current_result = result.clone();
+            }
             parent = &node.parent;
-
-            result = Some(Rc::new(RefCell::new(new_node)));
         }
 
         result
     }
+}
+
+fn create_node_with_longer_child(
+    current_parent: std::cell::Ref<TreeNode>,
+    val_child_to_drop: i32,
+) -> TreeNode {
+    let mut result = TreeNode::new(current_parent.val);
+
+    // Determine which child to keep
+    match (&current_parent.left, &current_parent.right) {
+        (None, None) => unreachable!("How did we get here without a child"),
+        (None, Some(child)) | (Some(child), None) => {
+            // We only have one child so we'll have no left child and put our parent on the right
+            debug_assert_eq!(
+                child.borrow().val,
+                val_child_to_drop,
+                "Only one child must be the child that called this function"
+            )
+        }
+        (Some(left), Some(right)) => {
+            if left.borrow().val == val_child_to_drop {
+                result.left = Some(Rc::clone(right));
+            } else {
+                debug_assert_eq!(
+                    right.borrow().val,
+                    val_child_to_drop,
+                    "Either left or right must be the child"
+                );
+                result.left = Some(Rc::clone(left));
+            }
+        }
+    }
+    result
 }
 
 // << ---------------- Code below here is only for local use ---------------- >>
