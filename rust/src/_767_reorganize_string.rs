@@ -19,25 +19,34 @@ impl Solution {
                 most_freq_count > 0 && next_count > 0,
                 "Values assumed to be greater than 0 to start"
             );
-            while most_freq_count > 0 && next_count > 0 {
+            while most_freq_count > 1 && next_count > 0 {
                 result.push(most_freq_c);
                 result.push(next_c);
                 most_freq_count -= 1;
                 next_count -= 1;
             }
+            if next_count > 0 {
+                debug_assert_eq!(
+                    most_freq_count, 1,
+                    "Loop exited and next still has left so this one is done we can use it now"
+                );
+                result.push(most_freq_c);
+                most_freq_count -= 1; // Bring it to 0 makes the logic below easier to follow
+            }
             match (most_freq_count, next_count) {
                 (0, 0) => most_freq = remaining.pop(),
                 (0, x) => {
+                    // The most_freq ran out
                     debug_assert!(
                         x > 0,
-                        "Because it's a usize and not equal to 0 so must be greater than"
+                        "Because it's a usize and not equal to 0 so must be greater than 0"
                     );
                     most_freq = Some((x, next_c));
                 }
                 (x, 0) => {
                     debug_assert!(
                         x > 0,
-                        "Because it's a usize and not equal to 0 so must be greater than"
+                        "Because it's a usize and not equal to 0 so must be greater than 0"
                     );
                     most_freq = Some((x, most_freq_c));
                 }
@@ -70,8 +79,20 @@ mod tests {
     #[case("aab", "aba")]
     #[case("aaab", "")]
     #[case("zhmyo", "zyomh")]
+    #[case("ogccckcwmbmxtsbmozli", "cocgcickmlmsmtbwbxoz")]
     fn case(#[case] s: String, #[case] expected: String) {
         let actual = Solution::reorganize_string(s);
-        assert_eq!(actual, expected);
+        assert_eq!(actual.len(), expected.len(), "Length should be the same");
+        check_no_repeats(actual);
+    }
+
+    fn check_no_repeats(actual: String) {
+        let Some(mut last_char) = actual.chars().next() else {
+            return;
+        };
+        for c in actual.chars().skip(1) {
+            assert_ne!(c, last_char, "Duplicate character found in {actual}");
+            last_char = c;
+        }
     }
 }
