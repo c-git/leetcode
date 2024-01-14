@@ -1,67 +1,34 @@
 //! Solution for https://leetcode.com/problems/reorganize-string
 //! 767. Reorganize String
 
-use std::collections::HashMap;
+use std::collections::{BinaryHeap, HashMap};
 
 impl Solution {
     pub fn reorganize_string(s: String) -> String {
-        let mut result = String::with_capacity(s.len());
-        let mut freq: HashMap<char, usize> = HashMap::new();
-        s.chars().for_each(|c| *freq.entry(c).or_default() += 1);
-        let mut remaining: Vec<(usize, char)> = freq.into_iter().map(|(k, v)| (v, k)).collect();
-        remaining.sort_unstable();
-        let mut most_freq = remaining.pop();
-        while let Some((mut next_count, next_c)) = remaining.pop() {
-            let (mut most_freq_count, most_freq_c) = most_freq.expect(
-                "This should always be some at the top of the loop otherwise we've made a mistake",
-            );
-            debug_assert!(
-                most_freq_count > 0 && next_count > 0,
-                "Values assumed to be greater than 0 to start"
-            );
-            while most_freq_count > 1 && next_count > 0 {
-                result.push(most_freq_c);
-                result.push(next_c);
-                most_freq_count -= 1;
-                next_count -= 1;
+        // Converted Beixuan's Python Solution to Rust
+        let mut output = String::with_capacity(s.len());
+        let mut c_occ: HashMap<char, usize> = HashMap::new();
+        s.chars().for_each(|c| *c_occ.entry(c).or_default() += 1);
+        let num_dist_c = c_occ.len();
+        let max_occ = c_occ.values().max().unwrap();
+        if *max_occ > (s.len() + 1) / 2 {
+            return output;
+        };
+        let mut pairs = BinaryHeap::new();
+        c_occ.into_iter().for_each(|(k, v)| pairs.push((v, k)));
+        let mut pre = None;
+        while let Some(curr) = pairs.pop() {
+            output.push(curr.1);
+            if let Some(val) = pre {
+                pairs.push(val);
             }
-            if next_count > 0 {
-                debug_assert_eq!(
-                    most_freq_count, 1,
-                    "Loop exited and next still has left so this one is done we can use it now"
-                );
-                result.push(most_freq_c);
-                most_freq_count -= 1; // Bring it to 0 makes the logic below easier to follow
-            }
-            match (most_freq_count, next_count) {
-                (0, 0) => most_freq = remaining.pop(),
-                (0, x) => {
-                    // The most_freq ran out
-                    debug_assert!(
-                        x > 0,
-                        "Because it's a usize and not equal to 0 so must be greater than 0"
-                    );
-                    most_freq = Some((x, next_c));
-                }
-                (x, 0) => {
-                    debug_assert!(
-                        x > 0,
-                        "Because it's a usize and not equal to 0 so must be greater than 0"
-                    );
-                    most_freq = Some((x, most_freq_c));
-                }
-                _ => unreachable!("One of them must be 0 to exit the loop"),
-            }
+            pre = if curr.0 > 1 {
+                Some((curr.0 - 1, curr.1))
+            } else {
+                None
+            };
         }
-
-        match most_freq {
-            Some((1, c)) => {
-                result.push(c);
-                result
-            }
-            None => result,
-            Some(_) => "".to_string(), // More than one left cannot work
-        }
+        output
     }
 }
 
@@ -80,6 +47,7 @@ mod tests {
     #[case("aaab", "")]
     #[case("zhmyo", "zyomh")]
     #[case("ogccckcwmbmxtsbmozli", "cocgcickmlmsmtbwbxoz")]
+    #[case("aabbcc", "abcabc")]
     fn case(#[case] s: String, #[case] expected: String) {
         let actual = Solution::reorganize_string(s);
         assert_eq!(actual.len(), expected.len(), "Length should be the same");
