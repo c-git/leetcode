@@ -23,10 +23,11 @@ use std::cell::RefCell;
 use std::rc::Rc;
 type NodeOpt = Option<Rc<RefCell<TreeNode>>>;
 
+type ParentLink = Option<Rc<ParentNode>>;
 #[derive(Debug, Clone)]
 struct ParentNode {
     tree_node: Rc<RefCell<TreeNode>>,
-    parent: Option<Box<ParentNode>>,
+    parent: ParentLink,
 }
 
 impl Solution {
@@ -41,7 +42,7 @@ impl Solution {
     }
 
     fn make_infected_root(root: &NodeOpt, val_infected: i32) -> NodeOpt {
-        let mut stack: Vec<(NodeOpt, Option<Box<ParentNode>>)> = vec![(root.clone(), None)];
+        let mut stack: Vec<(NodeOpt, ParentLink)> = vec![(root.clone(), None)];
         while let Some((node, parent)) = stack.pop() {
             if let Some(node) = node {
                 let node_inner = node.borrow();
@@ -71,12 +72,17 @@ impl Solution {
                     return Some(Rc::new(RefCell::new(new_root)));
                 } else {
                     // keep searching for the infected node
-                    let ancestors_including_current = Some(Box::new(ParentNode {
+                    let ancestors_including_current = Some(Rc::new(ParentNode {
                         tree_node: Rc::clone(&node),
                         parent,
                     }));
-                    stack.push((node_inner.left.clone(), ancestors_including_current.clone()));
-                    stack.push((node_inner.right.clone(), ancestors_including_current));
+
+                    if node_inner.left.is_some() {
+                        stack.push((node_inner.left.clone(), ancestors_including_current.clone()));
+                    }
+                    if node_inner.right.is_some() {
+                        stack.push((node_inner.right.clone(), ancestors_including_current));
+                    }
                 }
             }
         }
@@ -100,13 +106,13 @@ impl Solution {
 
     /// Must be called from a child and will keep the other child as the left child and it's parent if any as the right child
     fn parent_with_relevant_ancestors_as_children(
-        parent_list: Option<Box<ParentNode>>,
+        parent_list: ParentLink,
         mut val_child_to_drop: i32,
     ) -> NodeOpt {
         let mut result: NodeOpt = None;
         let mut current_result: NodeOpt = result.clone();
 
-        let mut parent = &parent_list; // Get ref to most recent parent
+        let mut parent = parent_list; // Get ref to most recent parent
         while let Some(node) = parent {
             let current_parent = node.tree_node.borrow();
 
@@ -120,7 +126,7 @@ impl Solution {
                 result = Some(Rc::new(RefCell::new(new_node)));
                 current_result = result.clone();
             }
-            parent = &node.parent;
+            parent = node.parent.clone();
         }
 
         result
