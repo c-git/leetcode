@@ -32,7 +32,8 @@ struct ParentNode {
 
 impl Solution {
     pub fn amount_of_time(root: NodeOpt, start: i32) -> i32 {
-        // SEE PREVIOUS VERSION OF THIS FILE AS THIS IS NOT THE MOST EFFICIENT WAY TO SOLVE JUST MORE INTERESTING
+        // SEE PREVIOUS VERSION OF THIS FILE TO SEE METHOD THAT JUST COUNTS INSTEAD OF BUILDING A NEW TREE
+        // https://github.com/c-git/leetcode/blob/075ff7dd4eaab0c4fa92f8b1f5acf5fdaf2427ae/rust/src/_2385_amount_of_time_for_binary_tree_to_be_infected.rs
 
         // Need to leak this memory because otherwise it will stack overflow trying to drop
         // NB: Could also have used forget just did two different ways to record both for future reference)
