@@ -35,8 +35,8 @@ impl Solution {
     ) -> i32 {
         if let Some(node) = root {
             let node = node.borrow();
-            let node_bit_value = 1 << node.val;
-            needing_match ^= node_bit_value; // Toggle the bit for this node
+            let node_bit_value = 1 << node.val; // Create a number with one bit set that matches value
+            needing_match ^= node_bit_value; // Toggle the bit for this node with xor
 
             let is_leaf = node.left.is_none() && node.right.is_none();
             if is_leaf {
