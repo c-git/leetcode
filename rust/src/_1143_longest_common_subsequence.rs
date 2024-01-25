@@ -16,17 +16,23 @@ impl Solution {
         let (longer, shorter) = (longer.as_bytes(), shorter.as_bytes());
 
         // Initialize previous DP row. All zeros represent taking no characters from text1
-        let mut dp_prev = vec![0; shorter.len() + 1];
+        let mut dp_prev = vec![0; shorter.len()];
         let mut dp_curr = dp_prev.clone();
 
         // Iterate in reverse over the text strings, keeping track of the LCS considering the
         // corresponding suffixes
-        for idx_longer in (0..longer.len()).rev() {
-            for idx_shorter in (0..shorter.len()).rev() {
+        #[allow(clippy::needless_range_loop)]
+        for idx_longer in 0..longer.len() {
+            for idx_shorter in 0..shorter.len() {
                 // Take the best path - either skipping the current character in shorter, or
                 // skipping the current character in longer, or using the characters if they match.
-                dp_curr[idx_shorter] = dp_prev[idx_shorter].max(dp_curr[idx_shorter + 1]).max(
-                    dp_prev[idx_shorter + 1]
+                let (last_curr_value, last_prev_value) = if idx_shorter == 0 {
+                    (0, 0)
+                } else {
+                    (dp_curr[idx_shorter - 1], dp_prev[idx_shorter - 1])
+                };
+                dp_curr[idx_shorter] = dp_prev[idx_shorter].max(last_curr_value).max(
+                    last_prev_value
                         + if longer[idx_longer] == shorter[idx_shorter] {
                             1
                         } else {
@@ -38,7 +44,7 @@ impl Solution {
             std::mem::swap(&mut dp_prev, &mut dp_curr);
         }
 
-        dp_prev[0]
+        *dp_prev.last().unwrap()
     }
 }
 
