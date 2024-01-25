@@ -19,8 +19,8 @@ impl Solution {
         let mut dp_prev = vec![0; shorter.len()];
         let mut dp_curr = dp_prev.clone();
 
-        // Iterate in reverse over the text strings, keeping track of the LCS considering the
-        // corresponding suffixes
+        // Iterate in over the text strings, keeping track of the LCS considering the
+        // corresponding prefixes
         #[allow(clippy::needless_range_loop)]
         for idx_longer in 0..longer.len() {
             for idx_shorter in 0..shorter.len() {
