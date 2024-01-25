@@ -20,32 +20,54 @@ impl Solution {
             for index2 in 0..text2.len() {
                 let is_match = text1[index1] == text2[index2];
                 let should_increment = is_match && !has_matched;
+                let mut used_match = false;
                 dp[index1][index2] = match (index1, index2) {
                     (0, 0) => {
                         // If match set to 1 otherwise no
                         if should_increment {
+                            used_match = true;
                             1
                         } else {
                             0
                         }
                     }
-                    (0, _) => dp[index1][index2 - 1] + if should_increment { 1 } else { 0 },
+                    (0, _) => {
+                        dp[index1][index2 - 1]
+                            + if should_increment {
+                                used_match = true;
+                                1
+                            } else {
+                                0
+                            }
+                    }
                     (_, 0) => {
                         if should_increment {
-                            1
+                            if dp[index1 - 1][index2] == 0 {
+                                used_match = true;
+                                1
+                            } else {
+                                1
+                            }
                         } else {
                             dp[index1 - 1][index2]
                         }
                     }
                     _ => {
                         if should_increment {
-                            dp[index1][index2 - 1] + 1
+                            debug_assert!(dp[index1][index2 - 1] <= dp[index1 - 1][index2]);
+                            if dp[index1][index2 - 1] == dp[index1 - 1][index2] {
+                                // Wasn't matched before
+                                used_match = true;
+                                dp[index1][index2 - 1] + 1
+                            } else {
+                                dp[index1 - 1][index2]
+                            }
                         } else {
                             dp[index1 - 1][index2].max(dp[index1][index2 - 1])
                         }
                     }
                 };
-                has_matched = has_matched || is_match;
+                has_matched = has_matched || used_match;
                 #[cfg(debug_assertions)]
                 print_table(index1, index2, has_matched, &dp);
             }
@@ -60,7 +82,7 @@ fn print_table(index1: usize, index2: usize, has_matched: bool, dp: &[Vec<i32>])
     println!(
         "({index1},{index2}) - {}",
         if has_matched {
-            "matched"
+            "has matched"
         } else {
             "not matched yet"
         }
@@ -87,6 +109,7 @@ mod tests {
     #[case("abcde", "ce", 2)]
     #[case("abc", "abc", 3)]
     #[case("abc", "def", 0)]
+    #[case("abcba", "abcbcba", 5)]
     fn case(#[case] text1: String, #[case] text2: String, #[case] expected: i32) {
         let actual = Solution::longest_common_subsequence(text1, text2);
         assert_eq!(actual, expected);
