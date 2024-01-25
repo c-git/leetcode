@@ -3,94 +3,32 @@
 
 impl Solution {
     pub fn longest_common_subsequence(text1: String, text2: String) -> i32 {
-        // It is safe to use byte values because both are only only ascii chars as per problem constraints
-        #[cfg(debug_assertions)]
-        println!("Text1: {text1}\nText2: {text2}");
-        debug_assert_eq!(text1.len(), text1.as_bytes().len());
-        debug_assert_eq!(text2.len(), text2.as_bytes().len());
-        let text1 = text1.as_bytes();
-        let text2 = text2.as_bytes();
+        // Taken from https://leetcode.com/problems/longest-common-subsequence/solutions/2394254/rust-dp-with-comments/
 
-        // Stores the longest solution to that index in each string
-        let mut dp = vec![vec![0; text2.len()]; text1.len()];
+        // Input is ASCII => chars are bytes
+        let (text1, text2) = (text1.as_bytes(), text2.as_bytes());
+        let (n1, n2) = (text1.len(), text2.len());
 
-        #[allow(clippy::needless_range_loop)]
-        for index1 in 0..text1.len() {
-            let mut has_matched = false;
-            for index2 in 0..text2.len() {
-                let is_match = text1[index1] == text2[index2];
-                let should_increment = is_match && !has_matched;
-                let mut used_match = false;
-                dp[index1][index2] = match (index1, index2) {
-                    (0, 0) => {
-                        // If match set to 1 otherwise no
-                        if should_increment {
-                            used_match = true;
-                            1
-                        } else {
-                            0
-                        }
-                    }
-                    (0, _) => {
-                        dp[index1][index2 - 1]
-                            + if should_increment {
-                                used_match = true;
-                                1
-                            } else {
-                                0
-                            }
-                    }
-                    (_, 0) => {
-                        if should_increment {
-                            if dp[index1 - 1][index2] == 0 {
-                                used_match = true;
-                                1
-                            } else {
-                                1
-                            }
-                        } else {
-                            dp[index1 - 1][index2]
-                        }
-                    }
-                    _ => {
-                        if should_increment {
-                            debug_assert!(dp[index1][index2 - 1] <= dp[index1 - 1][index2]);
-                            if dp[index1][index2 - 1] == dp[index1 - 1][index2] {
-                                // Wasn't matched before
-                                used_match = true;
-                                dp[index1][index2 - 1] + 1
-                            } else {
-                                dp[index1 - 1][index2]
-                            }
-                        } else {
-                            dp[index1 - 1][index2].max(dp[index1][index2 - 1])
-                        }
-                    }
-                };
-                has_matched = has_matched || used_match;
-                #[cfg(debug_assertions)]
-                print_table(index1, index2, has_matched, &dp);
+        // Initialize previous DP row. All zeros represent taking no characters from text1
+        let mut dp_prev = vec![0; n2 + 1];
+        let mut dp_curr = dp_prev.clone();
+
+        // Iterate in reverse over the text strings, keeping track of the LCS considering the
+        // corresponding suffixes
+        for i in (0..n1).rev() {
+            for j in (0..n2).rev() {
+                // Take the best path - either skipping the current character in text2, or
+                // skipping the current character in text1, or using the characters if they match.
+                dp_curr[j] = dp_prev[j]
+                    .max(dp_curr[j + 1])
+                    .max(dp_prev[j + 1] + if text1[i] == text2[j] { 1 } else { 0 });
             }
+            // Swap the rows to reuse dp_prev, which is now stale
+            std::mem::swap(&mut dp_prev, &mut dp_curr);
         }
 
-        *dp.last().unwrap().last().unwrap()
+        dp_prev[0]
     }
-}
-
-#[cfg(debug_assertions)]
-fn print_table(index1: usize, index2: usize, has_matched: bool, dp: &[Vec<i32>]) {
-    println!(
-        "({index1},{index2}) - {}",
-        if has_matched {
-            "has matched"
-        } else {
-            "not matched yet"
-        }
-    );
-    for row in dp {
-        println!("{row:?}");
-    }
-    println!();
 }
 
 // << ---------------- Code below here is only for local use ---------------- >>
@@ -110,6 +48,7 @@ mod tests {
     #[case("abc", "abc", 3)]
     #[case("abc", "def", 0)]
     #[case("abcba", "abcbcba", 5)]
+    #[case("pmjghexybyrgzczy", "hafcdqbgncrcbihkd", 4)]
     fn case(#[case] text1: String, #[case] text2: String, #[case] expected: i32) {
         let actual = Solution::longest_common_subsequence(text1, text2);
         assert_eq!(actual, expected);
