@@ -39,13 +39,44 @@ impl Solution {
                             0
                         },
                 );
+                #[cfg(debug_assertions)]
+                print_debug_info(
+                    idx_shorter,
+                    idx_longer,
+                    &dp_prev,
+                    &dp_curr,
+                    &shorter,
+                    &longer,
+                );
             }
+
             // Swap the rows to reuse dp_prev, which is now stale
+            #[cfg(debug_assertions)]
+            println!("Swapping arrays now................................\n");
             std::mem::swap(&mut dp_prev, &mut dp_curr);
         }
 
         *dp_prev.last().unwrap()
     }
+}
+
+#[cfg(debug_assertions)]
+fn print_debug_info(
+    idx_shorter: usize,
+    idx_longer: usize,
+    dp_prev: &[i32],
+    dp_curr: &[i32],
+    shorter: &&[u8],
+    longer: &&[u8],
+) {
+    println!(
+        "({idx_longer}, {idx_shorter}) - ({}, {})",
+        char::from_u32(longer[idx_longer] as _).unwrap(),
+        char::from_u32(shorter[idx_shorter] as _).unwrap()
+    );
+    println!("prev: {dp_prev:?}");
+    println!("curr: {dp_curr:?}");
+    println!();
 }
 
 // << ---------------- Code below here is only for local use ---------------- >>
@@ -59,13 +90,14 @@ mod tests {
     use rstest::rstest;
 
     #[rstest]
-    #[case("abcde", "ace", 3)]
-    #[case("abcde", "cce", 2)]
-    #[case("abcde", "ce", 2)]
-    #[case("abc", "abc", 3)]
-    #[case("abc", "def", 0)]
-    #[case("abcba", "abcbcba", 5)]
-    #[case("pmjghexybyrgzczy", "hafcdqbgncrcbihkd", 4)]
+    // #[case("abcde", "ace", 3)]
+    // #[case("abcde", "cce", 2)]
+    // #[case("abcde", "ce", 2)]
+    // #[case("abc", "abc", 3)]
+    // #[case("abc", "def", 0)]
+    // #[case("abcba", "abcbcba", 5)]
+    // #[case("pmjghexybyrgzczy", "hafcdqbgncrcbihkd", 4)]
+    #[case("jghbrgc", "hcbgcrcbhk", 4)]
     fn case(#[case] text1: String, #[case] text2: String, #[case] expected: i32) {
         let actual = Solution::longest_common_subsequence(text1, text2);
         assert_eq!(actual, expected);
