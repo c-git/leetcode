@@ -32,12 +32,7 @@ impl Solution {
                     (dp_curr[idx_shorter - 1], dp_prev[idx_shorter - 1])
                 };
                 dp_curr[idx_shorter] = dp_prev[idx_shorter].max(last_curr_value).max(
-                    last_prev_value
-                        + if longer[idx_longer] == shorter[idx_shorter] {
-                            1
-                        } else {
-                            0
-                        },
+                    last_prev_value + increment_for_match(longer, idx_longer, shorter, idx_shorter),
                 );
                 #[cfg(debug_assertions)]
                 print_debug_info(
@@ -57,6 +52,20 @@ impl Solution {
         }
 
         *dp_prev.last().unwrap()
+    }
+}
+
+#[inline]
+fn increment_for_match(
+    longer: &[u8],
+    idx_longer: usize,
+    shorter: &[u8],
+    idx_shorter: usize,
+) -> i32 {
+    if longer[idx_longer] == shorter[idx_shorter] {
+        1
+    } else {
+        0
     }
 }
 
