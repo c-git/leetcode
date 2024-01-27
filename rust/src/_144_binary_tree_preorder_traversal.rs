@@ -31,11 +31,11 @@ impl Solution {
         while let Some(node) = stack.pop() {
             let node = node.borrow();
             result.push(node.val);
-            if let Some(left) = node.left.clone() {
-                stack.push(left);
-            }
             if let Some(right) = node.right.clone() {
                 stack.push(right);
+            }
+            if let Some(left) = node.left.clone() {
+                stack.push(left);
             }
         }
         result
@@ -58,6 +58,7 @@ mod tests {
     #[case(TreeRoot::from("[1,null,2,3]").into(), vec![1,2,3])]
     #[case(TreeRoot::from("[]").into(), vec![])]
     #[case(TreeRoot::from("[1]").into(),vec![1])]
+    #[case(TreeRoot::from("[3,1,2]").into(), vec![3,1,2])]
     fn case(#[case] root: Option<Rc<RefCell<TreeNode>>>, #[case] expected: Vec<i32>) {
         let actual = Solution::preorder_traversal(root);
         assert_eq!(actual, expected);
