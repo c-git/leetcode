@@ -24,17 +24,22 @@ use std::rc::Rc;
 impl Solution {
     pub fn postorder_traversal(root: Option<Rc<RefCell<TreeNode>>>) -> Vec<i32> {
         let mut result = vec![];
-        Self::postorder_traversal_(&root, &mut result);
-        result
-    }
-
-    fn postorder_traversal_(root: &Option<Rc<RefCell<TreeNode>>>, result: &mut Vec<i32>) {
-        if let Some(node) = root {
+        let Some(node) = root else {
+            return result;
+        };
+        let mut stack = vec![node];
+        while let Some(node) = stack.pop() {
             let node = node.borrow();
-            Self::postorder_traversal_(&node.left, result);
-            Self::postorder_traversal_(&node.right, result);
             result.push(node.val);
+            if let Some(left) = node.left.clone() {
+                stack.push(left);
+            }
+            if let Some(right) = node.right.clone() {
+                stack.push(right);
+            }
         }
+        result.reverse();
+        result
     }
 }
 
