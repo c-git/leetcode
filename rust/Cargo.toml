@@ -6,7 +6,7 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-cargo-leet = { git = "https://github.com/rust-practice/cargo-leet.git", branch = "develop" }
+cargo-leet = "0.2.0"
 #Old versions used because or old version of rust on leetcode
 rand = "0.6"
 rstest = "0.18.2"
