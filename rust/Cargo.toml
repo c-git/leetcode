@@ -7,6 +7,5 @@ edition = "2021"
 
 [dependencies]
 cargo-leet = "0.2.0"
-#Old versions used because or old version of rust on leetcode
-rand = "0.6"
+rand = "0.6" #Old version used to match version used on leetcode servers
 rstest = "0.18.2"
