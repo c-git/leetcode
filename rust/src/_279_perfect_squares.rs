@@ -1,8 +1,6 @@
 //! Solution for https://leetcode.com/problems/perfect-squares
 //! 279. Perfect Squares
 
-use std::collections::HashMap;
-
 impl Solution {
     pub fn num_squares(n: i32) -> i32 {
         let perfect_squares: Vec<i32> = (1..=n)
@@ -16,7 +14,7 @@ impl Solution {
             })
             .collect();
 
-        let mut memo = HashMap::new();
+        let mut memo = vec![vec![None; perfect_squares.len() + 1]; n as usize + 1];
         Self::num_squares_(n, &perfect_squares, &mut memo)
             .expect("should always have an answer if n is 1 or more")
     }
@@ -24,7 +22,7 @@ impl Solution {
     fn num_squares_(
         n: i32,
         perfect_squares: &[i32],
-        memo: &mut HashMap<(i32, usize), Option<i32>>,
+        memo: &mut Vec<Vec<Option<i32>>>,
     ) -> Option<i32> {
         debug_assert!(n >= 0);
         if perfect_squares.is_empty() {
@@ -34,9 +32,8 @@ impl Solution {
             // 1 number needed to make 1 and 0 numbers needed to make 0
             return Some(n);
         }
-        let key = (n, perfect_squares.len());
-        if let Some(result) = memo.get(&key) {
-            return *result;
+        if memo[n as usize][perfect_squares.len()].is_some() {
+            return memo[n as usize][perfect_squares.len()];
         }
 
         let largest_index_that_fits = perfect_squares
@@ -60,7 +57,7 @@ impl Solution {
             (Some(x), Some(y)) => Some(y.min(x + 1)),
         };
 
-        memo.insert(key, result);
+        memo[n as usize][perfect_squares.len()] = result;
         result
     }
 }
