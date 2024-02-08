@@ -5,7 +5,7 @@ use std::collections::HashMap;
 
 impl Solution {
     pub fn num_squares(n: i32) -> i32 {
-        let perfect_squares: Vec<i32> = (1..n)
+        let perfect_squares: Vec<i32> = (1..=n)
             .map_while(|x| {
                 let y = x * x;
                 if y <= n {
@@ -78,6 +78,7 @@ mod tests {
     #[rstest]
     #[case(12, 3)]
     #[case(13, 2)]
+    #[case(1, 1)]
     fn case(#[case] n: i32, #[case] expected: i32) {
         let actual = Solution::num_squares(n);
         assert_eq!(actual, expected);
