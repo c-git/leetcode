@@ -73,11 +73,18 @@ impl Solution {
     pub fn can_traverse_all_pairs(nums: Vec<i32>) -> bool {
         // Loosely based on https://leetcode.com/problems/greatest-common-divisor-traversal/solutions/4780133/full-detailed-explanation-c-java-js-rust-python-go/
 
+        if nums.len() == 1 {
+            return true;
+        }
         let max = *nums.iter().max().unwrap() as usize;
         let mut union_find = UnionFind::new(max + 1);
         let primes = primes();
 
         for &num in nums.iter() {
+            if num == 1 {
+                // Automatically fail if we find a 1 because it cannot be connected
+                return false;
+            }
             let mut remainder = num as usize;
             for &prime in primes.iter() {
                 if remainder < prime {
@@ -115,6 +122,7 @@ mod tests {
     #[case(vec![99991; 100_000], true)]
     #[case(vec![99991], true)]
     #[case(vec![1], true)]
+    #[case(vec![1,1], false)]
     fn case(#[case] nums: Vec<i32>, #[case] expected: bool) {
         let actual = Solution::can_traverse_all_pairs(nums);
         assert_eq!(actual, expected);
