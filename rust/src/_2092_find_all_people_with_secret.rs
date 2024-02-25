@@ -60,9 +60,7 @@ impl Solution {
             let [x, y, t] = meeting[..] else {
                 unreachable!("guaranteed to be 3 by constraint")
             };
-            let key = t;
-            let value = (x, y);
-            same_time_meetings.entry(key).or_default().push(value);
+            same_time_meetings.entry(t).or_default().push((x, y));
         }
 
         // Create graph
@@ -74,15 +72,15 @@ impl Solution {
             // Unite two persons taking part in a meeting
             for (x, y) in meetings_at_time.iter() {
                 graph.union(*x as usize, *y as usize);
+            }
 
-                // If any one knows the secret, both will be connected to 0.
-                // If no one knows the secret, then reset.
-                for (x, y) in meetings_at_time.iter() {
-                    if !graph.is_same_set(*x as usize, 0) {
-                        // No need to check for y since x and y were united
-                        graph.reset(*x as usize);
-                        graph.reset(*y as usize);
-                    }
+            // If any one knows the secret, both will be connected to 0.
+            // If no one knows the secret, then reset.
+            for (x, y) in meetings_at_time.iter() {
+                if !graph.is_same_set(*x as usize, 0) {
+                    // No need to check for y since x and y were united
+                    graph.reset(*x as usize);
+                    graph.reset(*y as usize);
                 }
             }
         }
@@ -115,6 +113,8 @@ mod tests {
     #[case(4, vec![vec![3,1,3],vec![1,2,2],vec![0,3,3]], 3, vec![0,1,3])]
     #[case(5, vec![vec![3,4,2],vec![1,2,1],vec![2,3,1]], 1, vec![0,1,2,3,4])]
     #[case(6, vec![vec![0,2,1],vec![1,3,1],vec![4,5,1]], 1, vec![0,1,2,3,])]
+    #[case(5, vec![vec![1,4,3],vec![0,4,3]], 3, vec![0,1,3,4])]
+
     fn case(
         #[case] n: i32,
         #[case] meetings: Vec<Vec<i32>>,
