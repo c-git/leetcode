@@ -33,71 +33,60 @@ impl UnionFind {
         }
     }
 
-    fn is_full_rank(&mut self) -> bool {
-        let parent = self.find(0);
-        self.rank[parent] == self.rank.len()
+    fn rank(&mut self, x: usize) -> usize {
+        let parent = self.find(x);
+        self.rank[parent]
     }
-}
-
-/// Binary GCD algorithm taken from https://en.wikipedia.org/wiki/Binary_GCD_algorithm
-pub fn gcd(mut u: u64, mut v: u64) -> u64 {
-    // Base cases: gcd(n, 0) = gcd(0, n) = n
-    if u == 0 {
-        return v;
-    } else if v == 0 {
-        return u;
-    }
-
-    // Using identities 2 and 3:
-    // gcd(2ⁱ u, 2ʲ v) = 2ᵏ gcd(u, v) with u, v odd and k = min(i, j)
-    // 2ᵏ is the greatest power of two that divides both 2ⁱ u and 2ʲ v
-    let i = u.trailing_zeros();
-    u >>= i;
-    let j = v.trailing_zeros();
-    v >>= j;
-    let k = std::cmp::min(i, j);
-
-    loop {
-        // u and v are odd at the start of the loop
-        debug_assert!(u % 2 == 1, "u = {} should be odd", u);
-        debug_assert!(v % 2 == 1, "v = {} should be odd", v);
-
-        // Swap if necessary so u ≤ v
-        if u > v {
-            std::mem::swap(&mut u, &mut v);
-        }
-
-        // Identity 4: gcd(u, v) = gcd(u, v-u) as u ≤ v and u, v are both odd
-        v -= u;
-        // v is now even
-
-        if v == 0 {
-            // Identity 1: gcd(u, 0) = u
-            // The shift by k is necessary to add back the 2ᵏ factor that was removed before the loop
-            return u << k;
-        }
-
-        // Identity 3: gcd(u, 2ʲ v) = gcd(u, v) as u is odd
-        v >>= v.trailing_zeros();
-    }
-}
-
-fn is_gcd_greater_than_1(x: i32, y: i32) -> bool {
-    gcd(x.unsigned_abs() as _, y.unsigned_abs() as _) > 1
 }
 
 impl Solution {
     pub fn can_traverse_all_pairs(nums: Vec<i32>) -> bool {
-        let mut uf = UnionFind::new(nums.len());
-        for (outer_idx, &outer_val) in nums.iter().enumerate().skip(1) {
-            for (inner_idx, &inner_val) in nums.iter().take(outer_idx).enumerate() {
-                if is_gcd_greater_than_1(inner_val, outer_val) {
-                    uf.union(inner_idx, outer_idx);
+        // Based on https://leetcode.com/problems/greatest-common-divisor-traversal/solutions/3569019/rust-union-join-prime-factorization/
+
+        // handle edge case
+        if nums.len() == 1 {
+            return true;
+        }
+        let mut union_find = UnionFind::new(nums.len());
+        let mut mp = std::collections::HashMap::<i32, usize>::new();
+
+        for (i, val) in nums.iter().enumerate() {
+            let mut a = *val;
+            if a == 1 {
+                return false;
+            }
+
+            if let Some(j) = mp.get(&a) {
+                union_find.union(i, *j);
+            }
+            mp.insert(a, i);
+
+            for b in 2..a {
+                if b as i64 * b as i64 > nums[i] as i64 {
+                    break;
                 }
+                if a % b != 0 {
+                    continue;
+                }
+
+                if let Some(j) = mp.get(&b) {
+                    union_find.union(i, *j);
+                }
+                mp.insert(b, i);
+                while a % b == 0 {
+                    a /= b;
+                }
+                if a == 1 {
+                    break;
+                }
+                if let Some(j) = mp.get(&a) {
+                    union_find.union(i, *j);
+                }
+                mp.insert(a, i);
             }
         }
 
-        uf.is_full_rank()
+        union_find.rank(0) == nums.len()
     }
 }
 
@@ -115,6 +104,7 @@ mod tests {
     #[case(vec![2,3,6], true)]
     #[case(vec![3,9,5], false)]
     #[case(vec![4,3,12,8], true)]
+    #[case(vec![99991; 100_000], true)]
     fn case(#[case] nums: Vec<i32>, #[case] expected: bool) {
         let actual = Solution::can_traverse_all_pairs(nums);
         assert_eq!(actual, expected);
