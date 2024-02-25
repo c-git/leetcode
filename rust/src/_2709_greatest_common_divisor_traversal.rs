@@ -33,60 +33,71 @@ impl UnionFind {
         }
     }
 
-    fn rank(&mut self, x: usize) -> usize {
-        let parent = self.find(x);
-        self.rank[parent]
+    fn is_same_set(&mut self, a: usize, b: usize) -> bool {
+        self.find(a) == self.find(b)
     }
+}
+
+const MAX_VALUE: usize = 100_000; //If number is prime increase by 1 so it will be included
+
+/// Returns an array of booleans with the indices set to true being prime
+/// Mostly here because I was experimenting with const functions to see what could be offloaded
+/// to compile time and shared between runs
+const fn sieve_of_eratosthenes() -> [bool; MAX_VALUE] {
+    let mut result = [true; MAX_VALUE];
+    result[0] = false;
+    result[1] = false;
+    let mut outer = 2;
+    while outer < result.len() {
+        if result[outer] {
+            let mut inner = outer + outer;
+            while inner < result.len() {
+                result[inner] = false;
+                inner += outer;
+            }
+        }
+        outer += 1;
+    }
+    result
+}
+
+fn primes() -> Vec<usize> {
+    sieve_of_eratosthenes()
+        .iter()
+        .enumerate()
+        .filter_map(|(index, &is_prime)| if is_prime { Some(index) } else { None })
+        .collect()
 }
 
 impl Solution {
     pub fn can_traverse_all_pairs(nums: Vec<i32>) -> bool {
-        // Based on https://leetcode.com/problems/greatest-common-divisor-traversal/solutions/3569019/rust-union-join-prime-factorization/
+        // Loosely based on https://leetcode.com/problems/greatest-common-divisor-traversal/solutions/4780133/full-detailed-explanation-c-java-js-rust-python-go/
 
-        // handle edge case
-        if nums.len() == 1 {
-            return true;
-        }
-        let mut union_find = UnionFind::new(nums.len());
-        let mut mp = std::collections::HashMap::<i32, usize>::new();
+        let max = *nums.iter().max().unwrap() as usize;
+        let mut union_find = UnionFind::new(max + 1);
+        let primes = primes();
 
-        for (i, val) in nums.iter().enumerate() {
-            let mut a = *val;
-            if a == 1 {
+        for &num in nums.iter() {
+            if num == 1 {
+                // Automatically fail if we find a 1 because it cannot be connected
                 return false;
             }
-
-            if let Some(j) = mp.get(&a) {
-                union_find.union(i, *j);
-            }
-            mp.insert(a, i);
-
-            for b in 2..a {
-                if b as i64 * b as i64 > nums[i] as i64 {
+            let mut num = num as usize;
+            for &prime in primes.iter() {
+                if num < prime {
                     break;
                 }
-                if a % b != 0 {
-                    continue;
+                if num % prime == 0 {
+                    union_find.union(num, prime);
+                    num /= prime;
                 }
-
-                if let Some(j) = mp.get(&b) {
-                    union_find.union(i, *j);
-                }
-                mp.insert(b, i);
-                while a % b == 0 {
-                    a /= b;
-                }
-                if a == 1 {
-                    break;
-                }
-                if let Some(j) = mp.get(&a) {
-                    union_find.union(i, *j);
-                }
-                mp.insert(a, i);
             }
         }
 
-        union_find.rank(0) == nums.len()
+        let first_num = nums[0] as usize;
+        nums.iter()
+            .skip(1)
+            .all(|&num| union_find.is_same_set(num as usize, first_num))
     }
 }
 
@@ -96,6 +107,7 @@ pub struct Solution;
 
 #[cfg(test)]
 mod tests {
+
     use super::*;
 
     use rstest::rstest;
@@ -105,6 +117,7 @@ mod tests {
     #[case(vec![3,9,5], false)]
     #[case(vec![4,3,12,8], true)]
     #[case(vec![99991; 100_000], true)]
+    #[case(vec![99991], true)]
     fn case(#[case] nums: Vec<i32>, #[case] expected: bool) {
         let actual = Solution::can_traverse_all_pairs(nums);
         assert_eq!(actual, expected);
