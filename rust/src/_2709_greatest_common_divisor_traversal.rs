@@ -82,14 +82,14 @@ impl Solution {
                 // Automatically fail if we find a 1 because it cannot be connected
                 return false;
             }
-            let mut num = num as usize;
+            let mut remainder = num as usize;
             for &prime in primes.iter() {
-                if num < prime {
+                if remainder < prime {
                     break;
                 }
-                if num % prime == 0 {
-                    union_find.union(num, prime);
-                    num /= prime;
+                if remainder % prime == 0 {
+                    union_find.union(prime, num as usize);
+                    remainder /= prime;
                 }
             }
         }
