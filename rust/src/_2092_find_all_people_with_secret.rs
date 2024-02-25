@@ -1,7 +1,7 @@
 //! Solution for https://leetcode.com/problems/find-all-people-with-secret
 //! 2092. Find All People With Secret
 
-use std::collections::BTreeSet;
+use std::collections::BTreeMap;
 
 struct UnionFind {
     components: Vec<usize>,
@@ -39,62 +39,64 @@ impl UnionFind {
         self.find(a) == self.find(b)
     }
 
-    fn reset(&mut self) {
-        for (i, val) in self.components.iter_mut().enumerate() {
-            *val = i;
-        }
+    fn reset(&mut self, x: usize) {
+        self.components[x] = x;
+        self.rank[x] = 1;
     }
 }
 
 impl Solution {
-    pub fn find_all_people(n: i32, meetings: Vec<Vec<i32>>, first_person: i32) -> Vec<i32> {
+    pub fn find_all_people(n: i32, mut meetings: Vec<Vec<i32>>, first_person: i32) -> Vec<i32> {
+        // Based on last version in Editorial
         let n = n as usize;
-        let first_person = first_person as usize; // Use an way to find set in UnionFind that knows secret
-        let mut result: BTreeSet<usize> = [0, first_person].into();
-        let mut uf = UnionFind::new(n);
+        let first_person = first_person as usize;
 
-        // Change from i32 to usize
-        let mut meetings: Vec<Vec<usize>> = meetings
-            .into_iter()
-            .map(|x| x.into_iter().map(|y| y as usize).collect())
-            .collect();
+        // Sort meetings in increasing order of time
+        meetings.sort_unstable_by_key(|meeting| meeting[2]);
 
-        meetings.sort_unstable_by(|x, y| x[2].cmp(&y[2])); // Sort by time
+        // Group Meetings in increasing order of time
+        let mut same_time_meetings: BTreeMap<i32, Vec<(i32, i32)>> = BTreeMap::new();
+        for meeting in meetings {
+            let [x, y, t] = meeting[..] else {
+                unreachable!("guaranteed to be 3 by constraint")
+            };
+            let key = t;
+            let value = (x, y);
+            same_time_meetings.entry(key).or_default().push(value);
+        }
 
-        let mut iter = meetings.into_iter().peekable();
-        while let Some(meeting) = iter.next() {
-            let mut curr_meetings = vec![meeting];
+        // Create graph
+        let mut graph = UnionFind::new(n);
+        graph.union(first_person, 0);
 
-            // Collect all the current meetings
-            while Some(true) == iter.peek().map(|x| x[2] == curr_meetings[0][2]) {
-                curr_meetings.push(iter.next().expect("just checked that it is some"));
-            }
+        // Process in increasing order of time
+        for meetings_at_time in same_time_meetings.values() {
+            // Unite two persons taking part in a meeting
+            for (x, y) in meetings_at_time.iter() {
+                graph.union(*x as usize, *y as usize);
 
-            // See if someone in the meeting knows the secret
-            if curr_meetings
-                .iter()
-                .any(|x| result.contains(&x[0]) || result.contains(&x[1]))
-            {
-                // Spread the secret too all people connected
-                uf.reset();
-
-                // Merge into groups based on meetings
-                curr_meetings
-                    .iter()
-                    .for_each(|meeting| uf.union(meeting[0], meeting[1]));
-
-                // Merge all people that know the password
-                result.iter().for_each(|&x| uf.union(first_person, x));
-
-                // Now that all the people are that know the secret are in one group add them to result
-                for x in 0..n {
-                    if uf.is_same_set(first_person, x) {
-                        result.insert(x);
+                // If any one knows the secret, both will be connected to 0.
+                // If no one knows the secret, then reset.
+                for (x, y) in meetings_at_time.iter() {
+                    if !graph.is_same_set(*x as usize, 0) {
+                        // No need to check for y since x and y were united
+                        graph.reset(*x as usize);
+                        graph.reset(*y as usize);
                     }
                 }
             }
         }
-        result.into_iter().map(|x| x as i32).collect()
+
+        // All those who are connected to 0 will know the secret
+        (0..n)
+            .filter_map(|x| {
+                if graph.is_same_set(x, 0) {
+                    Some(x as i32)
+                } else {
+                    None
+                }
+            })
+            .collect()
     }
 }
 
