@@ -34,7 +34,6 @@ impl UnionFind {
     }
 
     fn is_full_rank(&mut self) -> bool {
-        dbg!(&self.rank);
         let parent = self.find(0);
         self.rank[parent] == self.rank.len()
     }
