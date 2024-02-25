@@ -1,5 +1,3 @@
-use std::mem::swap;
-
 struct UnionFind {
     components: Vec<usize>,
     rank: Vec<usize>,
@@ -25,7 +23,7 @@ impl UnionFind {
         let mut root_y = self.find(y);
         if root_x != root_y {
             if self.rank[root_x] > self.rank[root_y] {
-                swap(&mut root_x, &mut root_y)
+                std::mem::swap(&mut root_x, &mut root_y)
             }
             self.rank[root_y] += self.rank[root_x];
             self.components[root_x] = root_y;
@@ -65,7 +63,7 @@ impl Solution {
     }
 }
 
-struct Solution;
+pub struct Solution;
 #[cfg(test)]
 mod tests {
     use super::*;
