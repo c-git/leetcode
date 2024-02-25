@@ -78,10 +78,6 @@ impl Solution {
         let primes = primes();
 
         for &num in nums.iter() {
-            if num == 1 {
-                // Automatically fail if we find a 1 because it cannot be connected
-                return false;
-            }
             let mut remainder = num as usize;
             for &prime in primes.iter() {
                 if remainder < prime {
@@ -118,6 +114,7 @@ mod tests {
     #[case(vec![4,3,12,8], true)]
     #[case(vec![99991; 100_000], true)]
     #[case(vec![99991], true)]
+    #[case(vec![1], true)]
     fn case(#[case] nums: Vec<i32>, #[case] expected: bool) {
         let actual = Solution::can_traverse_all_pairs(nums);
         assert_eq!(actual, expected);
