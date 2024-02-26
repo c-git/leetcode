@@ -1,12 +1,14 @@
 //! Solution for https://leetcode.com/problems/greatest-common-divisor-traversal
 //! 2709. Greatest Common Divisor Traversal
 
+/// Structure to store data for UnionFind
 struct UnionFind {
     components: Vec<usize>,
     rank: Vec<usize>,
 }
 
 impl UnionFind {
+    /// Creates a new UnionFind of the size passed
     fn new(n: usize) -> Self {
         Self {
             components: (0..n).collect(),
@@ -14,6 +16,7 @@ impl UnionFind {
         }
     }
 
+    /// Finds the set that a value belongs to
     fn find(&mut self, x: usize) -> usize {
         if x != self.components[x] {
             self.components[x] = self.find(self.components[x]);
@@ -21,6 +24,7 @@ impl UnionFind {
         self.components[x]
     }
 
+    /// Joins the two values passed into one group (into the bigger set)
     fn union(&mut self, x: usize, y: usize) {
         let mut root_x = self.find(x);
         let mut root_y = self.find(y);
@@ -33,6 +37,7 @@ impl UnionFind {
         }
     }
 
+    /// Checks if two values are in the same set
     fn is_same_set(&mut self, a: usize, b: usize) -> bool {
         self.find(a) == self.find(b)
     }
@@ -64,6 +69,9 @@ const fn sieve_of_eratosthenes() -> [bool; MAX_VALUE] {
 /// Move running of sieve_of_eratosthenes to compile time (Mostly just for fun)
 const SIEVED_PRIMES: [bool; MAX_VALUE] = sieve_of_eratosthenes();
 
+/// Creates a vector of primes up to (and possibly including) the value passed
+///
+/// Assumes max is less than the limit given in the question
 fn primes(max: usize) -> Vec<usize> {
     SIEVED_PRIMES
         .iter()
@@ -76,28 +84,43 @@ fn primes(max: usize) -> Vec<usize> {
 impl Solution {
     pub fn can_traverse_all_pairs(nums: Vec<i32>) -> bool {
         // Loosely based on https://leetcode.com/problems/greatest-common-divisor-traversal/solutions/4780133/full-detailed-explanation-c-java-js-rust-python-go/
+        // and the editorial
 
+        // Special case needed because even if the value in the array is 1 then it is still connected as no traversal is needed
+        // To see why it's need consider the case of an array 1's
         if nums.len() == 1 {
             return true;
         }
+
+        // Get the maximum value in the input to avoid allocating more space than needed
         let max = *nums.iter().max().unwrap() as usize;
+
+        // Create a UnionFind to store the connected sets
         let mut union_find = UnionFind::new(max + 1);
+
+        // Get a list of the primes that are up to the max value in the input
         let primes = primes(max);
 
+        // Link numbers in the input to their prime factors (which will link them if they have the same prime factors)
         for &num in nums.iter() {
             if num == 1 {
-                // Automatically fail if we find a 1 because it cannot be connected
+                // Automatically fail if we find a 1 because it cannot be connected (Special case of a single 1 already handled)
                 return false;
             }
-            let mut remainder = num as usize;
+
+            let mut remainder = num as usize; // Start of with the whole number
+
+            // Iteratively remove the prime factors from each number
             while remainder > 1 {
-                let factor;
-                (remainder, factor) = remove_prime_factor(remainder, &primes);
-                union_find.union(factor, num as usize);
+                let factor; // Allocate a space to store the returned value
+                (remainder, factor) = remove_prime_factor(remainder, &primes); // Remove a factor
+                union_find.union(factor, num as usize); // Link the prime factor removed to the original number from the input
             }
         }
 
-        let first_num = nums[0] as usize;
+        let first_num = nums[0] as usize; // Test point to see if all other points can reach it
+
+        // Test all other points against the first and return true iff all can reach it
         nums.iter()
             .skip(1)
             .all(|&num| union_find.is_same_set(num as usize, first_num))
