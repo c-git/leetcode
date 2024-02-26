@@ -61,8 +61,11 @@ const fn sieve_of_eratosthenes() -> [bool; MAX_VALUE] {
     result
 }
 
+/// Move running of sieve_of_eratosthenes to compile time (Mostly just for fun)
+const SIEVED_PRIMES: [bool; MAX_VALUE] = sieve_of_eratosthenes();
+
 fn primes(max: usize) -> Vec<usize> {
-    sieve_of_eratosthenes()
+    SIEVED_PRIMES
         .iter()
         .enumerate()
         .take_while(|(index, _)| index <= &max)
