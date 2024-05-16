@@ -26,22 +26,24 @@ impl Solution {
         let mut result = vec![];
 
         let mut current_node = root;
-        let mut stack = vec![];
+        let mut stack: Vec<Rc<RefCell<TreeNode>>> = vec![];
         while !stack.is_empty() || current_node.is_some() {
             // Go to leftmost node
-            while current_node.is_some() {
-                stack.push(current_node.clone());
-                current_node = current_node.unwrap().as_ref().borrow().left.clone();
+            while let Some(node) = current_node.as_ref() {
+                stack.push(Rc::clone(node));
+                let temp = node.borrow().left.clone();
+                current_node = temp;
             }
-            current_node = stack
+            // Recover leftmost node from stack
+            let leftmost_node = stack
                 .pop()
-                .expect("Only Some(_) should have been added to stack");
+                .expect("stack cannot be empty because to enter the loop either the stack has to be non-empty or current_node must be some. If stack was empty then the current_node at a minium would be added to the stack");
 
             // Perform action
-            result.push(current_node.clone().unwrap().borrow().val);
+            result.push(leftmost_node.borrow().val);
 
             // Check if this node has a right subtree
-            current_node = current_node.unwrap().as_ref().borrow().right.clone();
+            current_node.clone_from(&leftmost_node.borrow().right);
         }
 
         result
@@ -49,7 +51,7 @@ impl Solution {
 }
 
 use cargo_leet::TreeNode;
-struct Solution;
+pub struct Solution;
 
 #[cfg(test)]
 mod tests {
