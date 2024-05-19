@@ -20,50 +20,43 @@ impl Solution {
 
         // dp stores the minimum number of edits required to go from word1 to word2
         // dp is indexed by the number of characters from (word1, word2) (using length of substring)
-        let mut dp = vec![vec![0; word2.len() + 1]; word1.len() + 1];
+        // but to save space as we only use at most the previous row we only store the previous and current rows
 
-        // Initialize first row where number of characters is 0 from word1
-        for (i, cell) in dp[0].iter_mut().enumerate() {
-            // Each position we need to do an addition as there are no chars from word1 to be used
-            *cell = i; //dp[0][i] = i;
-        }
+        // The first row uses 0 characters from word1 and records the changes needed to turn it into word2
+        // In each position we need to do an addition as there are no chars from word1 to be used
+        let mut dp_prev: Vec<usize> = (0..=word2.len()).collect();
 
-        // Initialize first column of where number of characters from word2 is 0
-        for (i, row) in dp.iter_mut().enumerate() {
-            // Each position we need to do a deletion as there are no chars from word2 to be used
-            row[0] = i; //dp[i][0] = i;
-        }
+        // Create a vector to use for the current row so we don't need to allocate the memory in each loop
+        let mut dp_curr = vec![0; word2.len() + 1];
 
         // See explanation at top for how each value is determined
-        for (idx1, c1) in word1.iter().enumerate() {
+        for c1 in word1.iter() {
+            // Initialize first column of where number of characters from word2 is 0
+            // Each time we will need to do a deletion as there are no chars from word2 to be used
+            dp_curr[0] = dp_prev[0] + 1;
+
             for (idx2, c2) in word2.iter().enumerate() {
                 // LI:
                 //  - dp index is one more than word idx because dp is indexed by length
-                //  - All rows above are filled in, that is dp with first index <= idx1 are already calculated
-                //  - All cells to the left are filled in, that is all dp with first index == idx1 +1 and second index <= idx2 are already calculated
+                //  - dp_prev is already fully completed
+                //  - All cells to the left are filled in in current, that is where dp_curr where index <= idx2
 
                 // Add char from word2 so add to cell on the left
-                let addition = dp[idx1 + 1][idx2] + 1;
+                let addition = dp_curr[idx2] + 1;
 
                 // Delete char from word1 so add to cell above
-                let deletion = dp[idx1][idx2 + 1] + 1;
+                let deletion = dp_prev[idx2 + 1] + 1;
 
                 // Replace char from word1 with char from word2
-                let replace = dp[idx1][idx2] + if c1 == c2 { 0 } else { 1 };
+                let replace = dp_prev[idx2] + if c1 == c2 { 0 } else { 1 };
 
-                dp[idx1 + 1][idx2 + 1] = addition.min(deletion).min(replace);
+                dp_curr[idx2 + 1] = addition.min(deletion).min(replace);
             }
-        }
-
-        // Print out dp for being able to understand algorithm
-        #[cfg(debug_assertions)]
-        // Conditionally compiles the for loop only in debug mode so not when submitted on leetcode
-        for row in dp.iter() {
-            println!("{row:?}");
+            std::mem::swap(&mut dp_curr, &mut dp_prev);
         }
 
         // The must be at least 1 row and at least 1 column because len+1 is always at least 1
-        *dp.last().unwrap().last().unwrap() as i32
+        *dp_prev.last().unwrap() as i32
     }
 }
 
