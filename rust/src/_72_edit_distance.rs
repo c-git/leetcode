@@ -39,8 +39,8 @@ impl Solution {
             for (idx2, c2) in word2.iter().enumerate() {
                 // LI:
                 //  - dp index is one more than word idx because dp is indexed by length
-                //  - All dp with first index <= idx1 are already calculated
-                //  - All dp with first index == idx1 +1 and second index <= idx2 are already calculated
+                //  - All rows above are filled in, that is dp with first index <= idx1 are already calculated
+                //  - All cells to the left are filled in, that is all dp with first index == idx1 +1 and second index <= idx2 are already calculated
 
                 // Add char from word2 so add to cell on the left
                 let addition = dp[idx1 + 1][idx2] + 1;
@@ -53,6 +53,13 @@ impl Solution {
 
                 dp[idx1 + 1][idx2 + 1] = addition.min(deletion).min(replace);
             }
+        }
+
+        // Print out dp for being able to understand algorithm
+        #[cfg(debug_assertions)]
+        // Conditionally compiles the for loop only in debug mode so not when submitted on leetcode
+        for row in dp.iter() {
+            println!("{row:?}");
         }
 
         // The must be at least 1 row and at least 1 column because len+1 is always at least 1
