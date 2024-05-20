@@ -27,15 +27,15 @@ impl Solution {
         let mut nodes = vec![];
         while let Some(mut node) = head {
             head = node.as_mut().next.take();
-            nodes.push((node.val, node));
+            nodes.push(node);
         }
 
         // Short split list
-        nodes.sort_unstable_by_key(|x| x.0);
+        nodes.sort_unstable_by_key(|x| x.val);
 
         // Rejoin list
         let mut result = None;
-        for (_val, mut node) in nodes.into_iter().rev() {
+        for mut node in nodes.into_iter().rev() {
             node.next = result;
             result = Some(node);
         }
