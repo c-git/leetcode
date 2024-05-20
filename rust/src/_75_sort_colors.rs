@@ -4,20 +4,16 @@
 #[allow(clippy::ptr_arg)]
 impl Solution {
     pub fn sort_colors(nums: &mut Vec<i32>) {
-        // Solved using radix sort but hard coded to exactly 0,1,2. Will panic if other numbers are seen
-        let mut freq = [0, 0, 0];
-        for num in nums.iter() {
-            let num = *num as usize;
-            freq[num] += 1;
-        }
-
-        let mut index = 0;
-        for num in nums.iter_mut() {
-            while freq[index] == 0 {
-                index += 1;
+        // Trying bubble sort to see if it will get TLE
+        let mut unsorted = true;
+        while unsorted {
+            unsorted = false;
+            for i in 0..nums.len() - 1 {
+                if nums[i] > nums[i + 1] {
+                    nums.swap(i, i + 1);
+                    unsorted = true;
+                }
             }
-            *num = index as i32;
-            freq[index] -= 1;
         }
     }
 }
