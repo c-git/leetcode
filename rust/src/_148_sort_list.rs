@@ -19,27 +19,23 @@
 // }
 impl Solution {
     pub fn sort_list(mut head: Option<Box<ListNode>>) -> Option<Box<ListNode>> {
-        // Wanted to test out a bubble sort idea but couldn't figure out how to
-        // mutate the later parts of the list while holding onto a reference to the start
-        // and decided didn't add value so split up the nodes and sorted them and rejoined them
+        // Testing basic bubble sort
 
-        // Split list into nodes
-        let mut nodes = vec![];
-        while let Some(mut node) = head {
-            head = node.as_mut().next.take();
-            nodes.push(node);
+        let mut unsorted = true;
+        while unsorted {
+            unsorted = false;
+            let mut next = &mut head;
+            while let Some(node) = next.as_mut() {
+                if let Some(next_node) = node.next.as_mut() {
+                    if node.val > next_node.val {
+                        std::mem::swap(&mut node.val, &mut next_node.val);
+                        unsorted = true;
+                    }
+                }
+                next = &mut node.next;
+            }
         }
-
-        // Short split list
-        nodes.sort_unstable_by_key(|x| x.val);
-
-        // Rejoin list
-        let mut result = None;
-        for mut node in nodes.into_iter().rev() {
-            node.next = result;
-            result = Some(node);
-        }
-        result
+        head
     }
 }
 
