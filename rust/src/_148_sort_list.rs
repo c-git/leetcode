@@ -30,16 +30,16 @@ impl Solution {
             nodes.push(node);
         }
 
-        // Short split list (switched to bubble sort to see if that's why I got TLE)
-        let mut unsorted = true;
-        while unsorted {
-            unsorted = false;
-            for i in 0..nodes.len().saturating_sub(1) {
-                if nodes[i].val > nodes[i + 1].val {
-                    nodes.swap(i, i + 1);
-                    unsorted = true;
-                }
-            }
+        // Short split list (using selection sort)
+        for next_unsorted in 0..nodes.len() {
+            let min_index = nodes
+                .iter()
+                .enumerate()
+                .skip(next_unsorted)
+                .min_by_key(|(_, x)| x.val)
+                .unwrap()
+                .0;
+            nodes.swap(next_unsorted, min_index);
         }
 
         // Rejoin list
