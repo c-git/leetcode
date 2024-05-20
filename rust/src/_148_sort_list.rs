@@ -31,16 +31,7 @@ impl Solution {
         }
 
         // Short split list (using selection sort)
-        for next_unsorted in 0..nodes.len() {
-            let min_index = nodes
-                .iter()
-                .enumerate()
-                .skip(next_unsorted)
-                .min_by_key(|(_, x)| x.val)
-                .unwrap()
-                .0;
-            nodes.swap(next_unsorted, min_index);
-        }
+        nodes.sort_unstable_by_key(|x| x.val);
 
         // Rejoin list
         let mut result = None;
