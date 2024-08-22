@@ -3,23 +3,29 @@
 
 impl Solution {
     pub fn is_palindrome(s: String) -> bool {
-        let s: Vec<char> = s.to_lowercase().chars().collect();
-        let mut left = 0;
-        let mut right = s.len() - 1;
-        while left < right {
-            if !s[left].is_alphanumeric() {
-                left += 1;
+        let mut left = s.char_indices();
+        let mut right = s.char_indices().rev();
+        let mut left_next = left.next();
+        let mut right_next = right.next();
+        while let (Some(&(l_idx, l_char)), Some(&(r_idx, r_char))) =
+            (left_next.as_ref(), right_next.as_ref())
+        {
+            if l_idx >= r_idx {
+                break;
+            }
+            if !l_char.is_alphanumeric() {
+                left_next = left.next();
                 continue;
             }
-            if !s[right].is_alphanumeric() {
-                right -= 1;
+            if !r_char.is_alphanumeric() {
+                right_next = right.next();
                 continue;
             }
-            if s[left] != s[right] {
+            if l_char.to_ascii_lowercase() != r_char.to_ascii_lowercase() {
                 return false;
             }
-            left += 1;
-            right -= 1;
+            left_next = left.next();
+            right_next = right.next();
         }
         true
     }
