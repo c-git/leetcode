@@ -7,5 +7,6 @@ edition = "2021"
 
 [dependencies]
 cargo-leet = "0.2.0"
-rand = "0.6" #Old version used to match version used on leetcode servers
-rstest = "0.18.2"
+rand = "0.8"
+regex = "1"
+rstest = "0.22.0"

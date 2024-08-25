@@ -1,5 +1,6 @@
 [toolchain]
-# PIN rust version because leetcode uses an old version
-# https://support.leetcode.com/hc/en-us/articles/360011833974-What-are-the-environments-for-the-programming-languages-
+# PIN rust to version used by leetcode
+# Feel free to delete this file if you don't want to pin your version of rust to use for leetcode
+# See https://support.leetcode.com/hc/en-us/articles/360011833974-What-are-the-environments-for-the-programming-languages for current version
 # channel = "1.79"
-channel = "stable" # Preferred option for general use (only one channel can be set at a time)
+channel = "stable" # Some people preferred this option for general use (only one channel can be set at a time)
