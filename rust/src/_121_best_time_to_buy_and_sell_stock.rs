@@ -1,34 +1,37 @@
-struct Solution;
+//! Solution for https://leetcode.com/problems/best-time-to-buy-and-sell-stock
+//! 121. Best Time to Buy and Sell Stock
+
 impl Solution {
     pub fn max_profit(prices: Vec<i32>) -> i32 {
-        let mut max_diff = 0;
-        let mut min_price = i32::MAX;
+        let mut result = 0;
+        let mut low = i32::MAX;
         for price in prices {
-            if price < min_price {
-                min_price = price;
+            if price < low {
+                low = price;
             } else {
-                let diff = price - min_price;
-                if diff > max_diff {
-                    max_diff = diff;
-                }
+                let diff = price - low;
+                result = result.max(diff);
             }
         }
-        max_diff
+        result
     }
 }
 
-#[test]
-fn case1() {
-    let input = vec![7, 1, 5, 3, 6, 4];
-    let expected = 5;
-    let actual = Solution::max_profit(input);
-    assert_eq!(actual, expected);
-}
+// << ---------------- Code below here is only for local use ---------------- >>
 
-#[test]
-fn case2() {
-    let input = vec![7, 6, 4, 3, 1];
-    let expected = 0;
-    let actual = Solution::max_profit(input);
-    assert_eq!(actual, expected);
+pub struct Solution;
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    use rstest::rstest;
+
+    #[rstest]
+    #[case(vec![7,1,5,3,6,4], 5)]
+    #[case(vec![7,6,4,3,1], 0)]
+    fn case(#[case] prices: Vec<i32>, #[case] expected: i32) {
+        let actual = Solution::max_profit(prices);
+        assert_eq!(actual, expected);
+    }
 }
