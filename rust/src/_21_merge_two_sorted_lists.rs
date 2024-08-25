@@ -26,25 +26,21 @@ impl Solution {
         let mut result_current = &mut result_head;
 
         while list1.is_some() || list2.is_some() {
+            debug_assert!(
+                result_current.is_none(),
+                "should always be the next spot to add a node"
+            );
             match (list1, list2) {
                 (None, None) => {
                     unreachable!("Should not be reachable by exit condition for while loop")
                 }
                 (None, Some(node2)) => {
-                    if let Some(curr) = result_current {
-                        curr.next = Some(node2);
-                    } else {
-                        *result_current = Some(node2);
-                    }
+                    *result_current = Some(node2);
                     list1 = None;
                     list2 = None; // node2 moved into result
                 }
                 (Some(node1), None) => {
-                    if let Some(curr) = result_current {
-                        curr.next = Some(node1);
-                    } else {
-                        *result_current = Some(node1);
-                    }
+                    *result_current = Some(node1);
                     list1 = None; // node1 moved into result
                     list2 = None;
                 }
@@ -55,12 +51,13 @@ impl Solution {
                     }
                     list1 = node1.next.take();
                     list2 = Some(node2);
-                    if let Some(curr) = result_current {
-                        curr.next = Some(node1);
-                        result_current = &mut curr.next;
-                    } else {
-                        *result_current = Some(node1);
-                    }
+                    *result_current = Some(node1);
+
+                    // Move result_current forward
+                    let Some(curr) = result_current else {
+                        unreachable!("we just set the value into result_current")
+                    };
+                    result_current = &mut curr.next;
                 }
             }
         }
