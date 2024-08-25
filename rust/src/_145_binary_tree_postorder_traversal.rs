@@ -29,12 +29,12 @@ impl Solution {
         };
         let mut stack = vec![node];
         while let Some(node) = stack.pop() {
-            let node = node.borrow();
+            let mut node = node.borrow_mut();
             result.push(node.val);
-            if let Some(left) = node.left.clone() {
+            if let Some(left) = node.left.take() {
                 stack.push(left);
             }
-            if let Some(right) = node.right.clone() {
+            if let Some(right) = node.right.take() {
                 stack.push(right);
             }
         }
