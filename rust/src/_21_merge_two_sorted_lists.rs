@@ -1,4 +1,5 @@
-use cargo_leet::ListNode;
+//! Solution for https://leetcode.com/problems/merge-two-sorted-lists
+//! 21. Merge Two Sorted Lists
 
 // Definition for singly-linked list.
 // #[derive(PartialEq, Eq, Clone, Debug)]
@@ -16,18 +17,14 @@ use cargo_leet::ListNode;
 //     }
 //   }
 // }
-struct Solution;
 impl Solution {
     pub fn merge_two_lists(
-        list1: Option<Box<ListNode>>,
-        list2: Option<Box<ListNode>>,
+        mut list1: Option<Box<ListNode>>,
+        mut list2: Option<Box<ListNode>>,
     ) -> Option<Box<ListNode>> {
         let mut result_head: Option<Box<ListNode>> = None;
         let mut result_current = &mut result_head;
 
-        // Change variables to be mutable to only do splicing and not allocate new nodes
-        let mut list1 = list1;
-        let mut list2 = list2;
         while list1.is_some() || list2.is_some() {
             match (list1, list2) {
                 (None, None) => {
@@ -56,8 +53,7 @@ impl Solution {
                         // Make sure node1 is always the smaller one
                         std::mem::swap(&mut node1, &mut node2);
                     }
-                    list1 = node1.next;
-                    node1.next = None;
+                    list1 = node1.next.take();
                     list2 = Some(node2);
                     if let Some(curr) = result_current {
                         curr.next = Some(node1);
@@ -72,32 +68,28 @@ impl Solution {
     }
 }
 
-#[test]
-fn case1() {
-    let l1: cargo_leet::ListHead = vec![1, 2, 4].into();
-    let l2: cargo_leet::ListHead = vec![1, 3, 4].into();
-    let expected: cargo_leet::ListHead = vec![1, 1, 2, 3, 4, 4].into();
+// << ---------------- Code below here is only for local use ---------------- >>
 
-    let actual = Solution::merge_two_lists(l1.into(), l2.into());
-    assert_eq!(actual, expected.into());
-}
+pub struct Solution;
+use cargo_leet::ListNode;
 
-#[test]
-fn case2() {
-    let l1: cargo_leet::ListHead = vec![].into();
-    let l2: cargo_leet::ListHead = vec![].into();
-    let expected: cargo_leet::ListHead = vec![].into();
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use cargo_leet::ListHead;
 
-    let actual = Solution::merge_two_lists(l1.into(), l2.into());
-    assert_eq!(actual, expected.into());
-}
+    use rstest::rstest;
 
-#[test]
-fn case3() {
-    let l1: cargo_leet::ListHead = vec![].into();
-    let l2: cargo_leet::ListHead = vec![0].into();
-    let expected: cargo_leet::ListHead = vec![0].into();
-
-    let actual = Solution::merge_two_lists(l1.into(), l2.into());
-    assert_eq!(actual, expected.into());
+    #[rstest]
+    #[case(ListHead::from(vec![1,2,4]).into(), ListHead::from(vec![1,3,4]).into(), ListHead::from(vec![1,1,2,3,4,4]).into())]
+    #[case(ListHead::from(vec![]).into(), ListHead::from(vec![]).into(), ListHead::from(vec![]).into())]
+    #[case(ListHead::from(vec![]).into(), ListHead::from(vec![0]).into(), ListHead::from(vec![0]).into())]
+    fn case(
+        #[case] list1: Option<Box<ListNode>>,
+        #[case] list2: Option<Box<ListNode>>,
+        #[case] expected: Option<Box<ListNode>>,
+    ) {
+        let actual = Solution::merge_two_lists(list1, list2);
+        assert_eq!(actual, expected);
+    }
 }
