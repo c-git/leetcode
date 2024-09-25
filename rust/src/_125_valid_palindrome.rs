@@ -3,31 +3,13 @@
 
 impl Solution {
     pub fn is_palindrome(s: String) -> bool {
-        let mut left = s.char_indices();
-        let mut right = s.char_indices().rev();
-        let mut left_next = left.next();
-        let mut right_next = right.next();
-        while let (Some(&(l_idx, l_char)), Some(&(r_idx, r_char))) =
-            (left_next.as_ref(), right_next.as_ref())
-        {
-            if l_idx >= r_idx {
-                break;
-            }
-            if !l_char.is_alphanumeric() {
-                left_next = left.next();
-                continue;
-            }
-            if !r_char.is_alphanumeric() {
-                right_next = right.next();
-                continue;
-            }
-            if l_char.to_ascii_lowercase() != r_char.to_ascii_lowercase() {
-                return false;
-            }
-            left_next = left.next();
-            right_next = right.next();
-        }
-        true
+        let s: String = s
+            .to_lowercase()
+            .chars()
+            .filter(|x| x.is_alphanumeric())
+            .collect();
+        let s_rev = s.chars().rev().collect::<String>();
+        s == s_rev
     }
 }
 
