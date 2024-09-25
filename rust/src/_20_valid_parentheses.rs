@@ -1,71 +1,51 @@
-struct Solution;
+//! Solution for https://leetcode.com/problems/valid-parentheses
+//! 20. Valid Parentheses
 
 impl Solution {
     pub fn is_valid(s: String) -> bool {
-        let mut stack = vec![];
-        let open_brackets = ['(', '{', '['];
+        let mut stack = Vec::new();
         for c in s.chars() {
-            if open_brackets.contains(&c) {
+            if ['[', '(', '{'].contains(&c) {
                 stack.push(c);
-            } else {
-                match c {
-                    ')' => {
-                        if !Self::check_pop('(', &mut stack) {
-                            return false;
-                        }
-                    }
-                    '}' => {
-                        if !Self::check_pop('{', &mut stack) {
-                            return false;
-                        }
-                    }
-                    ']' => {
-                        if !Self::check_pop('[', &mut stack) {
-                            return false;
-                        }
-                    }
+                continue;
+            }
 
-                    _ => unreachable!("Assumed only brackets based on question"),
+            let expected = match c {
+                ']' => '[',
+                ')' => '(',
+                '}' => '{',
+                _ => unreachable!("by constraint in question regarding valid input"),
+            };
+
+            if let Some(top) = stack.pop() {
+                if expected != top {
+                    return false;
                 }
+            } else {
+                return false;
             }
         }
-        stack.is_empty() // If stack is empty then string is valid otherwise there are unclosed brackets
-    }
-
-    fn check_pop(open_bracket: char, stack: &mut Vec<char>) -> bool {
-        if !stack.is_empty() && stack[stack.len() - 1] == open_bracket {
-            stack.pop();
-            return true;
-        }
-
-        // Wrong char at top of stack or stack empty
-        false
+        stack.is_empty()
     }
 }
 
-#[test]
-fn case1() {
-    let s = "()".to_string();
-    let expected = true;
+// << ---------------- Code below here is only for local use ---------------- >>
 
-    let actual = Solution::is_valid(s);
-    assert_eq!(actual, expected);
-}
+pub struct Solution;
 
-#[test]
-fn case2() {
-    let s = "()[]{}".to_string();
-    let expected = true;
+#[cfg(test)]
+mod tests {
+    use super::*;
 
-    let actual = Solution::is_valid(s);
-    assert_eq!(actual, expected);
-}
+    use rstest::rstest;
 
-#[test]
-fn case3() {
-    let s = "(]".to_string();
-    let expected = false;
-
-    let actual = Solution::is_valid(s);
-    assert_eq!(actual, expected);
+    #[rstest]
+    #[case("()", true)]
+    #[case("()[]{}", true)]
+    #[case("(]", false)]
+    #[case("([])", true)]
+    fn case(#[case] s: String, #[case] expected: bool) {
+        let actual = Solution::is_valid(s);
+        assert_eq!(actual, expected);
+    }
 }
