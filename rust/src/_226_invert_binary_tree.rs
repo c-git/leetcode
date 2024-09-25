@@ -24,11 +24,11 @@ use std::rc::Rc;
 impl Solution {
     pub fn invert_tree(root: Option<Rc<RefCell<TreeNode>>>) -> Option<Rc<RefCell<TreeNode>>> {
         let root = root?;
-        let (left, right) = (root.borrow().left.clone(), root.borrow().right.clone());
-        root.borrow_mut().left = right;
-        root.borrow_mut().right = left;
-        Self::invert_tree(root.borrow().left.clone());
-        Self::invert_tree(root.borrow().right.clone());
+        let mut node = root.borrow_mut();
+        let temp = node.left.clone();
+        node.left = Self::invert_tree(node.right.clone());
+        node.right = Self::invert_tree(temp);
+        drop(node); // Drop to release borrow
         Some(root)
     }
 }
