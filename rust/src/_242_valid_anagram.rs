@@ -3,9 +3,9 @@
 
 impl Solution {
     pub fn is_anagram(s: String, t: String) -> bool {
-        let mut s: Vec<u8> = s.as_bytes().into();
-        let mut t: Vec<u8> = t.as_bytes().into();
+        let mut s: Vec<char> = s.chars().collect();
         s.sort_unstable();
+        let mut t: Vec<char> = t.chars().collect();
         t.sort_unstable();
         s == t
     }
