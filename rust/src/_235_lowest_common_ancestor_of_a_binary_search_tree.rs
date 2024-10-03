@@ -42,7 +42,7 @@ impl Solution {
             (Ordering::Greater, Ordering::Greater) => {
                 Self::lowest_common_ancestor(root?.borrow_mut().right.take(), p, q)
             }
-            _ => Some(Rc::new(RefCell::new(TreeNode::new(root?.borrow().val)))),
+            _ => root,
         }
     }
 }
@@ -70,6 +70,6 @@ mod tests {
         #[case] expected: Option<Rc<RefCell<TreeNode>>>,
     ) {
         let actual = Solution::lowest_common_ancestor(root, p, q);
-        assert_eq!(actual, expected);
+        assert_eq!(actual.unwrap().borrow().val, expected.unwrap().borrow().val);
     }
 }
