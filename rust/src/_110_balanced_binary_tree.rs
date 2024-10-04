@@ -1,5 +1,6 @@
-use std::cell::RefCell;
-use std::cmp::max;
+//! Solution for https://leetcode.com/problems/balanced-binary-tree
+//! 110. Balanced Binary Tree
+
 // Definition for a binary tree node.
 // #[derive(Debug, PartialEq, Eq)]
 // pub struct TreeNode {
@@ -18,91 +19,77 @@ use std::cmp::max;
 //     }
 //   }
 // }
+
+enum BalanceState {
+    Balanced { height: usize },
+    NotBalanced,
+}
+
+impl BalanceState {
+    /// Returns `true` if the balance state is [`IsBalanced`].
+    ///
+    /// [`IsBalanced`]: BalanceState::IsBalanced
+    #[must_use]
+    fn is_balanced(&self) -> bool {
+        matches!(self, Self::Balanced { .. })
+    }
+}
+
+use std::cell::RefCell;
 use std::rc::Rc;
-
-use cargo_leet::TreeNode;
-
-struct Solution;
-
 impl Solution {
     pub fn is_balanced(root: Option<Rc<RefCell<TreeNode>>>) -> bool {
-        Self.not_bal_or_max_height(root).is_balanced()
+        Self::is_balance_and_height(&root).is_balanced()
     }
-    fn not_bal_or_max_height(&self, root: Option<Rc<RefCell<TreeNode>>>) -> MaxBalancedHeight {
-        if let Some(root) = root {
-            let left_height = Self.not_bal_or_max_height(root.borrow().left.clone());
-            if !left_height.is_balanced() {
-                return MaxBalancedHeight::NotBalanced;
-            }
-            let right_height = Self.not_bal_or_max_height(root.borrow().right.clone());
-            if !right_height.is_balanced() {
-                return MaxBalancedHeight::NotBalanced;
-            }
-            match (left_height, right_height) {
-                (MaxBalancedHeight::Balanced(left), MaxBalancedHeight::Balanced(right)) => {
-                    // let diff = left.abs_diff(right); // Rust version LeetCode too old to use this
-                    let diff = if left > right {
-                        left - right
-                    } else {
-                        right - left
-                    };
-                    if diff > 1 {
-                        MaxBalancedHeight::NotBalanced
-                    } else {
-                        MaxBalancedHeight::Balanced(1 + max(left, right))
+
+    fn is_balance_and_height(root: &Option<Rc<RefCell<TreeNode>>>) -> BalanceState {
+        let Some(root) = root else {
+            return BalanceState::Balanced { height: 0 };
+        };
+        let root = root.borrow(); // Get borrowed version
+        match (
+            Self::is_balance_and_height(&root.left),
+            Self::is_balance_and_height(&root.right),
+        ) {
+            (
+                BalanceState::Balanced {
+                    height: left_height,
+                },
+                BalanceState::Balanced {
+                    height: right_height,
+                },
+            ) => {
+                if left_height.abs_diff(right_height) > 1 {
+                    BalanceState::NotBalanced
+                } else {
+                    BalanceState::Balanced {
+                        height: 1 + left_height.max(right_height),
                     }
                 }
-                _ => unreachable!("Both should be balanced as per checks above"),
             }
-        } else {
-            // Empty trees are considered balanced and of height 0
-            MaxBalancedHeight::Balanced(0)
+            _ => BalanceState::NotBalanced,
         }
     }
 }
 
-enum MaxBalancedHeight {
-    Balanced(u32),
-    NotBalanced,
-}
+// << ---------------- Code below here is only for local use ---------------- >>
 
-impl MaxBalancedHeight {
-    #[must_use]
-    fn is_balanced(&self) -> bool {
-        matches!(self, Self::Balanced(_))
-    }
-}
+pub struct Solution;
+use cargo_leet::TreeNode;
 
 #[cfg(test)]
 mod tests {
+    use super::*;
     use cargo_leet::TreeRoot;
 
-    use super::*;
+    use rstest::rstest;
 
-    #[test]
-    fn case1() {
-        let input: TreeRoot = "[3,9,20,null,null,15,7]".into();
-        let expected = true;
-
-        let actual = Solution::is_balanced(input.into());
-        assert_eq!(actual, expected);
-    }
-
-    #[test]
-    fn case2() {
-        let input: TreeRoot = "[1,2,2,3,3,null,null,4,4]".into();
-        let expected = false;
-
-        let actual = Solution::is_balanced(input.into());
-        assert_eq!(actual, expected);
-    }
-
-    #[test]
-    fn case3() {
-        let input: TreeRoot = "[]".into();
-        let expected = true;
-
-        let actual = Solution::is_balanced(input.into());
+    #[rstest]
+    #[case(TreeRoot::from("[3,9,20,null,null,15,7]").into(), true)]
+    #[case(TreeRoot::from("[1,2,2,3,3,null,null,4,4]").into(), false)]
+    #[case(TreeRoot::from("[]").into(), true)]
+    fn case(#[case] root: Option<Rc<RefCell<TreeNode>>>, #[case] expected: bool) {
+        let actual = Solution::is_balanced(root);
         assert_eq!(actual, expected);
     }
 }
