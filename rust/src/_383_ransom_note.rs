@@ -1,32 +1,25 @@
 //! Solution for https://leetcode.com/problems/ransom-note
 //! 383. Ransom Note
 
-use std::collections::BTreeMap;
-
 impl Solution {
     pub fn can_construct(ransom_note: String, magazine: String) -> bool {
-        // Also had an idea to use less memory by sorting the bytes and using an in order removal but was less general and not warranted
+        // Assumption: Using constraint from problem: `ransomNote` and `magazine` consist of lowercase English letters.
 
-        // Build up a list of the characters available
-        let mut available_chars: BTreeMap<char, usize> = BTreeMap::new();
-        for char in magazine.chars() {
-            *available_chars.entry(char).or_default() += 1;
+        let mut available_chars = vec![0usize; 26];
+
+        for c in magazine.as_bytes() {
+            let idx = (c - b'a') as usize;
+            available_chars[idx] += 1;
         }
 
-        // Check for required characters
-        for char in ransom_note.chars() {
-            if let Some(qty_left) = available_chars.get_mut(&char) {
-                if qty_left > &mut 0 {
-                    *qty_left -= 1;
-                } else {
-                    return false;
-                }
-            } else {
+        for c in ransom_note.as_bytes() {
+            let idx = (c - b'a') as usize;
+            if available_chars[idx] == 0 {
                 return false;
+            } else {
+                available_chars[idx] -= 1;
             }
         }
-
-        // All required characters found
         true
     }
 }
