@@ -1,49 +1,53 @@
 //! Solution for https://leetcode.com/problems/add-binary
 //! 67. Add Binary
 
-use std::cmp::max;
-
 impl Solution {
     pub fn add_binary(a: String, b: String) -> String {
-        let mut iter_a = a.chars().rev();
-        let mut iter_b = b.chars().rev();
-        let mut result = Vec::with_capacity(max(a.len(), b.len()) + 1);
-        let mut carry = 0;
+        let mut carry = false;
+        let mut result_buf = vec![];
+        let mut a = a.chars();
+        let mut b = b.chars();
         loop {
-            let val = match (iter_a.next(), iter_b.next()) {
+            match (a.next_back(), b.next_back()) {
                 (None, None) => {
-                    if carry > 0 {
-                        result.push(carry);
+                    if carry {
+                        result_buf.push(true);
                     }
                     break;
                 }
-                (Some(x), None) | (None, Some(x)) => x.to_digit(10).unwrap() + carry,
-                (Some(x), Some(y)) => x.to_digit(10).unwrap() + y.to_digit(10).unwrap() + carry,
-            };
-            match val {
-                0 => {
-                    result.push(0);
-                    // carry = 0; // Not needed as carry must already be 0 otherwise val wouldn't be 0
+                (None, Some(bit)) | (Some(bit), None) => {
+                    let is_one = bit != '0';
+                    match (is_one, carry) {
+                        (false, false) | (true, true) => result_buf.push(false),
+                        (true, false) | (false, true) => {
+                            result_buf.push(true);
+                            carry = false;
+                        }
+                    }
                 }
-                1 => {
-                    result.push(1);
-                    carry = 0;
+                (Some(bit_a), Some(bit_b)) => {
+                    let (is_one_a, is_one_b) = (bit_a != '0', bit_b != '0');
+                    match (is_one_a, is_one_b, carry) {
+                        (true, true, true) => result_buf.push(true),
+                        (true, true, false) => {
+                            result_buf.push(false);
+                            carry = true;
+                        }
+                        (true, false, true) | (false, true, true) => result_buf.push(false),
+                        (true, false, false) | (false, true, false) => result_buf.push(true),
+                        (false, false, false) => result_buf.push(false),
+                        (false, false, true) => {
+                            result_buf.push(true);
+                            carry = false;
+                        }
+                    }
                 }
-                2 => {
-                    result.push(0);
-                    carry = 1;
-                }
-                3 => {
-                    result.push(1);
-                    carry = 1;
-                }
-                _ => unreachable!("Values should only be binary"),
             }
         }
-        result
-            .iter()
+        result_buf
+            .into_iter()
             .rev()
-            .map(|&x| char::from_u32(x + b'0' as u32).unwrap())
+            .map(|bit| if bit { "1" } else { "0" })
             .collect()
     }
 }
