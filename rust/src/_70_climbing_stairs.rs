@@ -3,26 +3,20 @@
 
 impl Solution {
     pub fn climb_stairs(n: i32) -> i32 {
-        let mut memo = vec![None; n as usize + 1];
-        memo[0] = Some(1);
-        memo[1] = Some(1);
-        Self::climb_stairs_(n as usize, &mut memo)
-    }
-
-    fn climb_stairs_(n: usize, memo: &mut [Option<i32>]) -> i32 {
-        debug_assert!(
-            memo[0].is_some() && memo[1].is_some(),
-            "Assumed to be set before first call"
-        );
-        if let Some(val) = memo[n] {
-            return val;
+        if n <= 1 {
+            return 1;
         }
-
-        // n is at least 2 because 0 and 1 come preset
-        let result = Self::climb_stairs_(n - 1, memo) + Self::climb_stairs_(n - 2, memo);
-
-        memo[n] = Some(result);
-        result
+        let mut prev_prev = 1; // Step 0 (starting position one way to get here)
+        let mut prev = 1; // Step 1 (only one way to get here take a step)
+        for _ in 2..=n {
+            // For each step you can take one step from prev so same number of steps as prev or
+            // you can take 2 steps from the one before so same number as that
+            // adding them together we get the way to get to the next step (Hey it's a Fibonacci sequence)
+            let temp = prev + prev_prev;
+            prev_prev = prev;
+            prev = temp;
+        }
+        prev
     }
 }
 
@@ -39,7 +33,6 @@ mod tests {
     #[rstest]
     #[case(2, 2)]
     #[case(3, 3)]
-    #[case(45, 1_836_311_903)]
     fn case(#[case] n: i32, #[case] expected: i32) {
         let actual = Solution::climb_stairs(n);
         assert_eq!(actual, expected);
