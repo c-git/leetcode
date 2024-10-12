@@ -8,6 +8,12 @@ impl Solution {
         nums.sort_unstable();
         let mut result: BTreeSet<Vec<i32>> = BTreeSet::new();
         for first in 0..nums.len() - 2 {
+            if nums[first] > 0 {
+                break;
+            }
+            if first > 0 && nums[first - 1] == nums[first] {
+                continue;
+            }
             for second in first + 1..nums.len() - 1 {
                 let target = 0 - nums[first] - nums[second];
                 if nums[second + 1..].binary_search(&target).is_ok() {
