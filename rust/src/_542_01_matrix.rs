@@ -5,44 +5,47 @@ use std::collections::VecDeque;
 
 impl Solution {
     pub fn update_matrix(mut mat: Vec<Vec<i32>>) -> Vec<Vec<i32>> {
-        let mut seen = vec![vec![false; mat[0].len()]; mat.len()];
+        // Change all non-zero values to -1 to indicate they are not done then do BFS to
+        // update the values after adding all the 0 positions to the queue
 
-        // Stores tuples of (row, col, distance)
+        // Stores tuples of (row, col)
         let mut queue = VecDeque::new();
 
-        // mark 0 nodes
-        let rows = mat.len();
-        let cols = mat[0].len();
-        for row in 0..rows {
-            for col in 0..cols {
-                if mat[row][col] == 0 {
-                    seen[row][col] = true;
-                    queue.push_back((row, col, 0));
+        // Add 0 nodes to queue
+        for (row_idx, row) in mat.iter_mut().enumerate() {
+            for (col_idx, cell) in row.iter_mut().enumerate() {
+                if *cell == 0 {
+                    queue.push_back((row_idx, col_idx));
+                } else {
+                    // Mark as not done
+                    *cell = -1;
                 }
             }
         }
 
-        while let Some((row, col, distance)) = queue.pop_front() {
-            mat[row][col] = distance;
+        let rows_count = mat.len();
+        let cols_count = mat[0].len();
+        while let Some((row, col)) = queue.pop_front() {
+            let new_distance = mat[row][col] + 1;
 
             // Up
             if row > 0 {
-                check_neighbour(&mut seen, &mut queue, row - 1, col, distance);
+                check_neighbour(&mut mat, &mut queue, row - 1, col, new_distance);
             }
 
             // Down
-            if row + 1 < rows {
-                check_neighbour(&mut seen, &mut queue, row + 1, col, distance);
+            if row + 1 < rows_count {
+                check_neighbour(&mut mat, &mut queue, row + 1, col, new_distance);
             }
 
             // Left
             if col > 0 {
-                check_neighbour(&mut seen, &mut queue, row, col - 1, distance);
+                check_neighbour(&mut mat, &mut queue, row, col - 1, new_distance);
             }
 
             // Right
-            if col + 1 < cols {
-                check_neighbour(&mut seen, &mut queue, row, col + 1, distance);
+            if col + 1 < cols_count {
+                check_neighbour(&mut mat, &mut queue, row, col + 1, new_distance);
             }
         }
         mat
@@ -50,15 +53,15 @@ impl Solution {
 }
 
 fn check_neighbour(
-    seen: &mut [Vec<bool>],
-    queue: &mut VecDeque<(usize, usize, i32)>,
+    mat: &mut [Vec<i32>],
+    queue: &mut VecDeque<(usize, usize)>,
     row: usize,
     col: usize,
-    distance: i32,
+    new_distance: i32,
 ) {
-    if !seen[row][col] {
-        seen[row][col] = true;
-        queue.push_back((row, col, distance + 1));
+    if mat[row][col] < 0 {
+        mat[row][col] = new_distance; // Update distance as we could not have reached it earlier
+        queue.push_back((row, col)); // Add to queue to check neighbours
     }
 }
 
