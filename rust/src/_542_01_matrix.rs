@@ -5,58 +5,60 @@ use std::collections::VecDeque;
 
 impl Solution {
     pub fn update_matrix(mut mat: Vec<Vec<i32>>) -> Vec<Vec<i32>> {
-        // Modified based on lower memory solution on leetcode
-        let count_rows = mat.len();
-        let count_cols = mat[0].len();
+        let mut seen = vec![vec![false; mat[0].len()]; mat.len()];
 
+        // Stores tuples of (row, col, distance)
         let mut queue = VecDeque::new();
 
-        // Find all 0's and set all 1's to -1 to indicate they are not done yet
-        for (idx_row, row) in mat.iter_mut().enumerate() {
-            for (idx_col, cell) in row.iter_mut().enumerate() {
-                if *cell == 0 {
-                    queue.push_back((idx_row, idx_col));
-                } else {
-                    *cell = -1;
+        // mark 0 nodes
+        let rows = mat.len();
+        let cols = mat[0].len();
+        for row in 0..rows {
+            for col in 0..cols {
+                if mat[row][col] == 0 {
+                    seen[row][col] = true;
+                    queue.push_back((row, col, 0));
                 }
             }
         }
 
-        while let Some((idx_row, idx_col)) = queue.pop_front() {
-            let new_steps = mat[idx_row][idx_col] + 1;
-            for (neighbour_row, neighbour_col) in
-                Self::neighbours(idx_row, idx_col, count_rows, count_cols)
-            {
-                if mat[neighbour_row][neighbour_col] < 0 {
-                    mat[neighbour_row][neighbour_col] = new_steps;
-                    queue.push_back((neighbour_row, neighbour_col));
-                }
+        while let Some((row, col, distance)) = queue.pop_front() {
+            mat[row][col] = distance;
+
+            // Up
+            if row > 0 {
+                check_neighbour(&mut seen, &mut queue, row - 1, col, distance);
+            }
+
+            // Down
+            if row + 1 < rows {
+                check_neighbour(&mut seen, &mut queue, row + 1, col, distance);
+            }
+
+            // Left
+            if col > 0 {
+                check_neighbour(&mut seen, &mut queue, row, col - 1, distance);
+            }
+
+            // Right
+            if col + 1 < cols {
+                check_neighbour(&mut seen, &mut queue, row, col + 1, distance);
             }
         }
-
         mat
     }
+}
 
-    fn neighbours(
-        idx_row: usize,
-        idx_col: usize,
-        count_rows: usize,
-        count_cols: usize,
-    ) -> Vec<(usize, usize)> {
-        let mut result = vec![];
-        if idx_row > 0 {
-            result.push((idx_row - 1, idx_col));
-        }
-        if idx_col > 0 {
-            result.push((idx_row, idx_col - 1));
-        }
-        if idx_row < count_rows - 1 {
-            result.push((idx_row + 1, idx_col));
-        }
-        if idx_col < count_cols - 1 {
-            result.push((idx_row, idx_col + 1));
-        }
-        result
+fn check_neighbour(
+    seen: &mut [Vec<bool>],
+    queue: &mut VecDeque<(usize, usize, i32)>,
+    row: usize,
+    col: usize,
+    distance: i32,
+) {
+    if !seen[row][col] {
+        seen[row][col] = true;
+        queue.push_back((row, col, distance + 1));
     }
 }
 
