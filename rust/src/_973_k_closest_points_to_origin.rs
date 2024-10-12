@@ -1,17 +1,38 @@
 //! Solution for https://leetcode.com/problems/k-closest-points-to-origin
 //! 973. K Closest Points to Origin
 
+use std::collections::BinaryHeap;
+
+#[derive(PartialEq, Eq)]
+struct PointWrapper(Vec<i32>);
+
+impl PartialOrd for PointWrapper {
+    fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
+        Some(self.cmp(other))
+    }
+}
+
+impl Ord for PointWrapper {
+    fn cmp(&self, other: &Self) -> std::cmp::Ordering {
+        let self_distance = f64::sqrt((self.0[0] as f64).powi(2) + (self.0[1] as f64).powi(2));
+        let other_distance = f64::sqrt((other.0[0] as f64).powi(2) + (other.0[1] as f64).powi(2));
+        self_distance
+            .partial_cmp(&other_distance)
+            .expect("nan is illegal value here")
+    }
+}
+
 impl Solution {
-    pub fn k_closest(mut points: Vec<Vec<i32>>, k: i32) -> Vec<Vec<i32>> {
-        points.sort_unstable_by(|x, y| {
-            let x_distance = f64::sqrt((x[0] as f64).powi(2) + (x[1] as f64).powi(2));
-            let y_distance = f64::sqrt((y[0] as f64).powi(2) + (y[1] as f64).powi(2));
-            x_distance
-                .partial_cmp(&y_distance)
-                .expect("nan is illegal value here")
-        });
-        points.truncate(k as usize);
-        points
+    pub fn k_closest(points: Vec<Vec<i32>>, k: i32) -> Vec<Vec<i32>> {
+        let k = k as usize;
+        let mut result = BinaryHeap::with_capacity(k + 1);
+        for point in points {
+            result.push(PointWrapper(point));
+            if result.len() > k {
+                result.pop();
+            }
+        }
+        result.into_iter().map(|x| x.0).collect()
     }
 }
 
