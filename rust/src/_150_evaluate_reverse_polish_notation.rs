@@ -3,47 +3,29 @@
 
 impl Solution {
     pub fn eval_rpn(tokens: Vec<String>) -> i32 {
-        let mut operand_stack = vec![];
-        for token in tokens {
-            match &token[..] {
-                "+" => {
-                    let (operand1, operand2) = get_operands(&mut operand_stack);
-                    let sum = operand1 + operand2;
-                    operand_stack.push(sum);
-                }
-                "-" => {
-                    let (operand1, operand2) = get_operands(&mut operand_stack);
-                    let difference = operand1 - operand2;
-                    operand_stack.push(difference);
-                }
-                "*" => {
-                    let (operand1, operand2) = get_operands(&mut operand_stack);
-                    let product = operand1 * operand2;
-                    operand_stack.push(product);
-                }
-                "/" => {
-                    let (operand1, operand2) = get_operands(&mut operand_stack);
-                    let dividend = operand1 / operand2;
-                    operand_stack.push(dividend);
-                }
-                _ => operand_stack.push(token.parse().unwrap()), // Assumed to be a number if it's not an operator
-            }
-        }
-        debug_assert_eq!(operand_stack.len(), 1);
-        operand_stack
-            .pop()
-            .expect("Should have exactly 1 item on the stack if input is valid")
+        Self::eval_rpn_(tokens).0
     }
-}
 
-fn get_operands(operand_stack: &mut Vec<i32>) -> (i32, i32) {
-    let operand2 = operand_stack
-        .pop()
-        .expect("Should have items on stack if RPN is valid");
-    let operand1 = operand_stack
-        .pop()
-        .expect("Should have items on stack if RPN is valid");
-    (operand1, operand2)
+    /// Returns the value and any unused tokens
+    pub fn eval_rpn_(mut tokens: Vec<String>) -> (i32, Vec<String>) {
+        let token = tokens.pop().expect("because of constraint: The input represents a valid arithmetic expression in a reverse polish notation.");
+
+        let is_operator = ["+", "-", "*", "/"].contains(&&token[..]);
+        if is_operator {
+            let (operand2, rest) = Self::eval_rpn_(tokens);
+            let (operand1, rest) = Self::eval_rpn_(rest);
+            let value = match &token[..] {
+                "+" => operand1 + operand2,
+                "-" => operand1 - operand2,
+                "/" => operand1 / operand2,
+                "*" => operand1 * operand2,
+                _ => unreachable!("already checked that it was an operator"),
+            };
+            (value, rest)
+        } else {
+            (token.parse().expect("not operator must be operand"), tokens)
+        }
+    }
 }
 
 // << ---------------- Code below here is only for local use ---------------- >>
