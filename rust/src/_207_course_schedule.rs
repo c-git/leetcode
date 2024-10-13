@@ -14,10 +14,12 @@ impl Solution {
         let mut graph = vec![Vec::new(); num_courses as usize];
         let mut visited = vec![Status::NotVisited; num_courses as usize];
 
+        // Build graph
         for item in prerequisites {
             graph[item[0] as usize].push(item[1]);
         }
 
+        // Check if there are any cycles
         for i in 0..num_courses {
             if Solution::contains_cycle(&graph, &mut visited, i as usize) {
                 return false;
