@@ -1,30 +1,64 @@
 //! Solution for https://leetcode.com/problems/evaluate-reverse-polish-notation
 //! 150. Evaluate Reverse Polish Notation
 
-impl Solution {
-    pub fn eval_rpn(tokens: Vec<String>) -> i32 {
-        Self::eval_rpn_(tokens).0
+enum Value {
+    Add,
+    Sub,
+    Div,
+    Mul,
+    Num(i32),
+}
+
+impl Value {
+    /// Returns `true` if the value is an operator.
+    #[must_use]
+    fn is_operator(&self) -> bool {
+        !matches!(self, Self::Num(..))
     }
+}
 
-    /// Returns the value and any unused tokens
-    pub fn eval_rpn_(mut tokens: Vec<String>) -> (i32, Vec<String>) {
-        let token = tokens.pop().expect("because of constraint: The input represents a valid arithmetic expression in a reverse polish notation.");
+impl Solution {
+    pub fn eval_rpn(mut tokens: Vec<String>) -> i32 {
+        let mut stack = vec![];
 
-        let is_operator = ["+", "-", "*", "/"].contains(&&token[..]);
-        if is_operator {
-            let (operand2, rest) = Self::eval_rpn_(tokens);
-            let (operand1, rest) = Self::eval_rpn_(rest);
-            let value = match &token[..] {
-                "+" => operand1 + operand2,
-                "-" => operand1 - operand2,
-                "/" => operand1 / operand2,
-                "*" => operand1 * operand2,
-                _ => unreachable!("already checked that it was an operator"),
-            };
-            (value, rest)
-        } else {
-            (token.parse().expect("not operator must be operand"), tokens)
+        while let Some(token) = tokens.pop() {
+            stack.push(match &token[..] {
+                "+" => Value::Add,
+                "-" => Value::Sub,
+                "/" => Value::Div,
+                "*" => Value::Mul,
+                num => Value::Num(num.parse().expect("not operator must be operand")),
+            });
+
+            // Check if we have two operands and an operator on the stack to collapse into one
+            while stack.len() >= 3
+                && stack[stack.len() - 3].is_operator()
+                && !stack[stack.len() - 2].is_operator()
+                && !stack[stack.len() - 1].is_operator()
+            {
+                let Some(Value::Num(operand1)) = stack.pop() else {
+                    unreachable!()
+                };
+                let Some(Value::Num(operand2)) = stack.pop() else {
+                    unreachable!()
+                };
+                let Some(operator) = stack.pop() else {
+                    unreachable!()
+                };
+                stack.push(match operator {
+                    Value::Add => Value::Num(operand1 + operand2),
+                    Value::Sub => Value::Num(operand1 - operand2),
+                    Value::Div => Value::Num(operand1 / operand2),
+                    Value::Mul => Value::Num(operand1 * operand2),
+                    Value::Num(_) => unreachable!("checked for operator in if statement"),
+                });
+            }
         }
+        debug_assert_eq!(stack.len(), 1);
+        let Some(Value::Num(result)) = stack.pop() else {
+            panic!("invalid rpn  received")
+        };
+        result
     }
 }
 
