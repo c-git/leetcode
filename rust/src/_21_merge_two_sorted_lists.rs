@@ -17,51 +17,31 @@
 //     }
 //   }
 // }
+
 impl Solution {
     pub fn merge_two_lists(
         mut list1: Option<Box<ListNode>>,
         mut list2: Option<Box<ListNode>>,
     ) -> Option<Box<ListNode>> {
-        let mut result_head: Option<Box<ListNode>> = None;
-        let mut result_current = &mut result_head;
-
+        let mut result = None;
+        let mut current = &mut result;
         while list1.is_some() || list2.is_some() {
-            debug_assert!(
-                result_current.is_none(),
-                "should always be the next spot to add a node"
-            );
-            match (list1, list2) {
-                (None, None) => {
-                    unreachable!("Should not be reachable by exit condition for while loop")
-                }
-                (None, Some(node2)) => {
-                    *result_current = Some(node2);
-                    list1 = None;
-                    list2 = None; // node2 moved into result
-                }
-                (Some(node1), None) => {
-                    *result_current = Some(node1);
-                    list1 = None; // node1 moved into result
-                    list2 = None;
-                }
-                (Some(mut node1), Some(mut node2)) => {
-                    if node1.val > node2.val {
-                        // Make sure node1 is always the smaller one
-                        std::mem::swap(&mut node1, &mut node2);
+            match (list1.as_ref(), list2.as_ref()) {
+                (None, None) => unreachable!("either must be some to enter loop"),
+                (None, Some(_)) => *current = list2.take(),
+                (Some(_), None) => *current = list1.take(),
+                (Some(x), Some(y)) => {
+                    if x.val > y.val {
+                        std::mem::swap(&mut list1, &mut list2);
                     }
-                    list1 = node1.next.take();
-                    list2 = Some(node2);
-                    *result_current = Some(node1);
-
-                    // Move result_current forward
-                    let Some(curr) = result_current else {
-                        unreachable!("we just set the value into result_current")
-                    };
-                    result_current = &mut curr.next;
+                    let mut temp = list1.take();
+                    list1 = temp.as_mut().expect("just checked it was some").next.take();
+                    *current = temp;
+                    current = &mut current.as_mut().expect("just checked it was some").next;
                 }
             }
         }
-        result_head
+        result
     }
 }
 
