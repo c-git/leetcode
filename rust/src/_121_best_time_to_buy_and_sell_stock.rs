@@ -4,14 +4,10 @@
 impl Solution {
     pub fn max_profit(prices: Vec<i32>) -> i32 {
         let mut result = 0;
-        let mut low = i32::MAX;
+        let mut best_buy_price = i32::MAX;
         for price in prices {
-            if price < low {
-                low = price;
-            } else {
-                let diff = price - low;
-                result = result.max(diff);
-            }
+            result = result.max(price.saturating_sub(best_buy_price));
+            best_buy_price = best_buy_price.min(price);
         }
         result
     }
