@@ -2,7 +2,8 @@
 //! 1352. Product of the Last K Numbers
 
 struct ProductOfNumbers {
-    data: Vec<i32>,
+    /// Never stores 0
+    products: Vec<i32>,
 }
 
 /**
@@ -12,16 +13,28 @@ struct ProductOfNumbers {
 impl ProductOfNumbers {
     fn new() -> Self {
         Self {
-            data: Default::default(),
+            products: Default::default(),
         }
     }
 
     fn add(&mut self, num: i32) {
-        self.data.push(num);
+        if num == 0 {
+            self.products.clear();
+            self.products.push(1);
+        } else {
+            let value = self.products.last().unwrap_or(&1) * num;
+            self.products.push(value);
+        }
     }
 
     fn get_product(&self, k: i32) -> i32 {
-        self.data.iter().rev().take(k as usize).product()
+        let k = k as usize;
+        if k >= self.products.len() {
+            0
+        } else {
+            let divisor = self.products[self.products.len() - k - 1];
+            self.products.last().unwrap() / divisor
+        }
     }
 }
 
