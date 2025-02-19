@@ -12,9 +12,7 @@ struct ProductOfNumbers {
  */
 impl ProductOfNumbers {
     fn new() -> Self {
-        Self {
-            products: Default::default(),
-        }
+        Self { products: vec![1] }
     }
 
     fn add(&mut self, num: i32) {
@@ -63,5 +61,17 @@ mod tests {
         assert_eq!(product_of_numbers.get_product(4), 0); // return 0. The product of the last 4 numbers is 0 * 2 * 5 * 4 = 0
         product_of_numbers.add(8); // [3,0,2,5,4,8]
         assert_eq!(product_of_numbers.get_product(2), 32); // return 32. The product of the last 2 numbers is 4 * 8 = 32
+    }
+
+    #[test]
+    fn failed_test_case() {
+        let mut product_of_numbers = ProductOfNumbers::new();
+        product_of_numbers.add(1);
+        assert_eq!(product_of_numbers.get_product(1), 1);
+        assert_eq!(product_of_numbers.get_product(1), 1);
+        assert_eq!(product_of_numbers.get_product(1), 1);
+        product_of_numbers.add(7);
+        product_of_numbers.add(6);
+        product_of_numbers.add(7);
     }
 }
