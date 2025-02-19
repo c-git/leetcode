@@ -2,10 +2,11 @@
 //! 3066. Minimum Operations to Exceed Threshold Value II
 
 impl Solution {
-    pub fn min_operations(mut nums: Vec<i32>, k: i32) -> i32 {
+    pub fn min_operations(nums: Vec<i32>, k: i32) -> i32 {
         // ASSUMPTION: Based on the guarantee from the question the unwraps below are valid
         // - The input is generated such that an answer always exists
-        nums.iter_mut().for_each(|x| *x *= -1);
+        let k = k as i64;
+        let nums: Vec<i64> = nums.into_iter().map(|x| -(x as i64)).collect();
         let mut result = 0;
         let mut heap = std::collections::BinaryHeap::from(nums);
         while (heap.peek().unwrap() * -1) < k {
@@ -31,6 +32,7 @@ mod tests {
     #[rstest]
     #[case(vec![2,11,10,1,3], 10, 2)]
     #[case(vec![1,1,2,4,9], 20, 4)]
+    #[case(vec![999999999,999999999,999999999], 1000000000, 2)]
     fn case(#[case] nums: Vec<i32>, #[case] k: i32, #[case] expected: i32) {
         let actual = Solution::min_operations(nums, k);
         assert_eq!(actual, expected);
