@@ -40,7 +40,6 @@ impl Solution {
                     match sum.cmp(&value) {
                         Ordering::Less => {}
                         Ordering::Equal => {
-                            println!("{left}, {right}, {value}, {}", right + value);
                             add_candidate(
                                 &mut prev_sequences,
                                 right + value,
