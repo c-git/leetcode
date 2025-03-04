@@ -3,6 +3,9 @@
 
 impl Solution {
     pub fn four_sum(mut nums: Vec<i32>, target: i32) -> Vec<Vec<i32>> {
+        if nums.len() < 4 {
+            return Default::default();
+        }
         let mut result = vec![];
         nums.sort_unstable();
         let mut scratch = vec![0; 4];
@@ -56,6 +59,7 @@ mod tests {
     #[rstest]
     #[case(vec![1,0,-1,0,-2,2], 0, vec![vec![-2,-1,1,2],vec![-2,0,0,2],vec![-1,0,0,1]])]
     #[case(vec![2,2,2,2,2], 8, vec![vec![2,2,2,2]])]
+    #[case(vec![0], 0, vec![])]
     fn case(#[case] nums: Vec<i32>, #[case] target: i32, #[case] mut expected: Vec<Vec<i32>>) {
         let mut actual = Solution::four_sum(nums, target);
         actual.iter_mut().for_each(|x| x.sort_unstable());
