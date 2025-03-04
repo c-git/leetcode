@@ -34,7 +34,11 @@ impl Solution {
             }
 
             scratch[pos] = nums[i];
-            Self::n_sum(scratch, &nums[i + 1..], pos + 1, target - nums[i], result);
+            let Some(new_target) = target.checked_sub(nums[i]) else {
+                // Target has gone out of bounds, don't think we can still make the target
+                return;
+            };
+            Self::n_sum(scratch, &nums[i + 1..], pos + 1, new_target, result);
         }
     }
 
@@ -60,6 +64,7 @@ mod tests {
     #[case(vec![1,0,-1,0,-2,2], 0, vec![vec![-2,-1,1,2],vec![-2,0,0,2],vec![-1,0,0,1]])]
     #[case(vec![2,2,2,2,2], 8, vec![vec![2,2,2,2]])]
     #[case(vec![0], 0, vec![])]
+    #[case(vec![1_000_000_000,1_000_000_000,1_000_000_000,1_000_000_000], -294_967_296, vec![])]
     fn case(#[case] nums: Vec<i32>, #[case] target: i32, #[case] mut expected: Vec<Vec<i32>>) {
         let mut actual = Solution::four_sum(nums, target);
         actual.iter_mut().for_each(|x| x.sort_unstable());
