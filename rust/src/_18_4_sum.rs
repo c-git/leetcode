@@ -32,6 +32,11 @@ impl Solution {
 
         // General case - add next
         for i in 0..nums.len() + 1 + pos - scratch.len() {
+            if nums[i] as i64 > target {
+                // Early exit, already too big to make target. Number can only get bigger from
+                // here
+                return;
+            }
             if i > 0 && nums[i - 1] == nums[i] {
                 // Already tried this value in this position
                 continue;
