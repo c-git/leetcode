@@ -32,11 +32,6 @@ impl Solution {
 
         // General case - add next
         for i in 0..nums.len() + 1 + pos - scratch.len() {
-            if nums[i] as i64 > target {
-                // Early exit, already too big to make target. Number can only get bigger from
-                // here
-                return;
-            }
             if i > 0 && nums[i - 1] == nums[i] {
                 // Already tried this value in this position
                 continue;
@@ -76,6 +71,7 @@ mod tests {
     #[case(vec![2,2,2,2,2], 8, vec![vec![2,2,2,2]])]
     #[case(vec![0], 0, vec![])]
     #[case(vec![1_000_000_000,1_000_000_000,1_000_000_000,1_000_000_000], -294_967_296, vec![])]
+    #[case(vec![1,-2,-5,-4,-3,3,3,5], -11, vec![vec![-5,-4,-3,1]])]
     fn case(#[case] nums: Vec<i32>, #[case] target: i32, #[case] mut expected: Vec<Vec<i32>>) {
         let mut actual = Solution::four_sum(nums, target);
         actual.iter_mut().for_each(|x| x.sort_unstable());
