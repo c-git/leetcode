@@ -9,7 +9,7 @@ impl Solution {
         let mut result = vec![];
         nums.sort_unstable();
         let mut scratch = vec![0; 4];
-        Self::n_sum(&mut scratch, &nums, 0, target, &mut result);
+        Self::n_sum(&mut scratch, &nums, 0, target as _, &mut result);
         result
     }
 
@@ -17,11 +17,15 @@ impl Solution {
         scratch: &mut [i32],
         nums: &[i32],
         pos: usize,
-        target: i32,
+        target: i64,
         result: &mut Vec<Vec<i32>>,
     ) {
         // Base case looking for last value call function to binary search
         if pos == scratch.len() - 1 {
+            let Ok(target) = target.try_into() else {
+                // Out of bounds unable to be reached
+                return;
+            };
             Self::check_for_last(scratch, nums, target, result);
             return;
         }
@@ -34,11 +38,13 @@ impl Solution {
             }
 
             scratch[pos] = nums[i];
-            let Some(new_target) = target.checked_sub(nums[i]) else {
-                // Target has gone out of bounds, don't think we can still make the target
-                return;
-            };
-            Self::n_sum(scratch, &nums[i + 1..], pos + 1, new_target, result);
+            Self::n_sum(
+                scratch,
+                &nums[i + 1..],
+                pos + 1,
+                target - nums[i] as i64,
+                result,
+            );
         }
     }
 
