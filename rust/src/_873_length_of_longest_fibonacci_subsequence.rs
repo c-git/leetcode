@@ -21,7 +21,7 @@ impl Solution {
             }],
         );
         for (i, &x) in arr.iter().enumerate().skip(2) {
-            if let Some(prev_list) = prev_sequences.get(&x).cloned() {
+            if let Some(prev_list) = prev_sequences.remove(&x) {
                 for prev in prev_list {
                     let next = prev.last_value + x;
                     let candidate = PrevSeq {
