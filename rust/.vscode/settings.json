@@ -1,13 +1,14 @@
 {
-    "code-runner.customCommand": "cargo test --lib && echo \"--------------------------------------------------------------------------------------------------------------------------\"",
-    "cSpell.words": [
-        "atoi",
-        "conv",
-        "leetcode",
-        "Leyton",
-        "Manacher's",
-        "mincost",
-        "subseq"
-    ],
-    "rust-analyzer.showUnlinkedFileNotification": false,
+  "code-runner.customCommand": "cargo test --lib && echo \"--------------------------------------------------------------------------------------------------------------------------\"",
+  "cSpell.words": [
+    "atoi",
+    "conv",
+    "leetcode",
+    "Leyton",
+    "Manacher's",
+    "mincost",
+    "subseq",
+    "supersequence"
+  ],
+  "rust-analyzer.showUnlinkedFileNotification": false
 }
