@@ -12,7 +12,6 @@ impl Solution {
         }
         let mut best_count = curr_count;
         for i in k..blocks.len() {
-            dbg!(std::str::from_utf8(&[blocks[i]]).unwrap());
             if blocks[i] == b'B' {
                 curr_count += 1;
             }
