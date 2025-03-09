@@ -1,26 +1,29 @@
 //! Solution for https://leetcode.com/problems/alternating-groups-ii
 //! 3208. Alternating Groups II
 
-use std::collections::VecDeque;
-
 impl Solution {
     pub fn number_of_alternating_groups(colors: Vec<i32>, k: i32) -> i32 {
         let mut result = 0;
         let k = k as usize;
-        let mut group: VecDeque<i32> = VecDeque::with_capacity(k + 1);
-        for color in colors.iter().cycle().take(colors.len() + k - 1) {
-            if let Some(last) = group.back() {
-                if color == last {
-                    // not alternating abandon group
-                    group.clear();
-                }
+        let mut last = colors[0];
+        let mut group_start = 0;
+        for (i, color) in colors
+            .iter()
+            .copied()
+            .cycle()
+            .take(colors.len() + k - 1)
+            .enumerate()
+        {
+            if color == last {
+                // not alternating abandon group
+                group_start = i;
             }
-            group.push_back(*color);
+            last = color;
 
-            if group.len() > k {
-                group.pop_front();
+            if i - group_start >= k {
+                group_start += 1;
             }
-            if group.len() == k {
+            if i - group_start == k - 1 {
                 result += 1;
             }
         }
