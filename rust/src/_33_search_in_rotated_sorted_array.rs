@@ -17,9 +17,16 @@ impl Solution {
                 .find_map(|(i, &x)| if x == target { Some(i) } else { None });
         }
 
-        // O(log n) - Find partition point (Observation: All values in the left sorted list are greater than the all values in the right side sort list)
-        // left will be equal to right if there is a rotation and both on the end of the left side
-        // If it is not rotated then they will not be equal and left == 0 and right == n-1
+        // O(log n) - Find partition point
+        //
+        // If there is no rotation then then both `left` and `right` will not change
+        // from `left == 0` and `right n-1` But if there is a rotation then
+        // after finding the partition point `left` will be equal to `right` and both
+        // `left` and `right` will be on the right (high value) end of the left list,
+        // which is at the partition point.
+        //
+        // Observation: All values in the left sorted list are greater than all the
+        // values in the right side sort list.
         let mut left = 0;
         let mut right = n - 1;
         while left < right && nums[left] > nums[right] {
@@ -33,7 +40,8 @@ impl Solution {
             }
         }
         if left != right {
-            // They are not equal just use built in binary search on full array
+            // They are not equal, which means that there is no rotation so just use built
+            // in binary search on full array
             debug_assert_eq!(left, 0);
             debug_assert_eq!(right, n - 1);
             return match nums.binary_search(&target) {
@@ -41,28 +49,28 @@ impl Solution {
                 Err(_) => None,
             };
         } else {
-            // They are equal and thus must be on the end of the left side
+            // They are equal and thus must be on the right end of the left list
             debug_assert_ne!(left, 0);
         }
 
         // O(log n) - Find value
         debug_assert!(left < n - 1);
-        let end_of_left_side = left;
-        let start_of_right_side = left + 1;
-        if let Ok(pos) = nums[..=end_of_left_side].binary_search(&target) {
-            // Found on the left side
-            return Some(pos);
+        if target < nums[0] {
+            // If target exits it must be in the right list
+            let start_of_right_list = left + 1;
+            nums[start_of_right_list..]
+                .binary_search(&target)
+                .ok()
+                .map(|pos| pos + start_of_right_list)
+        } else {
+            // If target exits it must be in the left list
+            let end_of_left_list = left;
+            nums[..=end_of_left_list].binary_search(&target).ok()
         }
-        if let Ok(pos) = nums[start_of_right_side..].binary_search(&target) {
-            // Found on the right side
-            return Some(pos + start_of_right_side);
-        }
-        // Not found on either side
-        None
     }
 }
 
-struct Solution;
+pub struct Solution;
 #[cfg(test)]
 mod tests {
     use super::*;
