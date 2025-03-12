@@ -8,7 +8,7 @@ impl Solution {
             Err(x) => x,
         };
 
-        let mut max_negative_index = separator_index;
+        let mut max_negative_index = separator_index.saturating_sub(1);
         while max_negative_index > 0 && nums[max_negative_index] >= 0 {
             max_negative_index -= 1;
         }
@@ -37,6 +37,9 @@ mod tests {
     #[case(vec![-2,-1,-1,1,2,3], 3)]
     #[case(vec![-3,-2,-1,0,0,1,2], 3)]
     #[case(vec![5,20,66,1314], 4)]
+    #[case(vec![-1], 1)]
+    #[case(vec![1], 1)]
+    #[case(vec![0], 0)]
     fn case(#[case] nums: Vec<i32>, #[case] expected: i32) {
         let actual = Solution::maximum_count(nums);
         assert_eq!(actual, expected);
