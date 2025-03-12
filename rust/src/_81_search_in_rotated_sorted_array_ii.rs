@@ -20,7 +20,6 @@ impl Solution {
                 } else {
                     // We've found the pivot because the next cell is less than
                     // `nums[left]`
-                    left += 1;
                     right = left;
                 }
                 continue;
@@ -34,27 +33,15 @@ impl Solution {
             }
         }
 
-        // We should only be a few cases coming out of the loop
-        // 1 - There existed a pivot and we found it, we are on the right end of the
-        //      left list
-        //      (left == right && (nums[0] != nums[left] || nums[left] != nums[n-1])
-        // 2 - There was no pivot because all values were the same
-        //      (left == right && nums[0] == nums[left] && nums[n-1] == nums[0])
-        // 3 - There was no pivot so we never entered the loop
-        //      (left != right && left == 0 && right == n - 1)
         if left == right {
-            // We found a pivot let's see if it's real
-            if nums[0] == nums[left] && nums[left] == nums[n - 1] {
-                // We didn't actually find a pivot all values are equal
-                debug_assert!(nums.iter().all(|&x| x == nums[0]));
-                nums[0] == target
+            // Found a pivot search the correct side (pivot point is at end of left list)
+            if target >= nums[0] {
+                nums[..=left].binary_search(&target).is_ok()
+            } else if left < n {
+                nums[left + 1..].binary_search(&target).is_ok()
             } else {
-                // We found a real pivot search the correct side
-                if target >= nums[0] {
-                    nums[..left].binary_search(&target).is_ok()
-                } else {
-                    nums[left..].binary_search(&target).is_ok()
-                }
+                // Left list goes all the way to the end if it were included we would have gone on the first branch
+                false
             }
         } else {
             // No pivot found do normal binary search
@@ -81,6 +68,7 @@ mod tests {
     #[case(vec![4,4,4,4], 0, false)]
     #[case(vec![4,4,4,4], 4, true)]
     #[case(vec![4,4,0], 0, true)]
+    #[case(vec![2,2,2,3,2,2,2], 3, true)]
     fn case(#[case] nums: Vec<i32>, #[case] target: i32, #[case] expected: bool) {
         let actual = Solution::search(nums, target);
         assert_eq!(actual, expected);
