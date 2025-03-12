@@ -13,7 +13,7 @@ impl Solution {
         let mut left = 0;
         let mut right = n - 1;
         while left < right && nums[left] >= nums[right] {
-            while left < right && nums[left] == nums[right] {
+            while left < right && nums[left] == nums[left + 1] {
                 if nums[left] <= nums[left + 1] {
                     // Keep moving across the left list
                     left += 1;
@@ -69,6 +69,7 @@ mod tests {
     #[case(vec![4,4,4,4], 4, true)]
     #[case(vec![4,4,0], 0, true)]
     #[case(vec![2,2,2,3,2,2,2], 3, true)]
+    #[case(vec![0,0,1,1,2,0], 2, true)]
     fn case(#[case] nums: Vec<i32>, #[case] target: i32, #[case] expected: bool) {
         let actual = Solution::search(nums, target);
         assert_eq!(actual, expected);
