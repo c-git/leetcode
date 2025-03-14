@@ -13,7 +13,7 @@ impl Solution {
             return 0;
         };
         if Self::is_possible(&candies, high, k) {
-            return k as i32;
+            return high;
         }
         while low < high {
             debug_assert!(Self::is_possible(&candies, low, k));
@@ -55,6 +55,7 @@ mod tests {
     #[case(vec![2,3,4], 3, 2)]
     #[case(vec![2,4,7,5], 4, 3)]
     #[case(vec![4,12], 4, 4)]
+    #[case(vec![9,10,1,2,10,9,9,10,2,2], 3, 10)]
     fn case(#[case] candies: Vec<i32>, #[case] k: i64, #[case] expected: i32) {
         let actual = Solution::maximum_candies(candies, k);
         assert_eq!(actual, expected);
