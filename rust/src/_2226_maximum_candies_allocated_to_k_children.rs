@@ -2,38 +2,35 @@
 //! 2226. Maximum Candies Allocated to K Children
 
 impl Solution {
-    pub fn maximum_candies(mut candies: Vec<i32>, k: i64) -> i32 {
-        let mut result = 0;
-        candies.sort_unstable();
-        let mut candies_sum = 0;
-        for (i, curr_count) in candies.iter().map(|x| *x as i64).enumerate().rev() {
-            candies_sum += curr_count;
-            let min_clamp_value = if i > 0 {
-                if candies[i - 1] < candies[i] {
-                    candies[i - 1] + 1
-                } else {
-                    candies[i]
-                }
-            } else {
-                1
-            } as i64;
-            let mut per_child = candies_sum / k;
-            if per_child == 0 {
-                continue;
+    /// After reading hints from leetcode
+    pub fn maximum_candies(candies: Vec<i32>, k: i64) -> i32 {
+        let mut low = 1;
+        if !Self::is_possible(&candies, low, k) {
+            return 0;
+        }
+        let mut high: i32 = candies.iter().sum();
+        if Self::is_possible(&candies, high, k) {
+            return k as i32;
+        }
+        while low < high {
+            debug_assert!(Self::is_possible(&candies, low, k));
+            debug_assert!(!Self::is_possible(&candies, high, k));
+            let mid = (low + high) / 2;
+            if mid == low {
+                return low;
             }
-            for clamp_value in (min_clamp_value..=curr_count).rev() {
-                per_child = per_child.min(clamp_value);
-
-                // Test value to see if it can actually work
-                let actual_child_count: i64 = candies.iter().map(|x| *x as i64 / per_child).sum();
-                if actual_child_count >= k {
-                    // This number actually works let's update result
-                    result = result.max(per_child);
-                    break;
-                }
+            if Self::is_possible(&candies, mid, k) {
+                low = mid;
+            } else {
+                high = mid;
             }
         }
-        result as i32
+
+        low
+    }
+
+    fn is_possible(candies: &[i32], per_child: i32, k: i64) -> bool {
+        k <= candies.iter().map(|x| x / per_child).sum::<i32>() as i64
     }
 }
 
