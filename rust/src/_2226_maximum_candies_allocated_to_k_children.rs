@@ -8,7 +8,10 @@ impl Solution {
         if !Self::is_possible(&candies, low, k) {
             return 0;
         }
-        let mut high: i32 = candies.iter().sum();
+        let Some(mut high) = candies.iter().max().copied() else {
+            // No candies to share
+            return 0;
+        };
         if Self::is_possible(&candies, high, k) {
             return k as i32;
         }
@@ -30,7 +33,7 @@ impl Solution {
     }
 
     fn is_possible(candies: &[i32], per_child: i32, k: i64) -> bool {
-        k <= candies.iter().map(|x| x / per_child).sum::<i32>() as i64
+        k <= candies.iter().map(|x| (x / per_child) as i64).sum::<i64>()
     }
 }
 
