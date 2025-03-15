@@ -20,7 +20,7 @@ impl Solution {
             let mut possible_thefts = 0;
 
             let mut index = 0;
-            while index < total_houses {
+            while index < total_houses && possible_thefts < k {
                 if nums[index] <= mid_reward {
                     possible_thefts += 1;
                     index += 2 // Skip the next house to maintain the non-adjacent condition
@@ -29,9 +29,9 @@ impl Solution {
                 }
             }
             if possible_thefts >= k {
-                max_reward = mid_reward
+                max_reward = mid_reward;
             } else {
-                min_reward = mid_reward + 1
+                min_reward = mid_reward + 1;
             }
         }
         min_reward
