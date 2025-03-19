@@ -27,11 +27,11 @@ impl Solution {
                 && str1
                     .windows(prefix.len())
                     .step_by(prefix.len())
-                    .all(|win| dbg!(win == prefix))
+                    .all(|win| win == prefix)
                 && str2
                     .windows(prefix.len())
                     .step_by(prefix.len())
-                    .all(|win| dbg!(win == prefix))
+                    .all(|win| win == prefix)
             {
                 result = &str1[..=i];
             }
