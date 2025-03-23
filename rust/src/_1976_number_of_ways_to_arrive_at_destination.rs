@@ -30,64 +30,70 @@ impl Graph {
     }
 }
 
+type Time = usize;
+type Intersection = usize;
+
+struct MinHeap {
+    max_heap: std::collections::BinaryHeap<std::cmp::Reverse<(Time, Intersection)>>,
+}
+
+impl MinHeap {
+    fn new() -> Self {
+        Self {
+            max_heap: Default::default(),
+        }
+    }
+
+    fn push(&mut self, value: (Time, Intersection)) {
+        self.max_heap.push(std::cmp::Reverse(value));
+    }
+
+    fn pop(&mut self) -> Option<(Time, Intersection)> {
+        self.max_heap.pop().map(|x| x.0)
+    }
+}
+
 impl Solution {
+    /// After reading editorial
     pub fn count_paths(n: i32, roads: Vec<Vec<i32>>) -> i32 {
         let n = n as usize;
-        let mut result = 0;
-        let mut best_time = usize::MAX;
-        let mut visited = vec![false; n];
+        let mut shortest_paths_times = vec![usize::MAX; n];
+        let mut path_count = vec![0; n];
+        shortest_paths_times[0] = 0; // Starting point
+        path_count[0] = 1; // Exactly 1 way to get to starting point from the starting point
+
+        // Build Graph
         let mut graph = Graph::new(n);
         for road in roads {
             graph.add_edge(road);
         }
-        Self::dfs(
-            0,
-            n - 1,
-            0,
-            &graph,
-            &mut visited,
-            &mut best_time,
-            &mut result,
-        );
-        result as _
-    }
 
-    fn dfs(
-        src: usize,
-        dst: usize,
-        travel_time: usize,
-        graph: &Graph,
-        visited: &mut [bool],
-        best_time: &mut usize,
-        result: &mut usize,
-    ) {
-        if src == dst {
-            match travel_time.cmp(best_time) {
-                std::cmp::Ordering::Less => {
-                    *result = 1;
-                    *best_time = travel_time;
-                }
-                std::cmp::Ordering::Equal => *result = (*result + 1) % MODULUS,
-                std::cmp::Ordering::Greater => {}
+        // Use Dijkstra's algorithm to get the number of shortest paths available
+        let mut min_heap = MinHeap::new();
+        min_heap.push((0, 0));
+        while let Some((time, intersection)) = min_heap.pop() {
+            if time > shortest_paths_times[intersection] {
+                // Discard larger value for known path
+                continue;
             }
-            return;
+            for edge in graph.edges[intersection].iter().copied() {
+                let new_time = time + edge.time;
+                match new_time.cmp(&shortest_paths_times[edge.dst]) {
+                    std::cmp::Ordering::Less => {
+                        shortest_paths_times[edge.dst] = new_time;
+                        path_count[edge.dst] = path_count[intersection];
+                        min_heap.push((new_time, edge.dst));
+                    }
+                    std::cmp::Ordering::Equal => {
+                        path_count[edge.dst] =
+                            (path_count[edge.dst] + path_count[intersection]) % MODULUS;
+                    }
+                    std::cmp::Ordering::Greater => {} // Do not update this is a slower path
+                }
+            }
         }
-        if visited[src] || travel_time > *best_time {
-            return;
-        }
-        visited[src] = true;
-        for edge in graph.edges[src].iter().copied() {
-            Self::dfs(
-                edge.dst,
-                dst,
-                travel_time + edge.time,
-                graph,
-                visited,
-                best_time,
-                result,
-            );
-        }
-        visited[src] = false;
+
+        path_count[n - 1] as _
     }
 }
 
