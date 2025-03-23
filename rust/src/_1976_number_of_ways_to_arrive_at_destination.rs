@@ -72,7 +72,7 @@ impl Solution {
             }
             return;
         }
-        if visited[src] {
+        if visited[src] || travel_time > *best_time {
             return;
         }
         visited[src] = true;
