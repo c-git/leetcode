@@ -5,7 +5,7 @@ impl Solution {
     pub fn count_days(days: i32, mut meetings: Vec<Vec<i32>>) -> i32 {
         let mut result = 0;
         let mut meeting_end_day = 0;
-        meetings.sort();
+        meetings.sort_unstable();
         for meeting in meetings {
             let (start_day, end_day) = (meeting[0], meeting[1]);
             if start_day > days {
