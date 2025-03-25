@@ -6,36 +6,39 @@ use std::{cmp::min, collections::VecDeque};
 impl Solution {
     pub fn trap(heights: Vec<i32>) -> i32 {
         let n = heights.len();
-        let mut peaks_left = vec![(heights[0], 0)];
-        let mut end_left = peaks_left.last().unwrap();
+
+        // Peaks coming from the left (Height, Index)
+        let mut peaks_left = VecDeque::new();
+        peaks_left.push_back((heights[0], 0));
         for (idx_left, height) in heights.iter().enumerate().skip(1) {
-            if height >= &end_left.0 {
+            if height >= &peaks_left.back().unwrap().0 {
                 // This elevation is equal or higher
-                peaks_left.push((*height, idx_left));
-                end_left = peaks_left.last().unwrap();
+                peaks_left.push_back((*height, idx_left));
             }
         }
 
+        // Peaks coming from the right (Height, Index)
         let mut peaks_right = VecDeque::new();
         peaks_right.push_front((heights[n - 1], n - 1));
-        let mut end_right = peaks_right.front().unwrap();
         for (idx_right, height) in heights.iter().enumerate().rev().skip(1) {
-            if height >= &end_right.0 {
+            if height >= &peaks_right.front().unwrap().0 {
                 peaks_right.push_front((*height, idx_right));
-                end_right = peaks_right.front().unwrap();
             }
         }
 
-        // Join lists of peaks (Max of left will be at the end, Max of right will be at start)
-        while let Some(last) = peaks_left.last() {
-            if last.1 >= end_right.1 {
-                debug_assert_eq!(last.0, end_right.0);
-                peaks_left.pop(); // Remove overlap area (Should be equal values)
-            } else {
-                break;
-            }
+        // Join lists of peaks (Max of left will be at the back of deque, Max of right will be at front of deque)
+        if peaks_left.back().unwrap().1 >= peaks_right.front().unwrap().1 {
+            debug_assert_eq!(
+                peaks_left.back().unwrap().0,
+                peaks_right.front().unwrap().0,
+                "Should only match at most one location"
+            );
+            peaks_right.pop_front(); // Remove overlap area
+        } else {
+            unreachable!("They must match at exactly one position")
         }
-        peaks_left.append(&mut peaks_right.into_iter().collect());
+
+        peaks_left.append(&mut peaks_right);
         let peaks = peaks_left; // Now contains all relevant peaks
 
         if peaks.len() < 2 {
