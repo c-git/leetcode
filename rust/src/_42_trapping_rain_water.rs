@@ -4,6 +4,26 @@
 impl Solution {
     pub fn trap(heights: Vec<i32>) -> i32 {
         // Based on https://www.youtube.com/watch?v=588iXKwb7Zs
+        // Key intuition: tall towers in the middle don't change how much water is
+        // trapped. The lower edge controls how much water gets trapped. If we compare
+        // the lower of the two edges we see where water would leak out from. Then we
+        // add up and move in. Importantly a extremely tall tower in the middle doesn't
+        // change the trap volume if it is there or not. So knowing only the edges is
+        // enough to know the water level at that point. See example below, noting that
+        // the water level is the same everywhere except where the tower is. On either
+        // side of the tower the level is controlled by the lower side. Further note
+        // that even if the tower were at the end we still have a lower side where the
+        // water will leak out and thus we'll just keep moving that end in.
+
+        //   x
+        //   x  x
+        // x x  x
+        // xxxxxx
+
+        //      x
+        // x    x
+        // xxxxxx
+
         let mut result = 0;
         let mut left = 0;
         let mut right = heights.len() - 1;
