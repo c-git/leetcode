@@ -1,63 +1,26 @@
 //! Solution for https://leetcode.com/problems/trapping-rain-water
 //! 42. Trapping Rain Water
 
-use std::{cmp::min, collections::VecDeque};
-
 impl Solution {
     pub fn trap(heights: Vec<i32>) -> i32 {
-        let n = heights.len();
-
-        // Peaks coming from the left (Height, Index)
-        let mut peaks_left = VecDeque::new();
-        peaks_left.push_back((heights[0], 0));
-        for (idx_left, height) in heights.iter().enumerate().skip(1) {
-            if height >= &peaks_left.back().unwrap().0 {
-                // This elevation is equal or higher
-                peaks_left.push_back((*height, idx_left));
-            }
-        }
-
-        // Peaks coming from the right (Height, Index)
-        let mut peaks_right = VecDeque::new();
-        peaks_right.push_front((heights[n - 1], n - 1));
-        for (idx_right, height) in heights.iter().enumerate().rev().skip(1) {
-            if height >= &peaks_right.front().unwrap().0 {
-                peaks_right.push_front((*height, idx_right));
-            }
-        }
-
-        // Join lists of peaks (Max of left will be at the back of deque, Max of right will be at front of deque)
-        while !peaks_right.is_empty()
-            && peaks_left.back().unwrap().1 >= peaks_right.front().unwrap().1
-        {
-            peaks_right.pop_front(); // Remove overlap area
-        }
-
-        peaks_left.append(&mut peaks_right);
-        let peaks = peaks_left; // Now contains all relevant peaks
-
-        if peaks.len() < 2 {
-            // Not enough peaks to catch water (Don't see how this could happen though)
-            return 0;
-        }
-
+        // Based on https://www.youtube.com/watch?v=588iXKwb7Zs
         let mut result = 0;
-
-        // Calculate trapped water
-        let mut next_idx_peak = 2;
-        let mut catch_height = min(peaks[0].0, peaks[1].0);
-        let mut covered_height_idx = peaks[1].1;
-        for (i, height) in heights.iter().enumerate() {
-            if covered_height_idx < i {
-                debug_assert!(next_idx_peak < peaks.len(), "All indices should be covered thus if this one is not then there must be more peaks");
-                catch_height = min(peaks[next_idx_peak - 1].0, peaks[next_idx_peak].0);
-                covered_height_idx = peaks[next_idx_peak].1;
-                next_idx_peak += 1
-            }
-            if catch_height > *height {
-                result += catch_height - height;
+        let mut left = 0;
+        let mut right = heights.len() - 1;
+        let mut max_left = heights[left];
+        let mut max_right = heights[right];
+        while left < right {
+            if max_left < max_right {
+                result += max_left - heights[left];
+                left += 1;
+                max_left = max_left.max(heights[left]);
+            } else {
+                result += max_right - heights[right];
+                right -= 1;
+                max_right = max_right.max(heights[right]);
             }
         }
+
         result
     }
 }
