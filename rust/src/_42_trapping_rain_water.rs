@@ -27,15 +27,10 @@ impl Solution {
         }
 
         // Join lists of peaks (Max of left will be at the back of deque, Max of right will be at front of deque)
-        if peaks_left.back().unwrap().1 >= peaks_right.front().unwrap().1 {
-            debug_assert_eq!(
-                peaks_left.back().unwrap().0,
-                peaks_right.front().unwrap().0,
-                "Should only match at most one location"
-            );
+        while !peaks_right.is_empty()
+            && peaks_left.back().unwrap().1 >= peaks_right.front().unwrap().1
+        {
             peaks_right.pop_front(); // Remove overlap area
-        } else {
-            unreachable!("They must match at exactly one position")
         }
 
         peaks_left.append(&mut peaks_right);
@@ -85,6 +80,7 @@ mod tests {
     #[case(vec![1,2,3,4,5,20,0,1,1,5,3,4,0,1,2], 17)]
     #[case(vec![1,2,3,4,5], 0)]
     #[case(vec![5,4,3,2,1,0], 0)]
+    #[case(vec![5,5,1,7,1,1,5,2,7,6], 23)]
     fn case(#[case] height: Vec<i32>, #[case] expected: i32) {
         let actual = Solution::trap(height);
         assert_eq!(actual, expected);
