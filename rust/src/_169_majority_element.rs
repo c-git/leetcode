@@ -1,19 +1,29 @@
 //! Solution for https://leetcode.com/problems/majority-element
 //! 169. Majority Element
 
-use std::collections::HashMap;
-
 impl Solution {
     pub fn majority_element(nums: Vec<i32>) -> i32 {
-        let mut hash_map: HashMap<i32, usize> = HashMap::new();
-        let threshold = nums.len() / 2;
-        for num in nums {
-            *hash_map.entry(num).or_default() += 1;
+        // Solved follow up by looking at solution from https://www.youtube.com/watch?v=ZQHruHVU3zM
+
+        // Intuition: Because the majority must exist it will be more than half
+        // of all the values and as a result if we just keep track of the net
+        // amount of a number until it goes to 0 then we change to a new
+        // candidate
+
+        let mut candidate = *nums.first().expect("min length guaranteed to be 1");
+        let mut net_count = 1usize;
+        for num in nums.into_iter().skip(1) {
+            let is_same = num == candidate;
+            match (is_same, net_count) {
+                (true, _) => net_count += 1,
+                (false, 0) => {
+                    candidate = num;
+                    net_count = 1;
+                }
+                (false, _) => net_count -= 1,
+            }
         }
-        hash_map
-            .into_iter()
-            .find_map(|(num, freq)| if freq > threshold { Some(num) } else { None })
-            .expect("You may assume that the majority element always exists in the array")
+        candidate
     }
 }
 
