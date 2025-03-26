@@ -1,30 +1,19 @@
 //! Solution for https://leetcode.com/problems/majority-element
 //! 169. Majority Element
 
+use std::collections::HashMap;
+
 impl Solution {
-    pub fn majority_element(mut nums: Vec<i32>) -> i32 {
-        nums.sort_unstable();
-        let mut result = *nums.first().expect("guaranteed to exists by constraints");
-        let mut max_count = 0;
-        let mut last = result;
-        let mut curr_count = max_count;
+    pub fn majority_element(nums: Vec<i32>) -> i32 {
+        let mut hash_map: HashMap<i32, usize> = HashMap::new();
+        let threshold = nums.len() / 2;
         for num in nums {
-            if last == num {
-                curr_count += 1;
-            } else {
-                if max_count < curr_count {
-                    max_count = curr_count;
-                    result = last;
-                }
-                last = num;
-                curr_count = 1;
-            }
+            *hash_map.entry(num).or_default() += 1;
         }
-        if max_count < curr_count {
-            last
-        } else {
-            result
-        }
+        hash_map
+            .into_iter()
+            .find_map(|(num, freq)| if freq > threshold { Some(num) } else { None })
+            .expect("You may assume that the majority element always exists in the array")
     }
 }
 
