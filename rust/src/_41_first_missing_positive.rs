@@ -4,6 +4,9 @@
 // [0,1,2]
 impl Solution {
     pub fn first_missing_positive(mut nums: Vec<i32>) -> i32 {
+        if nums.len() == 1 {
+            return if nums[0] == 1 { 2 } else { 1 };
+        }
         for mut index in 0..nums.len() {
             let mut num = nums[index];
             loop {
@@ -57,6 +60,7 @@ mod tests {
     #[case(vec![1,2,0], 3)]
     #[case(vec![3,4,-1,1], 2)]
     #[case(vec![7,8,9,11,12], 1)]
+    #[case(vec![1], 2)]
     fn case(#[case] nums: Vec<i32>, #[case] expected: i32) {
         let actual = Solution::first_missing_positive(nums);
         assert_eq!(actual, expected);
