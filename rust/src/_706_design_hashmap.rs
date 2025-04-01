@@ -12,11 +12,11 @@ struct MyHashMap {
  * If you need a mutable reference, change it to `&mut self` instead.
  */
 impl MyHashMap {
-    const RESIZE_THRESHOLD: usize = 4;
+    const RESIZE_THRESHOLD: usize = 16;
 
     fn new() -> Self {
         #[cfg(not(debug_assertions))]
-        let size = 64;
+        let size = 10_007; // A large prime number to minimize collisions (based on solution lookup)
         #[cfg(debug_assertions)]
         let size = 2;
         Self {
@@ -45,7 +45,6 @@ impl MyHashMap {
     }
 
     fn resize(&mut self) {
-        dbg!(&self.data);
         self.is_resizing = true;
         let mut old_data = vec![Default::default(); self.data.len() * 2];
         std::mem::swap(&mut self.data, &mut old_data);
