@@ -5,7 +5,7 @@ impl Solution {
     pub fn max_subarray_length(nums: Vec<i32>, k: i32) -> i32 {
         let mut left = 0;
         let mut result = 1;
-        let mut freq_count = std::collections::BTreeMap::new();
+        let mut freq_count = std::collections::HashMap::new();
         freq_count.insert(nums[left], 1);
 
         for (right, new_value) in nums.iter().copied().enumerate().skip(1) {
