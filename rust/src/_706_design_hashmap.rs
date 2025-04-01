@@ -11,10 +11,7 @@ struct MyHashMap {
  */
 impl MyHashMap {
     fn new() -> Self {
-        #[cfg(not(debug_assertions))]
-        let size = 10_007; // A large prime number to minimize collisions (based on solution lookup)
-        #[cfg(debug_assertions)]
-        let size = 2;
+        let size = 500_000; // Test with "at most 4" collisions
         Self {
             data: vec![Default::default(); size],
         }
