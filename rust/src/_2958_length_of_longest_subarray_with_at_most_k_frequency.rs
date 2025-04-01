@@ -20,9 +20,6 @@ impl Solution {
                         .get_mut(&key)
                         .expect("must exist because we added it when we passed");
                     *freq -= 1;
-                    if *freq == 0 {
-                        freq_count.remove(&key);
-                    }
                     left += 1;
                     if key == new_value {
                         break;
