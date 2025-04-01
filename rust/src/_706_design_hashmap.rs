@@ -26,12 +26,7 @@ impl MyHashMap {
     }
 
     fn backing_index(&self, key: i32) -> usize {
-        use std::hash::{Hash, Hasher};
-
-        let mut hasher = std::hash::DefaultHasher::new();
-        key.hash(&mut hasher);
-        let hash = hasher.finish();
-        hash as usize % self.data.len()
+        key.unsigned_abs() as usize % self.data.len()
     }
 
     fn put(&mut self, key: i32, value: i32) {
