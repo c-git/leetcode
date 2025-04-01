@@ -11,7 +11,7 @@ struct MyHashMap {
  */
 impl MyHashMap {
     fn new() -> Self {
-        let size = 500_000; // Test with "at most 4" collisions
+        let size = 100_000;
         Self {
             data: vec![Default::default(); size],
         }
