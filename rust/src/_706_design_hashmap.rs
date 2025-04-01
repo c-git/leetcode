@@ -12,11 +12,11 @@ struct MyHashMap {
  * If you need a mutable reference, change it to `&mut self` instead.
  */
 impl MyHashMap {
-    const RESIZE_THRESHOLD: usize = 4;
+    const RESIZE_THRESHOLD: usize = 16;
 
     fn new() -> Self {
         #[cfg(not(debug_assertions))]
-        let size = 64;
+        let size = 1024;
         #[cfg(debug_assertions)]
         let size = 2;
         Self {
