@@ -1,95 +1,49 @@
 //! Solution for https://leetcode.com/problems/sliding-window-median
 //! 480. Sliding Window Median
 
-use std::cmp::Reverse;
-use std::collections::BinaryHeap;
-
-type LeftHeap = BinaryHeap<i32>;
-type RightHeap = BinaryHeap<Reverse<i32>>;
-
 impl Solution {
-    /// After hints
     pub fn median_sliding_window(nums: Vec<i32>, k: i32) -> Vec<f64> {
         let k = k as usize;
         let mut result = Vec::with_capacity(nums.len() - k + 1);
 
         // Establish preconditions for loop
-        let mut left_heap = BinaryHeap::new();
-        let mut right_heap = BinaryHeap::new();
+        let mut sorted_window = Vec::with_capacity(k);
         for x in nums.iter().copied().take(k) {
-            Self::insert_value(x, &mut left_heap, &mut right_heap)
+            sorted_window.push(x);
         }
-        result.push(Self::median_of(&left_heap, &right_heap));
+        sorted_window.sort_unstable();
+        result.push(Self::median_of(&sorted_window));
 
-        // Loop over rest of list
         let mut pop_value = nums[0];
         for window in nums.windows(k).skip(1) {
-            Self::remove_value(pop_value, &mut left_heap, &mut right_heap);
+            Self::remove_value(pop_value, &mut sorted_window);
             pop_value = window[0];
-            Self::insert_value(*window.last().unwrap(), &mut left_heap, &mut right_heap);
-            result.push(Self::median_of(&left_heap, &right_heap));
+            Self::insert_value(*window.last().unwrap(), &mut sorted_window);
+            result.push(Self::median_of(&sorted_window));
         }
 
         result
     }
 
-    fn remove_value(pop_value: i32, left_heap: &mut LeftHeap, right_heap: &mut RightHeap) {
-        let mut is_removed = false;
-
-        if !left_heap.is_empty() && pop_value <= *left_heap.peek().unwrap() {
-            left_heap.retain(|x| {
-                if !is_removed && x == &pop_value {
-                    is_removed = true;
-                    false
-                } else {
-                    true
-                }
-            });
-        } else {
-            right_heap.retain(|x| {
-                if !is_removed && x == &Reverse(pop_value) {
-                    is_removed = true;
-                    false
-                } else {
-                    true
-                }
-            });
-        }
-        Self::balance_heaps(left_heap, right_heap);
+    fn remove_value(pop_value: i32, sorted_window: &mut Vec<i32>) {
+        let index = sorted_window.binary_search(&pop_value).unwrap();
+        sorted_window.remove(index);
     }
 
-    fn balance_heaps(left_heap: &mut LeftHeap, right_heap: &mut RightHeap) {
-        while left_heap.len() < right_heap.len() || left_heap.len().abs_diff(right_heap.len()) > 1 {
-            if left_heap.len() < right_heap.len() {
-                let Reverse(right_min_value) = right_heap.pop().unwrap();
-                left_heap.push(right_min_value);
-            } else {
-                let left_max_value = left_heap.pop().unwrap();
-                right_heap.push(Reverse(left_max_value));
-            }
-        }
+    fn insert_value(new_value: i32, sorted_window: &mut Vec<i32>) {
+        let index = match sorted_window.binary_search(&new_value) {
+            Ok(idx) | Err(idx) => idx,
+        };
+        sorted_window.insert(index, new_value);
     }
 
-    fn insert_value(new_value: i32, left_heap: &mut LeftHeap, right_heap: &mut RightHeap) {
-        if let Some(left_max) = left_heap.peek() {
-            if new_value <= *left_max {
-                left_heap.push(new_value);
-            } else {
-                right_heap.push(Reverse(new_value));
-            }
+    fn median_of(sorted_window: &[i32]) -> f64 {
+        if sorted_window.len() % 2 == 0 {
+            let mid = sorted_window.len() / 2;
+            (sorted_window[mid] as f64 + sorted_window[mid - 1] as f64) / 2.0
         } else {
-            left_heap.push(new_value);
-        }
-
-        Self::balance_heaps(left_heap, right_heap);
-    }
-
-    fn median_of(left_heap: &LeftHeap, right_heap: &RightHeap) -> f64 {
-        if left_heap.len() > right_heap.len() {
-            *left_heap.peek().unwrap() as f64
-        } else {
-            debug_assert_eq!(left_heap.len(), right_heap.len());
-            (*left_heap.peek().unwrap() as f64 + right_heap.peek().unwrap().0 as f64) / 2.0
+            let mid = sorted_window.len() / 2;
+            sorted_window[mid] as f64
         }
     }
 }
