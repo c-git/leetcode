@@ -3,8 +3,6 @@
 
 struct MyHashMap {
     data: Vec<Vec<(i32, i32)>>,
-    /// To prevent loops of resizing
-    is_resizing: bool,
 }
 
 /**
@@ -12,8 +10,6 @@ struct MyHashMap {
  * If you need a mutable reference, change it to `&mut self` instead.
  */
 impl MyHashMap {
-    const RESIZE_THRESHOLD: usize = 16;
-
     fn new() -> Self {
         #[cfg(not(debug_assertions))]
         let size = 10_007; // A large prime number to minimize collisions (based on solution lookup)
@@ -21,7 +17,6 @@ impl MyHashMap {
         let size = 2;
         Self {
             data: vec![Default::default(); size],
-            is_resizing: false,
         }
     }
 
@@ -38,22 +33,7 @@ impl MyHashMap {
             prev.1 = value;
         } else {
             self.data[index].push((key, value));
-            if !self.is_resizing && self.data[index].len() > Self::RESIZE_THRESHOLD {
-                self.resize();
-            }
         }
-    }
-
-    fn resize(&mut self) {
-        self.is_resizing = true;
-        let mut old_data = vec![Default::default(); self.data.len() * 2];
-        std::mem::swap(&mut self.data, &mut old_data);
-        for position in old_data {
-            for (key, value) in position {
-                self.put(key, value);
-            }
-        }
-        self.is_resizing = false;
     }
 
     fn get(&self, key: i32) -> i32 {
