@@ -50,7 +50,6 @@ impl MyHashMap {
     }
 
     fn resize(&mut self) {
-        dbg!(&self.data);
         self.is_resizing = true;
         let mut old_data = vec![Default::default(); self.data.len() * 2];
         std::mem::swap(&mut self.data, &mut old_data);
