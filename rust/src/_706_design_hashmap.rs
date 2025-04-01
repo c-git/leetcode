@@ -18,7 +18,7 @@ impl MyHashMap {
     }
 
     fn backing_index(&self, key: i32) -> usize {
-        key.unsigned_abs() as usize % self.data.len()
+        key as usize % self.data.len()
     }
 
     fn put(&mut self, key: i32, value: i32) {
