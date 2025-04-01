@@ -34,30 +34,26 @@ impl Solution {
     }
 
     fn remove_value(pop_value: i32, left_heap: &mut LeftHeap, right_heap: &mut RightHeap) {
-        // Remove values until value is removed
-        if !left_heap.is_empty() && pop_value <= *left_heap.peek().unwrap() {
-            let mut temp = Vec::new();
-            while let Some(top) = left_heap.pop() {
-                if top == pop_value {
-                    break;
-                }
-                temp.push(top);
-            }
-            for x in temp {
-                left_heap.push(x);
-            }
-        } else {
-            let mut temp = Vec::new();
-            while let Some(top) = right_heap.pop() {
-                if top == Reverse(pop_value) {
-                    break;
-                }
-                temp.push(top);
-            }
+        let mut is_removed = false;
 
-            for x in temp {
-                right_heap.push(x);
-            }
+        if !left_heap.is_empty() && pop_value <= *left_heap.peek().unwrap() {
+            left_heap.retain(|x| {
+                if !is_removed && x == &pop_value {
+                    is_removed = true;
+                    false
+                } else {
+                    true
+                }
+            });
+        } else {
+            right_heap.retain(|x| {
+                if !is_removed && x == &Reverse(pop_value) {
+                    is_removed = true;
+                    false
+                } else {
+                    true
+                }
+            });
         }
         Self::balance_heaps(left_heap, right_heap);
     }
