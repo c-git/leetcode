@@ -12,13 +12,6 @@ impl Solution {
                 continue;
             }
             for k_val in nums.iter().skip(j + 2).copied() {
-                dbg!(
-                    j,
-                    i_val,
-                    j_val,
-                    k_val,
-                    (i_val - j_val) as i64 * k_val as i64
-                );
                 result = result.max((i_val - j_val) as i64 * k_val as i64)
             }
         }
