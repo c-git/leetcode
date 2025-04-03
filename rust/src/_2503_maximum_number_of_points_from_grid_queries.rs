@@ -30,32 +30,35 @@ impl Solution {
                 }
                 max_seen += 1;
                 seen[row][col] = true;
-                let directions: [Option<(usize, usize)>; 4] = [
-                    if row > 0 { Some((row - 1, col)) } else { None },
-                    if col > 0 { Some((row, col - 1)) } else { None },
-                    if row < row_count - 1 {
-                        Some((row + 1, col))
-                    } else {
-                        None
-                    },
-                    if col < col_count - 1 {
-                        Some((row, col + 1))
-                    } else {
-                        None
-                    },
-                ];
-                for direction in directions {
-                    let Some((next_row, next_col)) = direction else {
-                        continue;
-                    };
-                    if !seen[next_row][next_col] {
-                        cell_heap.push(Reverse((grid[next_row][next_col], next_row, next_col)));
-                    }
+                if row > 0 {
+                    Self::visit_cell(row - 1, col, &mut cell_heap, &grid, &seen);
+                }
+                if col > 0 {
+                    Self::visit_cell(row, col - 1, &mut cell_heap, &grid, &seen);
+                }
+                if row < row_count - 1 {
+                    Self::visit_cell(row + 1, col, &mut cell_heap, &grid, &seen);
+                }
+                if col < col_count - 1 {
+                    Self::visit_cell(row, col + 1, &mut cell_heap, &grid, &seen);
                 }
             }
             result[index] = max_seen;
         }
         result
+    }
+
+    #[inline]
+    fn visit_cell(
+        row: usize,
+        col: usize,
+        cell_heap: &mut BinaryHeap<Reverse<(i32, usize, usize)>>,
+        grid: &[Vec<i32>],
+        seen: &[Vec<bool>],
+    ) {
+        if !seen[row][col] {
+            cell_heap.push(Reverse((grid[row][col], row, col)));
+        }
     }
 }
 
