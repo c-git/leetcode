@@ -20,11 +20,11 @@ impl Solution {
         let mut cell_heap = BinaryHeap::new();
         cell_heap.push(Reverse((grid[0][0], 0, 0)));
         for (query, index) in queries.into_iter() {
-            while let Some(Reverse((cell_value, row, col))) = cell_heap.peek().copied() {
-                if query <= cell_value {
+            while let Some(Reverse((cell_value, ..))) = cell_heap.peek() {
+                if query <= *cell_value {
                     break;
                 }
-                cell_heap.pop(); // Remove from heap not just peek
+                let Reverse((_, row, col)) = cell_heap.pop().expect("just checked to enter loop");
                 if seen[row][col] {
                     continue;
                 }
