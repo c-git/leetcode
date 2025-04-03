@@ -9,15 +9,17 @@ impl Solution {
         let row_count = grid.len();
         let col_count = grid[0].len();
         let mut max_seen = 0;
-        let mut query_heap = BinaryHeap::with_capacity(queries.len());
-        for (i, query) in queries.into_iter().enumerate() {
-            query_heap.push(Reverse((query, i)));
-        }
+        let mut queries: Vec<_> = queries
+            .into_iter()
+            .enumerate()
+            .map(|(i, query)| (query, i))
+            .collect();
+        queries.sort_unstable();
 
         let mut seen = vec![vec![false; col_count]; row_count];
         let mut cell_heap = BinaryHeap::new();
         cell_heap.push(Reverse((grid[0][0], 0, 0)));
-        while let Some(Reverse((query, index))) = query_heap.pop() {
+        for (query, index) in queries.into_iter() {
             while let Some(Reverse((cell_value, row, col))) = cell_heap.peek().copied() {
                 if query <= cell_value {
                     break;
