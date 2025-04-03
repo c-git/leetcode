@@ -4,7 +4,8 @@
 use std::{cmp::Reverse, collections::BinaryHeap};
 
 impl Solution {
-    pub fn max_points(grid: Vec<Vec<i32>>, queries: Vec<i32>) -> Vec<i32> {
+    /// Reused grid for seen based on sak's solution
+    pub fn max_points(mut grid: Vec<Vec<i32>>, queries: Vec<i32>) -> Vec<i32> {
         let mut result = vec![0; queries.len()];
         let row_count = grid.len();
         let col_count = grid[0].len();
@@ -16,7 +17,6 @@ impl Solution {
             .collect();
         queries.sort_unstable();
 
-        let mut seen = vec![vec![false; col_count]; row_count];
         let mut cell_heap = BinaryHeap::new();
         cell_heap.push(Reverse((grid[0][0], 0, 0)));
         for (query, index) in queries.into_iter() {
@@ -25,22 +25,22 @@ impl Solution {
                     break;
                 }
                 let Reverse((_, row, col)) = cell_heap.pop().expect("just checked to enter loop");
-                if seen[row][col] {
+                if grid[row][col] == 0 {
                     continue;
                 }
                 max_seen += 1;
-                seen[row][col] = true;
+                grid[row][col] = 0;
                 if row > 0 {
-                    Self::visit_cell(row - 1, col, &mut cell_heap, &grid, &seen);
+                    Self::visit_cell(row - 1, col, &mut cell_heap, &grid);
                 }
                 if col > 0 {
-                    Self::visit_cell(row, col - 1, &mut cell_heap, &grid, &seen);
+                    Self::visit_cell(row, col - 1, &mut cell_heap, &grid);
                 }
                 if row < row_count - 1 {
-                    Self::visit_cell(row + 1, col, &mut cell_heap, &grid, &seen);
+                    Self::visit_cell(row + 1, col, &mut cell_heap, &grid);
                 }
                 if col < col_count - 1 {
-                    Self::visit_cell(row, col + 1, &mut cell_heap, &grid, &seen);
+                    Self::visit_cell(row, col + 1, &mut cell_heap, &grid);
                 }
             }
             result[index] = max_seen;
@@ -54,9 +54,8 @@ impl Solution {
         col: usize,
         cell_heap: &mut BinaryHeap<Reverse<(i32, usize, usize)>>,
         grid: &[Vec<i32>],
-        seen: &[Vec<bool>],
     ) {
-        if !seen[row][col] {
+        if grid[row][col] != 0 {
             cell_heap.push(Reverse((grid[row][col], row, col)));
         }
     }
