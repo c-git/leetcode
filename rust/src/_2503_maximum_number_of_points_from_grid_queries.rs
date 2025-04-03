@@ -28,20 +28,24 @@ impl Solution {
                 }
                 max_seen += 1;
                 seen[row][col] = true;
-                let mut directions = Vec::with_capacity(4);
-                if row > 0 {
-                    directions.push((row - 1, col));
-                }
-                if col > 0 {
-                    directions.push((row, col - 1));
-                }
-                if row < row_count - 1 {
-                    directions.push((row + 1, col));
-                }
-                if col < col_count - 1 {
-                    directions.push((row, col + 1));
-                }
-                for (next_row, next_col) in directions {
+                let directions: [Option<(usize, usize)>; 4] = [
+                    if row > 0 { Some((row - 1, col)) } else { None },
+                    if col > 0 { Some((row, col - 1)) } else { None },
+                    if row < row_count - 1 {
+                        Some((row + 1, col))
+                    } else {
+                        None
+                    },
+                    if col < col_count - 1 {
+                        Some((row, col + 1))
+                    } else {
+                        None
+                    },
+                ];
+                for direction in directions {
+                    let Some((next_row, next_col)) = direction else {
+                        continue;
+                    };
                     if !seen[next_row][next_col] {
                         cell_heap.push(Reverse((grid[next_row][next_col], next_row, next_col)));
                     }
