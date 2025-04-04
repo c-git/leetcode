@@ -10,12 +10,18 @@ impl Solution {
         // two groups those with that number and those without then our two single
         // number will be in different groups and thus each pair will cancel out each
         // other except our single numbers
-        
+
         let xor_all = nums.iter().copied().fold(0, |acc, x| acc ^ x);
-        let diff_bit_pos = xor_all.trailing_zeros() + 1;
+        let diff_bit_pos = xor_all.trailing_zeros();
         let diff_mask = 1 << diff_bit_pos;
-        let answer1 = nums.iter().copied().fold(0, |acc, x| if x & diff_mask == 0 { acc ^ x} else {acc});
-        let answer2 = nums.iter().copied().fold(0, |acc, x| if x & diff_mask != 0 { acc ^ x} else {acc});
+        let answer1 = nums
+            .iter()
+            .copied()
+            .fold(0, |acc, x| if x & diff_mask == 0 { acc ^ x } else { acc });
+        let answer2 = nums
+            .iter()
+            .copied()
+            .fold(0, |acc, x| if x & diff_mask != 0 { acc ^ x } else { acc });
         vec![answer1, answer2]
     }
 }
@@ -34,6 +40,7 @@ mod tests {
     #[case(vec![1,2,1,3,2,5], vec![3,5])]
     #[case(vec![-1,0], vec![-1,0])]
     #[case(vec![0,1], vec![1,0])]
+    #[case(vec![-1638685546,-2084083624,-307525016,-930251592,-1638685546,1354460680,623522045,-1370026032,-307525016,-2084083624,-930251592,472570145,-1370026032,1063150409,160988123,1122167217,1145305475,472570145,623522045,1122167217,1354460680,1145305475], vec![160988123,1063150409])]
     fn case(#[case] nums: Vec<i32>, #[case] mut expected: Vec<i32>) {
         let mut actual = Solution::single_number(nums);
         actual.sort();
