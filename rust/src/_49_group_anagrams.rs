@@ -5,12 +5,13 @@ use std::collections::HashMap;
 
 impl Solution {
     pub fn group_anagrams(strs: Vec<String>) -> Vec<Vec<String>> {
-        let mut result: HashMap<Vec<u8>, Vec<String>> = HashMap::new();
+        let mut result: HashMap<[u8; 26], Vec<String>> = HashMap::new();
         for s in strs {
-            let mut sorted_input: Vec<u8> = s.as_bytes().to_vec();
-            sorted_input.sort_unstable();
-            let entry = result.entry(sorted_input).or_default();
-            entry.push(s);
+            let mut characteristic = [0; 26];
+            for c in s.as_bytes() {
+                characteristic[(c - b'a') as usize] += 1;
+            }
+            result.entry(characteristic).or_default().push(s);
         }
         result.into_values().collect()
     }
@@ -27,9 +28,8 @@ mod tests {
     use rstest::rstest;
 
     #[rstest]
-    #[case(vec!["eat".into(),"tea".into(),"tan".into(),"ate".into(),"nat".into(),"bat".into()], 
-           vec![vec!["bat".into()],vec!["nat".into(),"tan".into()],vec!["ate".into(),"eat".into(),"tea".into()]])]
-    #[case(vec!["".into()],vec![vec!["".into()]])]
+    #[case(vec!["eat".into(),"tea".into(),"tan".into(),"ate".into(),"nat".into(),"bat".into()], vec![vec!["bat".into()],vec!["nat".into(),"tan".into()],vec!["ate".into(),"eat".into(),"tea".into()]])]
+    #[case(vec!["".into()], vec![vec!["".into()]])]
     #[case(vec!["a".into()], vec![vec!["a".into()]])]
     fn case(#[case] strs: Vec<String>, #[case] mut expected: Vec<Vec<String>>) {
         let mut actual = Solution::group_anagrams(strs);
