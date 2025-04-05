@@ -13,6 +13,16 @@ impl Solution {
             let mut left = first_idx + 1;
             let mut right = nums.len() - 1;
             while left < right {
+                if left > first_idx + 1 && nums[left] == nums[left - 1] {
+                    // Skip duplicates
+                    left += 1;
+                    continue;
+                }
+                if right < nums.len() - 1 && nums[right] == nums[right + 1] {
+                    // Skip duplicates
+                    right -= 1;
+                    continue;
+                }
                 let curr = first_val + nums[left] + nums[right];
                 if curr == 0 {
                     result.push(vec![first_val, nums[left], nums[right]]);
@@ -42,6 +52,7 @@ mod tests {
     #[case(vec![-1,0,1,2,-1,-4], vec![vec![-1,-1,2],vec![-1,0,1]])]
     #[case(vec![0,1,1], vec![])]
     #[case(vec![0,0,0], vec![vec![0,0,0]])]
+    #[case(vec![0,0,0,0], vec![vec![0,0,0]])]
     fn case(#[case] nums: Vec<i32>, #[case] expected: Vec<Vec<i32>>) {
         let actual = Solution::three_sum(nums);
         assert_eq!(actual, expected);
