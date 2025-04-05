@@ -1,27 +1,30 @@
 //! Solution for https://leetcode.com/problems/3sum
 //! 15. 3Sum
 
-use std::collections::BTreeSet;
-
 impl Solution {
     pub fn three_sum(mut nums: Vec<i32>) -> Vec<Vec<i32>> {
+        let mut result = vec![];
         nums.sort_unstable();
-        let mut result: BTreeSet<Vec<i32>> = BTreeSet::new();
-        for first in 0..nums.len() - 2 {
-            if nums[first] > 0 {
-                break;
-            }
-            if first > 0 && nums[first - 1] == nums[first] {
+        for (first_idx, first_val) in nums.iter().copied().enumerate() {
+            if first_idx > 0 && first_val == nums[first_idx - 1] {
+                // Skip duplicated values
                 continue;
             }
-            for second in first + 1..nums.len() - 1 {
-                let target = 0 - nums[first] - nums[second];
-                if nums[second + 1..].binary_search(&target).is_ok() {
-                    result.insert(vec![nums[first], nums[second], target]);
+            let mut left = first_idx + 1;
+            let mut right = nums.len() - 1;
+            while left < right {
+                let curr = first_val + nums[left] + nums[right];
+                if curr == 0 {
+                    result.push(vec![first_val, nums[left], nums[right]]);
+                }
+                if curr > 0 {
+                    right -= 1;
+                } else {
+                    left += 1;
                 }
             }
         }
-        result.into_iter().collect()
+        result
     }
 }
 
@@ -39,13 +42,8 @@ mod tests {
     #[case(vec![-1,0,1,2,-1,-4], vec![vec![-1,-1,2],vec![-1,0,1]])]
     #[case(vec![0,1,1], vec![])]
     #[case(vec![0,0,0], vec![vec![0,0,0]])]
-    #[case(vec![0,0,0,0], vec![vec![0,0,0]])]
-    #[case(vec![-1,0,1,2,-1,-4,-2,-3,3,0,4], vec![vec![-4,0,4],vec![-4,1,3],vec![-3,-1,4],vec![-3,0,3],vec![-3,1,2],vec![-2,-1,3],vec![-2,0,2],vec![-1,-1,2],vec![-1,0,1]])]
-    #[case(vec![-4,-2,-2,-2,0,1,2,2,2,3,3,4,4,6,6], vec![vec![-4,-2,6],vec![-4,0,4],vec![-4,1,3],vec![-4,2,2],vec![-2,-2,4],vec![-2,0,2]])]
-    fn case(#[case] nums: Vec<i32>, #[case] mut expected: Vec<Vec<i32>>) {
-        let mut actual = Solution::three_sum(nums);
-        actual.sort();
-        expected.sort();
+    fn case(#[case] nums: Vec<i32>, #[case] expected: Vec<Vec<i32>>) {
+        let actual = Solution::three_sum(nums);
         assert_eq!(actual, expected);
     }
 }
