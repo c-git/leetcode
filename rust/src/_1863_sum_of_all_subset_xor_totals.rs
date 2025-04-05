@@ -2,13 +2,12 @@
 //! 1863. Sum of All Subset XOR Totals
 
 impl Solution {
+    // Based on https://www.youtube.com/watch?v=HToBFhTa1uQ
     pub fn subset_xor_sum(nums: Vec<i32>) -> i32 {
-        // Translated version of editorial
-
-        // Capture each bit that is set in any of the elements
-        let result = nums.iter().fold(0, |acc, x| acc | x);
-
-        // Multiply by the number of subset XOR totals that will have each bit set
+        let mut result = 0;
+        for num in nums.iter().copied() {
+            result |= num;
+        }
         result << (nums.len() - 1)
     }
 }
