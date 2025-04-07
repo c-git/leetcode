@@ -2,29 +2,21 @@
 //! 560. Subarray Sum Equals K
 
 impl Solution {
+    // Based on https://www.youtube.com/watch?v=fFVZt-6sgyo
     pub fn subarray_sum(nums: Vec<i32>, k: i32) -> i32 {
-        let prefix_sum = {
-            // Build prefix sums
-            let mut sum = 0;
-            let mut res = Vec::with_capacity(nums.len());
-            for num in nums.iter() {
-                sum += num;
-                res.push(sum);
-            }
-            res
-        };
-
         let mut result = 0;
+        let mut prev_sum_seen = std::collections::HashMap::with_capacity(nums.len());
+        prev_sum_seen.insert(0, 1); // The empty prefix sums to 0
+        let mut curr_sum = 0;
+        for num in nums {
+            curr_sum += num;
+            if let Some(prev_sum_count) = prev_sum_seen.get(&(curr_sum - k)) {
+                // Add the amount of ways we can make the difference we need to subtract to get `k`
+                result += prev_sum_count;
+            }
 
-        for (right, &right_val) in prefix_sum.iter().enumerate() {
-            if right_val == k {
-                result += 1;
-            }
-            for left_val in prefix_sum.iter().take(right) {
-                if right_val - left_val == k {
-                    result += 1;
-                }
-            }
+            // Add the current sum as one that can be subtracted
+            *prev_sum_seen.entry(curr_sum).or_default() += 1;
         }
         result
     }
