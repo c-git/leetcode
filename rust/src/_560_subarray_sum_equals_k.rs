@@ -6,17 +6,17 @@ impl Solution {
         let mut result = 0;
         let mut curr_sum = 0;
         let mut left = 0;
-        for right_val in nums.iter() {
+        for (right, right_val) in nums.iter().enumerate() {
             curr_sum += right_val;
             if curr_sum == k {
                 result += 1;
             }
-            while curr_sum > k {
+            while left < right && curr_sum > k {
                 curr_sum -= nums[left];
-                left += 1;
                 if curr_sum == k {
                     result += 1;
                 }
+                left += 1;
             }
         }
         result
@@ -36,6 +36,7 @@ mod tests {
     #[rstest]
     #[case(vec![1,1,1], 2, 2)]
     #[case(vec![1,2,3], 3, 2)]
+    #[case(vec![1], 0, 0)]
     fn case(#[case] nums: Vec<i32>, #[case] k: i32, #[case] expected: i32) {
         let actual = Solution::subarray_sum(nums, k);
         assert_eq!(actual, expected);
