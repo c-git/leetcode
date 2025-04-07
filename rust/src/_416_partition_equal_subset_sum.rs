@@ -12,9 +12,6 @@ impl Solution {
         }
         let target = sum / 2;
         for num in nums {
-            if num > target {
-                return false;
-            }
             let mut upper = *possible_sums.last().unwrap() + 1;
             while let Some(&next) = possible_sums.range(0..upper).next_back() {
                 upper = next;
