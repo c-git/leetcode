@@ -23,13 +23,13 @@ impl Solution {
 
         for smaller_factor_idx in (0..nums.len()).rev() {
             for larger_factor_idx in smaller_factor_idx + 1..nums.len() {
-                if nums[larger_factor_idx] % nums[smaller_factor_idx] == 0 {
-                    if dp[smaller_factor_idx].length < dp[larger_factor_idx].length + 1 {
-                        dp[smaller_factor_idx].length = dp[larger_factor_idx].length + 1;
-                        dp[smaller_factor_idx].next_idx = Some(larger_factor_idx);
-                        if dp[smaller_factor_idx].length > dp[result_start_idx].length {
-                            result_start_idx = smaller_factor_idx;
-                        }
+                if nums[larger_factor_idx] % nums[smaller_factor_idx] == 0
+                    && dp[smaller_factor_idx].length < dp[larger_factor_idx].length + 1
+                {
+                    dp[smaller_factor_idx].length = dp[larger_factor_idx].length + 1;
+                    dp[smaller_factor_idx].next_idx = Some(larger_factor_idx);
+                    if dp[smaller_factor_idx].length > dp[result_start_idx].length {
+                        result_start_idx = smaller_factor_idx;
                     }
                 }
             }
