@@ -8,7 +8,7 @@ impl Solution {
         let mut right = height.len() - 1;
         while left < right {
             result = result.max(height[left].min(height[right]) * (right - left) as i32);
-            if left < right {
+            if height[left] < height[right] {
                 left += 1;
             } else {
                 right -= 1;
@@ -31,6 +31,7 @@ mod tests {
     #[rstest]
     #[case(vec![1,8,6,2,5,4,8,3,7], 49)]
     #[case(vec![1,1], 1)]
+    #[case(vec![8,7,2,1], 7)]
     fn case(#[case] height: Vec<i32>, #[case] expected: i32) {
         let actual = Solution::max_area(height);
         assert_eq!(actual, expected);
