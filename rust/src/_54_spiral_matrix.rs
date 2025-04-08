@@ -26,7 +26,10 @@ impl Solution {
                     } else {
                         is_row_changing = false;
                         is_increasing = false;
-                        curr_col -= 1;
+                        curr_col = match curr_col.checked_sub(1) {
+                            Some(x) => x,
+                            None => return result, // Only have one column if we get here
+                        };
                         bound_bottom -= 1;
                     }
                 }
@@ -48,7 +51,7 @@ impl Solution {
                     } else {
                         is_row_changing = true;
                         curr_row += 1;
-                        bound_right -= 1;
+                        bound_right = bound_right.saturating_sub(1);
                     }
                 }
                 (false, false) => {
@@ -80,6 +83,8 @@ mod tests {
     #[rstest]
     #[case(vec![vec![1,2,3],vec![4,5,6],vec![7,8,9]], vec![1,2,3,6,9,8,7,4,5])]
     #[case(vec![vec![1,2,3,4],vec![5,6,7,8],vec![9,10,11,12]], vec![1,2,3,4,8,12,11,10,9,5,6,7])]
+    #[case(vec![vec![3],vec![2]], vec![3,2])]
+    #[case(vec![vec![2, 3]], vec![2,3])]
     fn case(#[case] matrix: Vec<Vec<i32>>, #[case] expected: Vec<i32>) {
         let actual = Solution::spiral_order(matrix);
         assert_eq!(actual, expected);
