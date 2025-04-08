@@ -3,18 +3,12 @@
 
 impl Solution {
     pub fn max_sub_array(nums: Vec<i32>) -> i32 {
-        // Source: https://leetcode.com/problems/maximum-subarray/solutions/3315652/rust-dynamic-programming-kadane-s-algorithm-concise-solution/
         let mut result = i32::MIN;
-        let mut current_sum = 0i32;
+        let mut curr_sum = result;
         for num in nums {
-            // Calculate value of extension
-            current_sum = current_sum.saturating_add(num);
-
-            // Take better of extended sum or restart
-            current_sum = current_sum.max(num);
-
-            // Update best seen
-            result = result.max(current_sum);
+            curr_sum = curr_sum.max(0);
+            curr_sum += num;
+            result = result.max(curr_sum);
         }
         result
     }
