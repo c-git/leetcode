@@ -7,9 +7,9 @@ impl Solution {
         let mut left = 0;
         let mut sum = 0;
         for (right, num) in nums.iter().enumerate() {
-            sum += num;                            
+            sum += num;
             while sum >= target {
-                result = result.min((right-left+1) as i32);
+                result = result.min((right - left + 1) as i32);
                 sum -= nums[left];
                 left += 1;
             }
