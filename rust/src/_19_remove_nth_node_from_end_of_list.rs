@@ -1,3 +1,6 @@
+//! Solution for https://leetcode.com/problems/remove-nth-node-from-end-of-list
+//! 19. Remove Nth Node From End of List
+
 // Definition for singly-linked list.
 // #[derive(PartialEq, Eq, Clone, Debug)]
 // pub struct ListNode {
@@ -15,73 +18,49 @@
 //   }
 // }
 impl Solution {
-    // Based on solution by Conrad Ludgate
-    pub fn remove_nth_from_end(head: Option<Box<ListNode>>, n: i32) -> Option<Box<ListNode>> {
-        let len = Self::get_list_length(&head);
-
-        // Walk from front and collect values to rebuild list without undesirable node
-        let target_length = len - n as usize; // Doesn't have space for the undesirable node
-        let mut values = Vec::with_capacity(target_length);
-        let mut rest_of_list = head;
-        while values.len() < target_length {
-            let node = rest_of_list.expect("Target Length must be less than full length");
-            values.push(node.val);
-            rest_of_list = node.next;
+    pub fn remove_nth_from_end(mut head: Option<Box<ListNode>>, n: i32) -> Option<Box<ListNode>> {
+        // Unable to use two pointers at the same time with the second being n nodes behind as that would a second mutable borrow is not allowed
+        let mut count = 0;
+        let mut curr = &head;
+        while let Some(node) = curr {
+            count += 1;
+            curr = &node.next;
         }
 
-        // Rebuild list skipping the undesirable value
-        rest_of_list = rest_of_list.expect("This is the node to skip").next; // Node skipped here
-        for val in values.iter().rev() {
-            let mut new_node = ListNode::new(*val);
-            new_node.next = rest_of_list;
-            rest_of_list = Some(Box::new(new_node));
+        let steps_needed = count - n;
+        let mut curr = &mut head;
+        for _ in 0..steps_needed {
+            curr = &mut curr.as_mut().unwrap().next;
         }
+        let next = curr.as_mut().unwrap().next.take();
+        *curr = next;
 
-        rest_of_list
-    }
-
-    fn get_list_length(mut head: &Option<Box<ListNode>>) -> usize {
-        let mut len = 0;
-        while let Some(h) = head.as_ref() {
-            head = &h.next;
-            len += 1;
-        }
-        len
+        head
     }
 }
 
+// << ---------------- Code below here is only for local use ---------------- >>
+
+pub struct Solution;
 use cargo_leet::ListNode;
-struct Solution;
+
 #[cfg(test)]
 mod tests {
+    use super::*;
     use cargo_leet::ListHead;
 
-    use super::*;
+    use rstest::rstest;
 
-    #[test]
-    fn case1() {
-        let head: ListHead = vec![1, 2, 3, 4, 5].into();
-        let n = 2;
-        let expected: ListHead = vec![1, 2, 3, 5].into();
-        let actual = Solution::remove_nth_from_end(head.into(), n);
-        assert_eq!(actual, expected.into());
-    }
-
-    #[test]
-    fn case2() {
-        let head: ListHead = vec![1].into();
-        let n = 1;
-        let expected: ListHead = vec![].into();
-        let actual = Solution::remove_nth_from_end(head.into(), n);
-        assert_eq!(actual, expected.into());
-    }
-
-    #[test]
-    fn case3() {
-        let head: ListHead = vec![1, 2].into();
-        let n = 1;
-        let expected: ListHead = vec![1].into();
-        let actual = Solution::remove_nth_from_end(head.into(), n);
-        assert_eq!(actual, expected.into());
+    #[rstest]
+    #[case(ListHead::from(vec![1,2,3,4,5]).into(), 2, ListHead::from(vec![1,2,3,5]).into())]
+    #[case(ListHead::from(vec![1]).into(), 1, ListHead::from(vec![]).into())]
+    #[case(ListHead::from(vec![1,2]).into(), 1, ListHead::from(vec![1]).into())]
+    fn case(
+        #[case] head: Option<Box<ListNode>>,
+        #[case] n: i32,
+        #[case] expected: Option<Box<ListNode>>,
+    ) {
+        let actual = Solution::remove_nth_from_end(head, n);
+        assert_eq!(actual, expected);
     }
 }
