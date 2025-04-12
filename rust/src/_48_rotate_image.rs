@@ -1,54 +1,21 @@
 //! Solution for https://leetcode.com/problems/rotate-image
 //! 48. Rotate Image
 
-use std::mem;
-
-struct Pos {
-    row: usize,
-    col: usize,
-}
-
-impl Pos {
-    fn new(row: usize, col: usize) -> Self {
-        Self { row, col }
-    }
-    #[must_use]
-    fn next(&self, size: usize) -> Self {
-        Self {
-            row: self.col,
-            col: size - 1 - self.row,
-        }
-    }
-}
-
 impl Solution {
-    pub fn rotate(matrix: &mut Vec<Vec<i32>>) {
-        // Used working https://docs.google.com/spreadsheets/d/1fpLqmffz_Z-sxSXOH5w6oB63piPJTRQl0c4sviRZ0hI/
-        // to figure out formula to go from one cell to the next (needed the 9xx because 01 is not a valid number on leetcode)
+    pub fn rotate(matrix: &mut [Vec<i32>]) {
         let n = matrix.len();
-        let mut last_pixel_for_row = n - 2;
-        for layer in 0..n / 2 {
-            for col in layer..=last_pixel_for_row {
-                let mut pos = Pos::new(col, layer);
-                let mut temp = *Self::get_pos_in_matrix(&pos, matrix);
-                for _ in 0..4 {
-                    pos = pos.next(n);
-                    let next_val = Self::get_pos_in_matrix(&pos, matrix);
-                    mem::swap(next_val, &mut temp);
+        for row in 0..n / 2 {
+            for col in row..n - 1 - row {
+                let mut temp = matrix[row][col];
+                println!("row: {row}, col: {col}");
+                let mut curr_row = row;
+                let mut curr_col = col;
+                for _ in 1..=4 {
+                    (curr_row, curr_col) = (curr_col, n - 1 - curr_row);
+                    println!("{curr_row},{curr_col} = {temp}");
+                    std::mem::swap(&mut temp, &mut matrix[curr_row][curr_col]);
                 }
             }
-            last_pixel_for_row -= 1;
-        }
-    }
-
-    fn get_pos_in_matrix<'a>(pos: &Pos, matrix: &'a mut [Vec<i32>]) -> &'a mut i32 {
-        matrix.get_mut(pos.row).unwrap().get_mut(pos.col).unwrap()
-    }
-
-    pub fn print_matrix(matrix: &[Vec<i32>]) {
-        // For debugging
-        for row in matrix {
-            println!("{row:?}");
         }
     }
 }
