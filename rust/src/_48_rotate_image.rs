@@ -7,12 +7,10 @@ impl Solution {
         for row in 0..n / 2 {
             for col in row..n - 1 - row {
                 let mut temp = matrix[row][col];
-                println!("row: {row}, col: {col}");
                 let mut curr_row = row;
                 let mut curr_col = col;
                 for _ in 1..=4 {
                     (curr_row, curr_col) = (curr_col, n - 1 - curr_row);
-                    println!("{curr_row},{curr_col} = {temp}");
                     std::mem::swap(&mut temp, &mut matrix[curr_row][curr_col]);
                 }
             }
