@@ -1,3 +1,6 @@
+//! Solution for https://leetcode.com/problems/swap-nodes-in-pairs
+//! 24. Swap Nodes in Pairs
+
 // Definition for singly-linked list.
 // #[derive(PartialEq, Eq, Clone, Debug)]
 // pub struct ListNode {
@@ -16,61 +19,48 @@
 // }
 impl Solution {
     pub fn swap_pairs(mut head: Option<Box<ListNode>>) -> Option<Box<ListNode>> {
-        let mut left = &mut head;
-        while left.is_some() {
-            let mut right = left.as_mut().unwrap().next.take();
-            if right.is_some() {
-                left.as_mut().unwrap().next = right.as_mut().unwrap().next.take();
-                let temp = left.take();
-                *left = right;
-                left.as_mut().unwrap().next = temp;
-                left = &mut left.as_mut().unwrap().next.as_mut().unwrap().next;
-            } else {
-                break;
-            }
+        // Swap first two nodes
+        let mut old_head = head?;
+        head = old_head.next.take();
+        let mut curr;
+        if let Some(node) = head.as_mut() {
+            old_head.next = node.next.take();
+            node.next = Some(old_head);
+            curr = &mut node.next.as_mut().unwrap().next;
+        } else {
+            return Some(old_head);
+        }
+
+        while curr.is_some() && curr.as_ref().unwrap().next.is_some() {
+            let mut temp = curr.take();
+            *curr = temp.as_mut().unwrap().next.take();
+            temp.as_mut().unwrap().next = curr.as_mut().unwrap().next.take();
+            curr.as_mut().unwrap().next = temp;
+            curr = &mut curr.as_mut().unwrap().next.as_mut().unwrap().next;
         }
         head
     }
 }
 
+// << ---------------- Code below here is only for local use ---------------- >>
+
+pub struct Solution;
 use cargo_leet::ListNode;
 
-struct Solution;
 #[cfg(test)]
 mod tests {
+    use super::*;
     use cargo_leet::ListHead;
 
-    use super::*;
+    use rstest::rstest;
 
-    #[test]
-    fn case1() {
-        let input: ListHead = vec![1, 2, 3, 4].into();
-        let expected: ListHead = vec![2, 1, 4, 3].into();
-        let actual = Solution::swap_pairs(input.into());
-        assert_eq!(actual, expected.into());
-    }
-
-    #[test]
-    fn case2() {
-        let input: ListHead = vec![].into();
-        let expected: ListHead = vec![].into();
-        let actual = Solution::swap_pairs(input.into());
-        assert_eq!(actual, expected.into());
-    }
-
-    #[test]
-    fn case3() {
-        let input: ListHead = vec![1].into();
-        let expected: ListHead = vec![1].into();
-        let actual = Solution::swap_pairs(input.into());
-        assert_eq!(actual, expected.into());
-    }
-
-    #[test]
-    fn case4() {
-        let input: ListHead = vec![1, 2, 3, 4, 5].into();
-        let expected: ListHead = vec![2, 1, 4, 3, 5].into();
-        let actual = Solution::swap_pairs(input.into());
-        assert_eq!(actual, expected.into());
+    #[rstest]
+    #[case(ListHead::from(vec![1,2,3,4]).into(), ListHead::from(vec![2,1,4,3]).into())]
+    #[case(ListHead::from(vec![]).into(), ListHead::from(vec![]).into())]
+    #[case(ListHead::from(vec![1]).into(), ListHead::from(vec![1]).into())]
+    #[case(ListHead::from(vec![1,2,3]).into(), ListHead::from(vec![2,1,3]).into())]
+    fn case(#[case] head: Option<Box<ListNode>>, #[case] expected: Option<Box<ListNode>>) {
+        let actual = Solution::swap_pairs(head);
+        assert_eq!(actual, expected);
     }
 }
