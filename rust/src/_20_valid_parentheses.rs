@@ -3,35 +3,29 @@
 
 impl Solution {
     pub fn is_valid(s: String) -> bool {
-        let mut stack = Vec::new();
+        let mut open_stack = vec![];
         for c in s.chars() {
             match c {
-                '(' | '[' | '{' => stack.push(c),
                 ')' => {
-                    if !expect_top_char('(', &mut stack) {
+                    if Some('(') != open_stack.pop() {
                         return false;
                     }
                 }
                 ']' => {
-                    if !expect_top_char('[', &mut stack) {
+                    if Some('[') != open_stack.pop() {
                         return false;
                     }
                 }
                 '}' => {
-                    if !expect_top_char('{', &mut stack) {
+                    if Some('{') != open_stack.pop() {
                         return false;
                     }
                 }
-                _ => unreachable!("problem guarantee: s consists of parentheses only '()[]{{}}'"),
+                _ => open_stack.push(c),
             }
         }
-
-        stack.is_empty()
+        open_stack.is_empty()
     }
-}
-
-fn expect_top_char(expected_char: char, stack: &mut Vec<char>) -> bool {
-    Some(expected_char) == stack.pop()
 }
 
 // << ---------------- Code below here is only for local use ---------------- >>
