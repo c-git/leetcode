@@ -1,3 +1,6 @@
+//! Solution for https://leetcode.com/problems/reverse-nodes-in-k-group
+//! 25. Reverse Nodes in k-Group
+
 // Definition for singly-linked list.
 // #[derive(PartialEq, Eq, Clone, Debug)]
 // pub struct ListNode {
@@ -15,90 +18,69 @@
 //   }
 // }
 impl Solution {
+    // Source: sak96 - Converted to iterative
     pub fn reverse_k_group(mut head: Option<Box<ListNode>>, k: i32) -> Option<Box<ListNode>> {
-        // Source: sak96 (with modifications)
         // 1 means no swap
         if k == 1 {
             return head;
         }
 
-        let mut node_opt = &mut head;
-        // Move forward k nodes
-        for _ in 0..k {
-            if let Some(node) = node_opt {
-                node_opt = &mut node.next;
-            } else {
-                return head;
+        let mut unprocessed = &mut head;
+        loop {
+            let mut group_start = unprocessed.take();
+
+            // Move forward k nodes
+            let mut node_opt = &mut group_start;
+            for _ in 0..k {
+                if let Some(node) = node_opt {
+                    node_opt = &mut node.next;
+                } else {
+                    *unprocessed = group_start;
+                    return head;
+                }
+            }
+
+            // separate out the rest of the nodes
+            let mut rest = node_opt.take();
+
+            // Reverse this group
+            while let Some(mut node) = group_start.take() {
+                group_start = node.next.take();
+                node.next = rest;
+                rest = Some(node);
+            }
+
+            *unprocessed = rest;
+
+            // Move over group that was processed
+            for _ in 0..k {
+                unprocessed = &mut unprocessed.as_mut().unwrap().next;
             }
         }
-
-        // separate out the unprocessed nodes
-        let unprocessed = node_opt.take();
-
-        // reverse the rest of the list
-        let mut rest: Option<Box<ListNode>> = Self::reverse_k_group(unprocessed, k);
-
-        // Attach the reversed nodes in this group to the front
-        while let Some(mut node1) = head.take() {
-            head = node1.next.take();
-            node1.next = rest;
-            rest = Some(node1);
-        }
-
-        rest
     }
 }
 
+// << ---------------- Code below here is only for local use ---------------- >>
+
+pub struct Solution;
 use cargo_leet::ListNode;
-struct Solution;
+
 #[cfg(test)]
 mod tests {
+    use super::*;
     use cargo_leet::ListHead;
 
-    use super::*;
+    use rstest::rstest;
 
-    #[test]
-    fn case1() {
-        let head: ListHead = vec![1, 2, 3, 4, 5].into();
-        let k = 2;
-        let expected: ListHead = vec![2, 1, 4, 3, 5].into();
-        let actual = Solution::reverse_k_group(head.into(), k);
-        assert_eq!(actual, expected.into());
-    }
-
-    #[test]
-    fn case2() {
-        let head: ListHead = vec![1, 2, 3, 4, 5].into();
-        let k = 3;
-        let expected: ListHead = vec![3, 2, 1, 4, 5].into();
-        let actual = Solution::reverse_k_group(head.into(), k);
-        assert_eq!(actual, expected.into());
-    }
-
-    #[test]
-    fn case3() {
-        let head: ListHead = vec![1].into();
-        let k = 1;
-        let expected: ListHead = vec![1].into();
-        let actual = Solution::reverse_k_group(head.into(), k);
-        assert_eq!(actual, expected.into());
-    }
-
-    #[test]
-    fn case4() {
-        let head: ListHead = vec![1, 2, 3, 4, 5, 6].into();
-        let k = 1;
-        let expected: ListHead = vec![1, 2, 3, 4, 5, 6].into();
-        let actual = Solution::reverse_k_group(head.into(), k);
-        assert_eq!(actual, expected.into());
-    }
-
-    #[test]
-    fn case5() {
-        let head: ListHead = vec![1, 2, 3, 4, 5, 6].into();
-        let k = 2;
-        let expected: ListHead = vec![2, 1, 4, 3, 6, 5].into();
-        let actual = Solution::reverse_k_group(head.into(), k);
-        assert_eq!(actual, expected.into());
+    #[rstest]
+    #[case(ListHead::from(vec![1,2,3,4,5]).into(), 2, ListHead::from(vec![2,1,4,3,5]).into())]
+    #[case(ListHead::from(vec![1,2,3,4,5]).into(), 3, ListHead::from(vec![3,2,1,4,5]).into())]
+    fn case(
+        #[case] head: Option<Box<ListNode>>,
+        #[case] k: i32,
+        #[case] expected: Option<Box<ListNode>>,
+    ) {
+        let actual = Solution::reverse_k_group(head, k);
+        assert_eq!(actual, expected);
     }
 }
