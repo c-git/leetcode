@@ -6,7 +6,7 @@ impl Solution {
     pub fn count_bad_pairs(nums: Vec<i32>) -> i64 {
         let total_pairs = (1..nums.len()).fold(0, |acc, x| acc + x as i64);
         let mut good_pairs = 0;
-        let mut seen: std::collections::HashMap<i32, u32> = Default::default();
+        let mut seen: std::collections::HashMap<i32, i64> = Default::default();
         for (i, num) in nums.into_iter().enumerate() {
             let diff = num - i as i32;
             let entry = seen.entry(diff).or_default();
@@ -14,7 +14,7 @@ impl Solution {
             *entry += 1;
         }
 
-        total_pairs - good_pairs as i64
+        total_pairs - good_pairs
     }
 }
 
