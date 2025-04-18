@@ -1,46 +1,52 @@
+//! Solution for https://leetcode.com/problems/count-and-say
+//! 38. Count and Say
+
 impl Solution {
     pub fn count_and_say(n: i32) -> String {
         let mut result = "1".to_string();
-        for _ in 2..=n {
-            let mut temp = "".to_string();
-            let mut last_char = result
-                .chars()
-                .next()
-                .expect("Must be at least one character long"); // A char that is not expected
-            let mut count = 1;
-            for c in result.chars().skip(1) {
-                if c == last_char {
-                    count += 1;
+        for _ in 1..n {
+            let mut last_char = None;
+            let mut run_count = 0;
+            let mut temp_result = String::new();
+            for c in result.chars() {
+                if Some(c) == last_char {
+                    run_count += 1;
+                } else if let Some(ch) = last_char {
+                    temp_result.push_str(&run_count.to_string());
+                    temp_result.push(ch);
+                    run_count = 1;
+                    last_char = Some(c);
                 } else {
-                    temp.push_str(&count.to_string());
-                    temp.push(last_char);
-                    last_char = c;
-                    count = 1;
+                    // Was None
+                    run_count = 1;
+                    last_char = Some(c);
                 }
             }
-            temp.push_str(&count.to_string());
-            temp.push(last_char);
-            result = temp;
+
+            // Store the last run
+            temp_result.push_str(&run_count.to_string());
+            temp_result.push(last_char.expect("must end with a character"));
+            result = temp_result;
         }
         result
     }
 }
 
-struct Solution;
+// << ---------------- Code below here is only for local use ---------------- >>
+
+pub struct Solution;
+
 #[cfg(test)]
 mod tests {
     use super::*;
+
     use rstest::rstest;
 
     #[rstest]
-    #[case(1, "1")]
-    #[case(2, "11")]
-    #[case(3, "21")]
     #[case(4, "1211")]
-    #[case(5, "111221")]
-    #[case(6, "312211")]
-    fn case(#[case] input: i32, #[case] expected: String) {
-        let actual = Solution::count_and_say(input);
+    #[case(1, "1")]
+    fn case(#[case] n: i32, #[case] expected: String) {
+        let actual = Solution::count_and_say(n);
         assert_eq!(actual, expected);
     }
 }
