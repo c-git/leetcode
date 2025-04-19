@@ -3,34 +3,37 @@
 
 impl Solution {
     pub fn search(nums: Vec<i32>, target: i32) -> i32 {
-        Self::search_(nums, target).map(|x| x as i32).unwrap_or(-1)
-    }
-
-    // This function only exists to provide more clear semantics (The signature I want not the signature I have)
-    fn search_(nums: Vec<i32>, target: i32) -> Option<usize> {
-        if &target < nums.first()? {
-            // Less than first cannot be in nums
-            return None;
-        }
-
-        if &target > nums.last()? {
-            // Greater than last cannot be in nums
-            return None;
-        }
-
-        let mut low = 0;
-        let mut high = nums.len() - 1;
-
-        // LI: If target is in nums it is in nums[low..=high]
-        while low <= high {
-            let mid = (low + high) / 2;
-            match target.cmp(&nums[mid]) {
-                std::cmp::Ordering::Less => high = mid - 1,
-                std::cmp::Ordering::Equal => return Some(mid),
-                std::cmp::Ordering::Greater => low = mid + 1,
+        let index = partition_point(&nums, |x| x < &target);
+        if let Some(num) = nums.get(index) {
+            if num == &target {
+                index as _
+            } else {
+                -1
             }
+        } else {
+            -1
         }
-        None
+    }
+}
+
+/// Returns the index of the partition point according to the given predicate (the index of the first element of the second partition).
+/// See <https://doc.rust-lang.org/std/primitive.slice.html#method.partition_point> for more info
+fn partition_point<T>(arr: &[T], is_left_half: impl Fn(&T) -> bool) -> usize {
+    let mut size = arr.len();
+    if size == 0 {
+        return 0;
+    }
+    let mut base = 0usize;
+    while size > 1 {
+        let half = size / 2;
+        let mid = base + half;
+        base = if is_left_half(&arr[mid]) { mid } else { base };
+        size -= half;
+    }
+    if is_left_half(&arr[base]) {
+        base + 1
+    } else {
+        base
     }
 }
 
