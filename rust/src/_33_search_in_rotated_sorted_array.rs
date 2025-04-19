@@ -41,9 +41,9 @@ fn partition_point(arr: &[i32], is_left_half: impl Fn(&i32) -> bool) -> usize {
         size -= half;
     }
     if is_left_half(&arr[base]) {
-        base
-    } else {
         base + 1
+    } else {
+        base
     }
 }
 
@@ -60,6 +60,7 @@ mod tests {
     #[rstest]
     #[case(vec![4,5,6,7,8,0,1,2], 0, 5)]
     #[case(vec![4,5,6,7,0,1,2], 3, -1)]
+    #[case(vec![1], 0, -1)]
     #[case(vec![1], 0, -1)]
     fn case(#[case] nums: Vec<i32>, #[case] target: i32, #[case] expected: i32) {
         let actual = Solution::search(nums, target);
