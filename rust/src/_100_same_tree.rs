@@ -1,3 +1,6 @@
+//! Solution for https://leetcode.com/problems/same-tree
+//! 100. Same Tree
+
 // Definition for a binary tree node.
 // #[derive(Debug, PartialEq, Eq)]
 // pub struct TreeNode {
@@ -23,27 +26,40 @@ impl Solution {
         p: Option<Rc<RefCell<TreeNode>>>,
         q: Option<Rc<RefCell<TreeNode>>>,
     ) -> bool {
-        p == q
+        match (p, q) {
+            (None, None) => true,
+            (None, Some(_)) | (Some(_), None) => false,
+            (Some(x), Some(y)) => {
+                x.borrow().val == y.borrow().val
+                    && Self::is_same_tree(x.borrow().left.clone(), y.borrow().left.clone())
+                    && Self::is_same_tree(x.borrow().right.clone(), y.borrow().right.clone())
+            }
+        }
     }
 }
 
-struct Solution;
+// << ---------------- Code below here is only for local use ---------------- >>
+
+pub struct Solution;
 use cargo_leet::TreeNode;
+
 #[cfg(test)]
 mod tests {
+    use super::*;
     use cargo_leet::TreeRoot;
 
-    use super::*;
     use rstest::rstest;
 
     #[rstest]
-    #[case("[1,2,3]", "[1,2,3]", true)]
-    #[case("[1,2]", "[1,null,2]", false)]
-    #[case("[1,2,1]", "[1,1,2]", false)]
-    fn case(#[case] p: &str, #[case] q: &str, #[case] expected: bool) {
-        let p: TreeRoot = p.into();
-        let q: TreeRoot = q.into();
-        let actual = Solution::is_same_tree(p.into(), q.into());
+    #[case(TreeRoot::from("[1,2,3]").into(), TreeRoot::from("[1,2,3]").into(), true)]
+    #[case(TreeRoot::from("[1,2]").into(), TreeRoot::from("[1,null,2]").into(), false)]
+    #[case(TreeRoot::from("[1,2,1]").into(), TreeRoot::from("[1,1,2]").into(), false)]
+    fn case(
+        #[case] p: Option<Rc<RefCell<TreeNode>>>,
+        #[case] q: Option<Rc<RefCell<TreeNode>>>,
+        #[case] expected: bool,
+    ) {
+        let actual = Solution::is_same_tree(p, q);
         assert_eq!(actual, expected);
     }
 }
