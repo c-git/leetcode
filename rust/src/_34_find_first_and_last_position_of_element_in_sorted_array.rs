@@ -1,24 +1,25 @@
+//! Solution for https://leetcode.com/problems/find-first-and-last-position-of-element-in-sorted-array
+//! 34. Find First and Last Position of Element in Sorted Array
+
 impl Solution {
     pub fn search_range(nums: Vec<i32>, target: i32) -> Vec<i32> {
-        Self::_search_range(nums, target).unwrap_or_else(|| vec![-1; 2])
-    }
-
-    fn _search_range(nums: Vec<i32>, target: i32) -> Option<Vec<i32>> {
-        let n = nums.len();
-        let left = nums.partition_point(|&x| x < target);
-        if left == n || nums[left] != target {
-            return None;
+        let start = nums.partition_point(|&x| x < target);
+        if start >= nums.len() || nums[start] != target {
+            return vec![-1, -1];
         }
-        let right = nums.partition_point(|&x| x <= target) - 1;
-
-        Some(vec![left as i32, right as i32])
+        let end = nums.partition_point(|&x| x <= target) - 1;
+        vec![start as _, end as _]
     }
 }
 
-struct Solution;
+// << ---------------- Code below here is only for local use ---------------- >>
+
+pub struct Solution;
+
 #[cfg(test)]
 mod tests {
     use super::*;
+
     use rstest::rstest;
 
     #[rstest]
