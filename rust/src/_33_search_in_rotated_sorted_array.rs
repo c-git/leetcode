@@ -28,7 +28,7 @@ impl Solution {
 
 /// Returns the index of the partition point according to the given predicate (the index of the first element of the second partition).
 /// See <https://doc.rust-lang.org/std/primitive.slice.html#method.partition_point> for more info
-fn partition_point(arr: &[i32], is_left_half: impl Fn(&i32) -> bool) -> usize {
+fn partition_point<T>(arr: &[T], is_left_half: impl Fn(&T) -> bool) -> usize {
     let mut size = arr.len();
     if size == 0 {
         return 0;
