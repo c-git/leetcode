@@ -1,19 +1,19 @@
 //! Solution for https://leetcode.com/problems/sort-colors
 //! 75. Sort Colors
 
-#[allow(clippy::ptr_arg)]
 impl Solution {
-    pub fn sort_colors(nums: &mut Vec<i32>) {
-        // Trying bubble sort to see if it will get TLE
-        let mut unsorted = true;
-        while unsorted {
-            unsorted = false;
-            for i in 0..nums.len() - 1 {
-                if nums[i] > nums[i + 1] {
-                    nums.swap(i, i + 1);
-                    unsorted = true;
-                }
+    pub fn sort_colors(nums: &mut [i32]) {
+        // Use radix sort for linear runtime
+        let mut freq_counts = [0; 3];
+        for &num in nums.iter() {
+            freq_counts[num as usize] += 1;
+        }
+        let mut done = 0;
+        for color in 0..freq_counts.len() as i32 {
+            for num in nums.iter_mut().skip(done).take(freq_counts[color as usize]) {
+                *num = color;
             }
+            done += freq_counts[color as usize];
         }
     }
 }
