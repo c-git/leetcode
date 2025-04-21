@@ -10,7 +10,7 @@ impl Solution {
             curr += diff;
             min = min.min(curr);
             max = max.max(curr);
-            if min < -100_000 || max > 100_000 {
+            if min < -400_000 || max > 400_000 {
                 // Will never be possible for it to be valid and prevents overflow
                 return 0;
             }
@@ -35,6 +35,7 @@ mod tests {
     #[case(vec![1,-3,4], 1, 6, 2)]
     #[case(vec![3,-4,5,1,-2], -4, 5, 4)]
     #[case(vec![4,-7,2], 3, 6, 0)]
+    #[case(vec![53121,38601,47753], -83297, 63538, 7361)]
     fn case(
         #[case] differences: Vec<i32>,
         #[case] lower: i32,
