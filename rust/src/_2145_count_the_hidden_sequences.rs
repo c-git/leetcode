@@ -10,6 +10,10 @@ impl Solution {
             curr += diff;
             min = min.min(curr);
             max = max.max(curr);
+            if min < -100_000 || max > 100_000 {
+                // Will never be possible for it to be valid and prevents overflow
+                return 0;
+            }
         }
         let min_adjustment = lower - min;
         let adj_max = max + min_adjustment;
