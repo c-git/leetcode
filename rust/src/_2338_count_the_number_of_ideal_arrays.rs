@@ -51,7 +51,7 @@ impl Solution {
             } else {
                 break;
             }
-            combo *= top; // bottom
+            combo = combo * top / bottom;
             top -= 1;
             bottom += 1;
             base <<= 1;
