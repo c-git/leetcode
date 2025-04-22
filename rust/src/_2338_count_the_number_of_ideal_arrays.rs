@@ -2,60 +2,55 @@
 //! 2338. Count the Number of Ideal Arrays
 
 impl Solution {
-    /// Converted and modified from https://leetcode.com/problems/count-the-number-of-ideal-arrays/solutions/6675631/beat-100-with-explanation/
+    /// Copied from Editorial
     pub fn ideal_arrays(n: i32, max_value: i32) -> i32 {
-        const MODULO: i32 = 1_000_000_007;
+        const MOD: i64 = 1_000_000_007;
+        const MAX_N: usize = 10_000 + 10;
+        const MAX_P: usize = 15; // There are up to 15 prime factors
 
-        let mut strict_counts: Vec<Vec<i32>> = vec![(1..=max_value).collect()];
-        let mut prev_row = vec![1; max_value as usize];
-        let mut next_row = vec![0; max_value as usize];
-        let mut prev_base = 1;
-
-        while (prev_base << 1) <= max_value {
-            let next_base = prev_base << 1;
-            next_row
-                .iter_mut()
-                .skip(next_base as usize - 1)
-                .for_each(|x| *x = 0);
-            for prev_num in prev_base..=max_value {
-                let prev_count = prev_row[(prev_num - 1) as usize];
-                for multiple in 2..=max_value {
-                    let product = prev_num * multiple;
-                    if product > max_value {
-                        break;
-                    }
-                    next_row[product as usize - 1] =
-                        (next_row[product as usize - 1] + prev_count) % MODULO;
+        let mut sieve = vec![0; MAX_N]; // Minimum prime factor
+        for i in 2..MAX_N {
+            if sieve[i] == 0 {
+                for j in (i..MAX_N).step_by(i) {
+                    sieve[j] = i as i32;
                 }
             }
-            let mut current_counts = vec![next_row[next_base as usize - 1]];
-            for next_num in next_base..max_value {
-                current_counts
-                    .push((*current_counts.last().unwrap() + next_row[next_num as usize]) % MODULO)
-            }
-            strict_counts.push(current_counts);
-            prev_base = next_base;
-            std::mem::swap(&mut prev_row, &mut next_row);
         }
 
-        let mut result = 0;
-        let mut combo = 1;
-        let mut top = n as i128 - 1;
-        let mut bottom = 1;
-        let mut base = 1;
-        for strict_count in strict_counts.iter().cloned() {
-            if base <= max_value {
-                result = ((result + combo * strict_count[(max_value - base) as usize] as i128)
-                    % MODULO as i128) as _;
-            } else {
-                break;
+        let mut ps = vec![vec![]; MAX_N]; // List of prime factor counts
+        for i in 2..=max_value as usize {
+            let mut x = i;
+            while x > 1 {
+                let p = sieve[x] as usize;
+                let mut cnt = 0;
+                while x % p == 0 {
+                    x /= p;
+                    cnt += 1;
+                }
+                ps[i].push(cnt);
             }
-            combo = combo * top / bottom;
-            top -= 1;
-            bottom += 1;
-            base <<= 1;
         }
-        result as i32
+
+        let mut c = vec![vec![0; MAX_P + 1]; n as usize + MAX_P + 1];
+        c[0][0] = 1;
+        for i in 1..n as usize + MAX_P + 1 {
+            c[i][0] = 1;
+            for j in 1..=i.min(MAX_P) {
+                c[i][j] = (c[i - 1][j] + c[i - 1][j - 1]) % MOD;
+            }
+        }
+
+        let mut ans = 0i64;
+        let n = n as usize;
+        for x in 1..=max_value as usize {
+            let mut mul = 1i64;
+            for &p in &ps[x] {
+                mul = mul * c[n + p as usize - 1][p as usize] % MOD;
+            }
+            ans = (ans + mul) % MOD;
+        }
+
+        ans as i32
     }
 }
 
@@ -75,6 +70,7 @@ mod tests {
     #[case(5, 9, 111)]
     #[case(184, 389, 510488787)]
     #[case(5878, 2900, 465040898)]
+    #[case(9767, 9557, 1998089)]
     fn case(#[case] n: i32, #[case] max_value: i32, #[case] expected: i32) {
         let actual = Solution::ideal_arrays(n, max_value);
         assert_eq!(actual, expected);
