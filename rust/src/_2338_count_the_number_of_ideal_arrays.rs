@@ -40,12 +40,13 @@ impl Solution {
 
         let mut result = 0;
         let mut combo = 1;
-        let mut top = n - 1;
+        let mut top = n as i64 - 1;
         let mut bottom = 1;
         let mut base = 1;
         for strict_count in strict_counts.iter().cloned() {
             if base <= max_value {
-                result = (result + combo * strict_count[(max_value - base) as usize]) % MODULO;
+                result = ((result + combo * strict_count[(max_value - base) as usize] as i64)
+                    % MODULO as i64) as _;
             } else {
                 break;
             }
@@ -54,7 +55,7 @@ impl Solution {
             bottom += 1;
             base <<= 1;
         }
-        result
+        result as i32
     }
 }
 
@@ -72,6 +73,7 @@ mod tests {
     #[case(2, 5, 10)]
     #[case(5, 3, 11)]
     #[case(5, 9, 111)]
+    #[case(184, 389, 510488787)]
     fn case(#[case] n: i32, #[case] max_value: i32, #[case] expected: i32) {
         let actual = Solution::ideal_arrays(n, max_value);
         assert_eq!(actual, expected);
