@@ -17,8 +17,8 @@ impl Solution {
                 } else {
                     0
                 };
-                result = result.max(Self::max_rectangle_in_histogram(&row_histogram));
             }
+            result = result.max(Self::max_rectangle_in_histogram(&row_histogram));
         }
 
         result
@@ -66,6 +66,7 @@ mod tests {
     #[case(vec![vec!['0']], 0)]
     #[case(vec![vec!['1']], 1)]
     #[case(vec![vec!['1','0','1','0','0'],vec!['1','0','1','1','1'],vec!['1','1','1','1','1'],vec!['1','0','1','1','1']], 9)]
+    #[case(vec![vec!['0','1'],vec!['1','0']], 1)]
     fn case(#[case] matrix: Vec<Vec<char>>, #[case] expected: i32) {
         let actual = Solution::maximal_rectangle(matrix);
         assert_eq!(actual, expected);
