@@ -6,6 +6,8 @@ impl Solution {
     pub fn permute(nums: Vec<i32>) -> Vec<Vec<i32>> {
         let mut result = vec![vec![]];
 
+        // For each number insert it into each position in the previous solutions
+        // Including at the end
         for num in nums {
             let mut new_result = vec![];
             for prev_result_val in result {
