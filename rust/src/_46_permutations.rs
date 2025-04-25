@@ -2,28 +2,20 @@
 //! 46. Permutations
 
 impl Solution {
-    /// Based on https://www.youtube.com/watch?v=s7AvT7cGdSo
-    pub fn permute(mut nums: Vec<i32>) -> Vec<Vec<i32>> {
-        Self::permute_(&mut nums)
-    }
+    /// Based on https://www.youtube.com/watch?v=FZe0UqISmUw
+    pub fn permute(nums: Vec<i32>) -> Vec<Vec<i32>> {
+        let mut result = vec![vec![]];
 
-    pub fn permute_(nums: &mut Vec<i32>) -> Vec<Vec<i32>> {
-        let mut result = vec![];
-
-        // Base case
-        if nums.len() == 1 {
-            return vec![nums.clone()];
-        }
-
-        for _ in 0..nums.len() {
-            let first = nums.remove(0);
-            let sub_results = Self::permute_(nums);
-
-            for mut sub_result in sub_results {
-                sub_result.push(first);
-                result.push(sub_result);
+        for num in nums {
+            let mut new_result = vec![];
+            for prev_result_val in result {
+                for i in 0..=prev_result_val.len() {
+                    let mut clone = prev_result_val.clone();
+                    clone.insert(i, num);
+                    new_result.push(clone);
+                }
             }
-            nums.push(first);
+            result = new_result;
         }
 
         result
