@@ -2,29 +2,30 @@
 //! 46. Permutations
 
 impl Solution {
+    /// Based on https://www.youtube.com/watch?v=s7AvT7cGdSo
     pub fn permute(mut nums: Vec<i32>) -> Vec<Vec<i32>> {
-        // Looked up Heaps algorithm
-        // https://en.wikipedia.org/wiki/Heap%27s_algorithm
+        Self::permute_(&mut nums)
+    }
+
+    pub fn permute_(nums: &mut Vec<i32>) -> Vec<Vec<i32>> {
         let mut result = vec![];
-        let n = nums.len();
-        let mut c = vec![0; n];
-        result.push(nums.clone());
-        let mut i = 1;
-        while i < n {
-            if c[i] < i {
-                if i % 2 == 0 {
-                    nums.swap(0, i);
-                } else {
-                    nums.swap(c[i], i);
-                }
-                result.push(nums.clone());
-                c[i] += 1;
-                i = 1;
-            } else {
-                c[i] = 0;
-                i += 1;
-            }
+
+        // Base case
+        if nums.len() == 1 {
+            return vec![nums.clone()];
         }
+
+        for _ in 0..nums.len() {
+            let first = nums.remove(0);
+            let sub_results = Self::permute_(nums);
+
+            for mut sub_result in sub_results {
+                sub_result.push(first);
+                result.push(sub_result);
+            }
+            nums.push(first);
+        }
+
         result
     }
 }
