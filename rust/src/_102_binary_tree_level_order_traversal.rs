@@ -24,31 +24,29 @@ use std::collections::VecDeque;
 use std::rc::Rc;
 impl Solution {
     pub fn level_order(root: Option<Rc<RefCell<TreeNode>>>) -> Vec<Vec<i32>> {
-        let mut result = Vec::new();
         let Some(root) = root else {
-            return result;
+            return vec![];
         };
+
+        let mut result = vec![];
         let mut queue = VecDeque::new();
-        let mut level_nodes = vec![];
-        let mut current_level = 0;
-        queue.push_back((root, current_level));
-        while let Some((node, node_level)) = queue.pop_front() {
-            if node_level != current_level {
-                result.push(level_nodes);
-                level_nodes = Vec::new();
-                current_level = node_level;
+        queue.push_back((root, 0));
+        while let Some((node, level)) = queue.pop_front() {
+            if level >= result.len() {
+                // Extend to store new level
+                result.push(vec![]);
+                debug_assert!(level < result.len());
             }
-            level_nodes.push(node.borrow().val);
+
+            result[level].push(node.borrow().val);
             if let Some(left) = node.borrow_mut().left.take() {
-                queue.push_back((left, node_level + 1));
+                queue.push_back((left, level + 1));
             }
             if let Some(right) = node.borrow_mut().right.take() {
-                queue.push_back((right, node_level + 1));
+                queue.push_back((right, level + 1));
             }
         }
-        if !level_nodes.is_empty() {
-            result.push(level_nodes);
-        }
+
         result
     }
 }
