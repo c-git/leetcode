@@ -24,21 +24,17 @@ use std::rc::Rc;
 impl Solution {
     pub fn preorder_traversal(root: Option<Rc<RefCell<TreeNode>>>) -> Vec<i32> {
         let mut result = vec![];
-        let Some(node) = root else {
-            return result;
-        };
-        let mut stack = vec![node];
-        while let Some(node) = stack.pop() {
-            let node = node.borrow();
-            result.push(node.val);
-            if let Some(right) = node.right.clone() {
-                stack.push(right);
-            }
-            if let Some(left) = node.left.clone() {
-                stack.push(left);
-            }
-        }
+        Self::preorder_traversal_(root, &mut result);
         result
+    }
+
+    fn preorder_traversal_(root: Option<Rc<RefCell<TreeNode>>>, result: &mut Vec<i32>) {
+        let Some(root) = root else {
+            return;
+        };
+        result.push(root.borrow().val);
+        Self::preorder_traversal_(root.borrow_mut().left.take(), result);
+        Self::preorder_traversal_(root.borrow_mut().right.take(), result);
     }
 }
 
@@ -56,9 +52,9 @@ mod tests {
 
     #[rstest]
     #[case(TreeRoot::from("[1,null,2,3]").into(), vec![1,2,3])]
+    #[case(TreeRoot::from("[1,2,3,4,5,null,8,null,null,6,7,9]").into(), vec![1,2,4,5,6,7,3,8,9])]
     #[case(TreeRoot::from("[]").into(), vec![])]
-    #[case(TreeRoot::from("[1]").into(),vec![1])]
-    #[case(TreeRoot::from("[3,1,2]").into(), vec![3,1,2])]
+    #[case(TreeRoot::from("[1]").into(), vec![1])]
     fn case(#[case] root: Option<Rc<RefCell<TreeNode>>>, #[case] expected: Vec<i32>) {
         let actual = Solution::preorder_traversal(root);
         assert_eq!(actual, expected);
