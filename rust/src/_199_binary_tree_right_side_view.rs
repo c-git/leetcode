@@ -20,6 +20,7 @@
 //   }
 // }
 use std::cell::RefCell;
+use std::collections::VecDeque;
 use std::rc::Rc;
 impl Solution {
     pub fn right_side_view(root: Option<Rc<RefCell<TreeNode>>>) -> Vec<i32> {
@@ -27,20 +28,21 @@ impl Solution {
         let Some(root) = root else {
             return result;
         };
-        let mut prev_level = -1;
-        let mut queue = std::collections::VecDeque::new();
+        let mut queue = VecDeque::new();
         queue.push_back((root, 0));
         while let Some((node, level)) = queue.pop_front() {
-            if level == prev_level {
-                *result.last_mut().unwrap() = node.borrow().val;
+            let mut node = node.borrow_mut();
+            if level >= result.len() {
+                result.push(node.val);
+                debug_assert_eq!(result.len(), level + 1);
             } else {
-                prev_level = level;
-                result.push(node.borrow().val);
+                result[level] = node.val;
             }
-            if let Some(left) = node.borrow_mut().left.take() {
+
+            if let Some(left) = node.left.take() {
                 queue.push_back((left, level + 1));
             }
-            if let Some(right) = node.borrow_mut().right.take() {
+            if let Some(right) = node.right.take() {
                 queue.push_back((right, level + 1));
             }
         }
