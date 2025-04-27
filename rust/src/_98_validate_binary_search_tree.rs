@@ -1,5 +1,5 @@
-use std::cell::RefCell;
-use std::rc::Rc;
+//! Solution for https://leetcode.com/problems/validate-binary-search-tree
+//! 98. Validate Binary Search Tree
 
 // Definition for a binary tree node.
 // #[derive(Debug, PartialEq, Eq)]
@@ -19,80 +19,52 @@ use std::rc::Rc;
 //     }
 //   }
 // }
-use cargo_leet::TreeNode;
-
-struct Solution;
-
+use std::cell::RefCell;
+use std::rc::Rc;
 impl Solution {
-    fn is_valid_bst_in_range(
-        root: Option<Rc<RefCell<TreeNode>>>,
-        min: Option<i32>,
-        max: Option<i32>,
-    ) -> bool {
-        // Based on Fasil's idea
-        if let Some(root) = root {
-            let root = root.borrow();
-            if let Some(min) = min {
-                if root.val <= min {
-                    return false;
-                }
-            }
-            if let Some(max) = max {
-                if root.val >= max {
-                    return false;
-                }
-            }
-            Self::is_valid_bst_in_range(root.left.clone(), min, Some(root.val))
-                && Self::is_valid_bst_in_range(root.right.clone(), Some(root.val), max)
-        } else {
-            true
-        }
+    pub fn is_valid_bst(root: Option<Rc<RefCell<TreeNode>>>) -> bool {
+        let Some(root) = root else {
+            return true;
+        };
+        Self::is_valid_bst_(root, i32::MIN, i32::MAX)
     }
 
-    pub fn is_valid_bst(root: Option<Rc<RefCell<TreeNode>>>) -> bool {
-        Self::is_valid_bst_in_range(root, None, None)
+    fn is_valid_bst_(root: Rc<RefCell<TreeNode>>, low: i32, high: i32) -> bool {
+        let mut root = root.borrow_mut();
+        if !(low..=high).contains(&root.val) {
+            return false;
+        }
+        if let Some(left) = root.left.take() {
+            if !Self::is_valid_bst_(left, low, root.val) {
+                return false;
+            }
+        }
+        if let Some(left) = root.right.take() {
+            if !Self::is_valid_bst_(left, root.val, high) {
+                return false;
+            }
+        }
+        true
     }
 }
 
+// << ---------------- Code below here is only for local use ---------------- >>
+
+pub struct Solution;
+use cargo_leet::TreeNode;
+
 #[cfg(test)]
 mod tests {
+    use super::*;
     use cargo_leet::TreeRoot;
 
-    use super::*;
+    use rstest::rstest;
 
-    #[test]
-    fn case1() {
-        let input: TreeRoot = "[2,1,3]".into();
-        let expected = true;
-
-        let actual = Solution::is_valid_bst(input.into());
-        assert_eq!(actual, expected);
-    }
-
-    #[test]
-    fn case2() {
-        let input: TreeRoot = "[5,1,4,null,null,3,6]".into();
-        let expected = false;
-
-        let actual = Solution::is_valid_bst(input.into());
-        assert_eq!(actual, expected);
-    }
-
-    #[test]
-    fn case3() {
-        let input: TreeRoot = "[5,4,6,null,null,3,7]".into();
-        let expected = false;
-
-        let actual = Solution::is_valid_bst(input.into());
-        assert_eq!(actual, expected);
-    }
-
-    #[test]
-    fn case4() {
-        let input: TreeRoot = "[2,2,2]".into();
-        let expected = false;
-
-        let actual = Solution::is_valid_bst(input.into());
+    #[rstest]
+    #[case(TreeRoot::from("[2,1,3]").into(), true)]
+    #[case(TreeRoot::from("[5,1,4,null,null,3,6]").into(), false)]
+    fn case(#[case] root: Option<Rc<RefCell<TreeNode>>>, #[case] expected: bool) {
+        let actual = Solution::is_valid_bst(root);
         assert_eq!(actual, expected);
     }
 }
