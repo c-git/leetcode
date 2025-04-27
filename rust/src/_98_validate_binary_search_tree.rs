@@ -35,12 +35,15 @@ impl Solution {
             return false;
         }
         if let Some(left) = root.left.take() {
-            if !Self::is_valid_bst_(left, low, root.val) {
+            if !Self::is_valid_bst_(left, low, root.val.saturating_sub(1)) {
                 return false;
             }
         }
         if let Some(left) = root.right.take() {
-            if !Self::is_valid_bst_(left, root.val, high) {
+            let Some(new_low) = root.val.checked_add(1) else {
+                return false;
+            };
+            if !Self::is_valid_bst_(left, new_low, high) {
                 return false;
             }
         }
@@ -63,6 +66,7 @@ mod tests {
     #[rstest]
     #[case(TreeRoot::from("[2,1,3]").into(), true)]
     #[case(TreeRoot::from("[5,1,4,null,null,3,6]").into(), false)]
+    #[case(TreeRoot::from("[2,2,2]").into(), false)]
     fn case(#[case] root: Option<Rc<RefCell<TreeNode>>>, #[case] expected: bool) {
         let actual = Solution::is_valid_bst(root);
         assert_eq!(actual, expected);
