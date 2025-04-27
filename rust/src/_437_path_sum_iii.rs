@@ -27,16 +27,22 @@ impl Solution {
     pub fn path_sum(root: Option<Rc<RefCell<TreeNode>>>, target_sum: i32) -> i32 {
         let mut result = 0;
         let mut previous_segment_sums = HashMap::new();
-        previous_segment_sums.insert(0i32, 1u16); // Subtracting nothing is always an option
-        Self::path_sum_(root, target_sum, 0, &mut previous_segment_sums, &mut result);
+        previous_segment_sums.insert(0i64, 1u16); // Subtracting nothing is always an option
+        Self::path_sum_(
+            root,
+            target_sum as i64,
+            0,
+            &mut previous_segment_sums,
+            &mut result,
+        );
         result
     }
 
     pub fn path_sum_(
         root: Option<Rc<RefCell<TreeNode>>>,
-        target_sum: i32,
-        mut curr_path_sum: i32,
-        previous_segment_sums: &mut HashMap<i32, u16>,
+        target_sum: i64,
+        mut curr_path_sum: i64,
+        previous_segment_sums: &mut HashMap<i64, u16>,
         result: &mut i32,
     ) {
         let Some(root) = root else {
@@ -44,7 +50,7 @@ impl Solution {
         };
         let mut root = root.borrow_mut();
 
-        curr_path_sum += root.val;
+        curr_path_sum += root.val as i64;
         if let Some(&way_count) = previous_segment_sums.get(&(curr_path_sum - target_sum)) {
             // Add the number of segments we can remove that would give us our target
             *result += way_count as i32;
@@ -90,6 +96,7 @@ mod tests {
     #[rstest]
     #[case(TreeRoot::from("[10,5,-3,3,2,null,11,3,-2,null,1]").into(), 8, 3)]
     #[case(TreeRoot::from("[5,4,8,11,null,13,4,7,2,null,null,5,1]").into(), 22, 3)]
+    #[case(TreeRoot::from("[1000000000,1000000000,null,294967296,null,1000000000,null,1000000000,null,1000000000]").into(), 0, 0)]
     fn case(
         #[case] root: Option<Rc<RefCell<TreeNode>>>,
         #[case] target_sum: i32,
