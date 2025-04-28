@@ -2,19 +2,25 @@
 //! 2302. Count Subarrays With Score Less Than K
 
 impl Solution {
+    /// Based on https://www.youtube.com/watch?v=CtLsKfvG06s
     pub fn count_subarrays(nums: Vec<i32>, k: i64) -> i64 {
         let mut result = 0;
-        for start in 0..nums.len() {
-            let mut sum = 0;
-            let mut len = 0;
-            for &num in nums.iter().skip(start) {
-                sum += num as i64;
-                len += 1;
-                if sum * len < k {
-                    result += 1;
-                } else {
-                    break;
-                }
+        let mut right = 0;
+        let mut sum = 0; // Sum of left..right
+        for left in 0..nums.len() {
+            while right < nums.len() && (sum + nums[right] as i64) * ((right - left + 1) as i64) < k
+            {
+                sum += nums[right] as i64;
+                right += 1;
+            }
+            result += (right - left) as i64;
+
+            // Slide window forward
+            if right == left {
+                // Window is empty move right forward as well
+                right += 1;
+            } else {
+                sum -= nums[left] as i64;
             }
         }
         result
