@@ -7,6 +7,20 @@ struct Graph {
     nodes: Vec<Vec<(usize, i32)>>,
 }
 
+#[derive(Default)]
+struct MinHeap {
+    max_heap: BinaryHeap<Reverse<(i32, i32, usize)>>,
+}
+
+impl MinHeap {
+    fn push(&mut self, val: (i32, i32, usize)) {
+        self.max_heap.push(Reverse(val));
+    }
+    fn pop(&mut self) -> Option<(i32, i32, usize)> {
+        self.max_heap.pop().map(|x| x.0)
+    }
+}
+
 impl Solution {
     pub fn find_cheapest_price(n: i32, flights: Vec<Vec<i32>>, src: i32, dst: i32, k: i32) -> i32 {
         let mut graph = Graph {
@@ -19,24 +33,23 @@ impl Solution {
         }
         let src = src as usize;
         let dst = dst as usize;
-        let mut queue = BinaryHeap::new();
-        queue.push(Reverse((0, -1, src)));
-        let mut seen = vec![false; n as usize];
-        while let Some(Reverse((cost, stops, node_idx))) = queue.pop() {
+        let mut heap = MinHeap::default();
+        heap.push((0, k + 1, src));
+        while let Some((cost, stops_left, node_idx)) = heap.pop() {
             if node_idx == dst {
-                if stops <= k {
+                if stops_left <= k {
                     return cost;
                 } else {
                     continue;
                 }
             }
-            if seen[node_idx] {
+            if stops_left == 0 {
+                // Unable to use this path as we cannot stop here
                 continue;
             }
-            seen[node_idx] = true;
 
             for (neighbour, price) in graph.nodes[node_idx].iter().cloned() {
-                queue.push(Reverse((cost + price, stops + 1, neighbour)));
+                heap.push((cost + price, stops_left - 1, neighbour));
             }
         }
 
@@ -59,6 +72,7 @@ mod tests {
     #[case(4, vec![vec![0,1,100],vec![1,2,100],vec![2,0,100],vec![1,3,600],vec![2,3,200]], 0, 3, 1, 700)]
     #[case(3, vec![vec![0,1,100],vec![1,2,100],vec![0,2,500]], 0, 2, 1, 200)]
     #[case(3, vec![vec![0,1,100],vec![1,2,100],vec![0,2,500]], 0, 2, 0, 500)]
+    #[case(3, vec![vec![0,1,1],vec![0,2,5],vec![1,2,1],vec![2,3,1]], 0, 3, 1, 6)]
     fn case(
         #[case] n: i32,
         #[case] flights: Vec<Vec<i32>>,
