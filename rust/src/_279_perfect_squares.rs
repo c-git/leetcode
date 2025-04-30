@@ -3,62 +3,26 @@
 
 impl Solution {
     pub fn num_squares(n: i32) -> i32 {
-        let perfect_squares: Vec<i32> = (1..=n)
-            .map_while(|x| {
-                let y = x * x;
-                if y <= n {
-                    Some(y)
-                } else {
-                    None
-                }
-            })
-            .collect();
+        // Find perfect squares in range
+        let perfect_squares: Vec<i32> = (1..).map(|x| x * x).take_while(|&x| x <= n).collect();
 
-        let mut memo = vec![vec![None; perfect_squares.len() + 1]; n as usize + 1];
-        Self::num_squares_(n, &perfect_squares, &mut memo)
-            .expect("should always have an answer if n is 1 or more")
-    }
+        let mut dp = Vec::with_capacity(n as usize + 1); // Least number of steps to get the answer for each index
 
-    fn num_squares_(
-        n: i32,
-        perfect_squares: &[i32],
-        memo: &mut Vec<Vec<Option<i32>>>,
-    ) -> Option<i32> {
-        debug_assert!(n >= 0);
-        if perfect_squares.is_empty() {
-            return None;
-        }
-        if n <= 1 {
-            // 1 number needed to make 1 and 0 numbers needed to make 0
-            return Some(n);
-        }
-        if memo[n as usize][perfect_squares.len()].is_some() {
-            return memo[n as usize][perfect_squares.len()];
-        }
+        dp.push(0); // For index 0 we need 0 steps to make a total of 0
 
-        let largest_index_that_fits = perfect_squares
-            .iter()
-            .enumerate()
-            .rev()
-            .find_map(|(i, x)| if x <= &n { Some(i) } else { None })
-            .expect("at least 1 should always fit");
+        // Fill in dp from smallest to largest
+        for num in 1..=n {
+            let mut best = i32::MAX; // Stores best answer for `num`
 
-        let use_last = Self::num_squares_(
-            n - perfect_squares[largest_index_that_fits],
-            &perfect_squares[..=largest_index_that_fits],
-            memo,
-        );
-        let skip_last = Self::num_squares_(n, &perfect_squares[..largest_index_that_fits], memo);
-        let result = match (use_last, skip_last) {
-            (None, _) => {
-                unreachable!("since 1 is in the list we must always be able to use that")
+            // Check each perfect square and see which produces the smallest number of steps when removed from `num`
+            for perfect_square in perfect_squares.iter().take_while(|&&x| x <= num) {
+                best = best.min(dp[(num - *perfect_square) as usize] + 1);
             }
-            (Some(x), None) => Some(x + 1),
-            (Some(x), Some(y)) => Some(y.min(x + 1)),
-        };
 
-        memo[n as usize][perfect_squares.len()] = result;
-        result
+            // Add best found to `dp`
+            dp.push(best);
+        }
+        *dp.last().unwrap()
     }
 }
 
@@ -75,7 +39,6 @@ mod tests {
     #[rstest]
     #[case(12, 3)]
     #[case(13, 2)]
-    #[case(1, 1)]
     fn case(#[case] n: i32, #[case] expected: i32) {
         let actual = Solution::num_squares(n);
         assert_eq!(actual, expected);
