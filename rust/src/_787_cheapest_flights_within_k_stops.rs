@@ -22,9 +22,11 @@ impl MinHeap {
 }
 
 impl Solution {
+    // Performance fixed using https://www.youtube.com/watch?v=vWgoPTvQ3Rw
     pub fn find_cheapest_price(n: i32, flights: Vec<Vec<i32>>, src: i32, dst: i32, k: i32) -> i32 {
+        let n = n as usize;
         let mut graph = Graph {
-            nodes: vec![vec![]; n as usize],
+            nodes: vec![vec![]; n],
         };
         for flight in flights {
             debug_assert_eq!(flight.len(), 3);
@@ -33,23 +35,39 @@ impl Solution {
         }
         let src = src as usize;
         let dst = dst as usize;
+        let mut max_stops_left = vec![0; n + 1];
+        let mut min_cost = vec![i32::MAX; n + 1];
+        min_cost[src] = 0;
         let mut heap = MinHeap::default();
         heap.push((0, k + 1, src));
-        while let Some((cost, stops_left, node_idx)) = heap.pop() {
+        while let Some((cost, curr_stops_left, node_idx)) = heap.pop() {
             if node_idx == dst {
-                if stops_left <= k {
+                if curr_stops_left <= k {
                     return cost;
                 } else {
                     continue;
                 }
             }
-            if stops_left == 0 {
-                // Unable to use this path as we cannot stop here
+            if curr_stops_left == 0 {
+                // Unable to use this path as we cannot stop here because we have no stops left
                 continue;
             }
 
+            let next_stops_left = curr_stops_left - 1;
             for (neighbour, price) in graph.nodes[node_idx].iter().cloned() {
-                heap.push((cost + price, stops_left - 1, neighbour));
+                let next_cost = cost + price;
+                let mut should_try = false;
+                if min_cost[neighbour] > next_cost {
+                    min_cost[neighbour] = next_cost;
+                    should_try = true;
+                }
+                if next_stops_left > max_stops_left[neighbour] {
+                    max_stops_left[neighbour] = next_stops_left;
+                    should_try = true;
+                }
+                if should_try {
+                    heap.push((next_cost, next_stops_left, neighbour));
+                }
             }
         }
 
