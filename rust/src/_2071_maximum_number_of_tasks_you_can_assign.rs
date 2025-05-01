@@ -1,7 +1,7 @@
 //! Solution for https://leetcode.com/problems/maximum-number-of-tasks-you-can-assign
 //! 2071. Maximum Number of Tasks You Can Assign
 
-use std::collections::BTreeMap;
+use std::collections::VecDeque;
 
 impl Solution {
     /// Based on https://leetcode.com/problems/maximum-number-of-tasks-you-can-assign/solutions/6704796/beats-100-in-mosteasy-solution-usingbina-ucot/
@@ -28,23 +28,12 @@ impl Solution {
 }
 
 fn can_assign(tasks: &[i32], workers: &[i32], mut pills: i32, strength: i32, k: usize) -> bool {
-    let mut available_workers: BTreeMap<i32, u16> =
-        workers
-            .iter()
-            .skip(workers.len() - k)
-            .fold(BTreeMap::new(), |mut acc, &worker| {
-                *acc.entry(worker).or_default() += 1;
-                acc
-            });
+    let mut available_workers: VecDeque<_> = workers[workers.len() - k..].to_vec().into();
 
-    for task in tasks.iter().take(k).rev() {
-        if let Some(mut w) = available_workers.last_entry() {
-            if w.key() >= task {
-                if *w.get() == 1 {
-                    w.remove_entry();
-                } else {
-                    *w.get_mut() -= 1;
-                }
+    for &task in tasks.iter().take(k).rev() {
+        if let Some(&w) = available_workers.back() {
+            if w >= task {
+                available_workers.pop_back();
                 continue;
             }
         }
@@ -52,13 +41,10 @@ fn can_assign(tasks: &[i32], workers: &[i32], mut pills: i32, strength: i32, k: 
             return false;
         }
 
-        let first_able_worker = available_workers.range_mut(task - strength..).next();
-        if let Some((&worker, freq)) = first_able_worker {
-            if *freq == 1 {
-                available_workers.remove(&worker);
-            } else {
-                *freq -= 1;
-            }
+        let first_able_worker =
+            available_workers.partition_point(|&worker| worker + strength < task);
+        if first_able_worker < available_workers.len() {
+            available_workers.remove(first_able_worker);
             pills -= 1;
         } else {
             return false;
