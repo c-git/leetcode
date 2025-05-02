@@ -18,8 +18,8 @@ impl MyCalendar {
     }
 
     fn book(&mut self, start_time: i32, end_time: i32) -> bool {
-        for (&prev_start, &prev_end) in self.data.range(..end_time) {
-            if !(prev_end <= start_time || end_time <= prev_start) {
+        if let Some((_, &prev_end)) = self.data.range(..end_time).next_back() {
+            if prev_end > start_time {
                 return false;
             }
         }
