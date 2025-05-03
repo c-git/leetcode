@@ -1,81 +1,59 @@
-//! Source: <https://dev.to/timclicks/two-trie-implementations-in-rust-ones-super-fast-2f3m>
-//! Wanted to test out some of the ideas he proposed in his video https://www.youtube.com/live/f9B87LA86g0
+//! Solution for https://leetcode.com/problems/implement-trie-prefix-tree
+//! 208. Implement Trie (Prefix Tree)
 
-struct TrieNode {
-    /// The value that this node was created for (in utf-8 this matches a char)
-    /// For the leetcode problem this is the same as the ascii value of the letter
-    byte: u8,
-    is_end_of_word: bool,
-    children: Vec<TrieNode>,
+use std::collections::HashMap;
+
+#[derive(Default)]
+pub struct Trie {
+    root_node: Node,
 }
 
-impl TrieNode {
-    fn new(byte: u8) -> Self {
-        Self {
-            byte,
-            is_end_of_word: false,
-            children: vec![],
-        }
-    }
+#[derive(Default)]
+struct Node {
+    /// True if a word ends at this node
+    is_terminal: bool,
+    next_node: HashMap<char, Node>,
 }
 
-struct Trie {
-    root: TrieNode,
-}
-
+/**
+ * `&self` means the method takes an immutable reference.
+ * If you need a mutable reference, change it to `&mut self` instead.
+ */
 impl Trie {
-    fn new() -> Self {
-        Self {
-            root: TrieNode::new(0), // The byte at the root does not get used by design just easier to have it than put an option when all the rest have
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    pub fn insert(&mut self, word: String) {
+        let mut curr_node = &mut self.root_node;
+        for c in word.chars() {
+            curr_node = curr_node.next_node.entry(c).or_default();
+        }
+        curr_node.is_terminal = true;
+    }
+
+    pub fn search(&self, word: String) -> bool {
+        if let Some(node) = self.last_node_for_chars(word.chars()) {
+            node.is_terminal
+        } else {
+            false
         }
     }
 
-    fn insert(&mut self, word: String) {
-        let mut current_node = &mut self.root;
-
-        'outer: for b in word.bytes() {
-            for (i, element) in current_node.children.iter_mut().enumerate() {
-                if element.byte == b {
-                    current_node = &mut current_node.children[i];
-                    continue 'outer;
-                }
-            }
-
-            // `b` did not already have a node. Add one for `b`
-            current_node.children.push(TrieNode::new(b));
-            current_node = current_node
-                .children
-                .last_mut()
-                .expect("Item was just added");
-        }
-        current_node.is_end_of_word = true;
+    pub fn starts_with(&self, prefix: String) -> bool {
+        self.last_node_for_chars(prefix.chars()).is_some()
     }
 
-    fn find_prefix_node(&self, word: &str) -> Option<&TrieNode> {
-        let mut current_node = &self.root;
-
-        for b in word.bytes() {
-            if let Some(node) = current_node.children.iter().find(|node| node.byte == b) {
-                current_node = node;
-            } else {
-                return None;
-            }
+    fn last_node_for_chars(&self, chars: impl Iterator<Item = char>) -> Option<&Node> {
+        let mut curr_node = &self.root_node;
+        for c in chars {
+            curr_node = curr_node.next_node.get(&c)?;
         }
-
-        Some(current_node)
-    }
-
-    fn search(&self, word: String) -> bool {
-        match self.find_prefix_node(&word) {
-            Some(node) => node.is_end_of_word,
-            None => false,
-        }
-    }
-
-    fn starts_with(&self, prefix: String) -> bool {
-        self.find_prefix_node(&prefix).is_some()
+        Some(curr_node)
     }
 }
+
+// << ---------------- Code below here is only for local use ---------------- >>
 
 #[cfg(test)]
 mod tests {
