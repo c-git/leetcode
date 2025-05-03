@@ -22,6 +22,7 @@
 use std::cell::RefCell;
 use std::rc::Rc;
 impl Solution {
+    /// Based on https://www.youtube.com/watch?v=cfn-G-7vVlo
     pub fn max_path_sum(root: Option<Rc<RefCell<TreeNode>>>) -> i32 {
         Self::max_path_sum_(root).0
     }
