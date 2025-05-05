@@ -5,7 +5,7 @@ impl Solution {
     /// Used https://www.youtube.com/watch?v=CecjOo4Zo-g to understand and
     /// https://www.youtube.com/watch?v=ZbEe4lsWW60 for a more efficient solution
     pub fn num_tilings(n: i32) -> i32 {
-        const MOD: i32 = 1_000_000_007;
+        const MOD: i64 = 1_000_000_007;
 
         // Initialize base cases
         let (mut empty, mut up_blocked, mut down_blocked) = (1, 0, 0);
@@ -26,7 +26,7 @@ impl Solution {
             down_blocked = (up_blocked_prev + empty_prev2) % MOD;
         }
 
-        empty
+        empty as i32
     }
 }
 
@@ -43,6 +43,8 @@ mod tests {
     #[rstest]
     #[case(3, 5)]
     #[case(1, 1)]
+    #[case(30, 312342182)]
+    #[case(1000, 979232805)]
     fn case(#[case] n: i32, #[case] expected: i32) {
         let actual = Solution::num_tilings(n);
         assert_eq!(actual, expected);
