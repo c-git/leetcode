@@ -8,22 +8,20 @@ impl Solution {
         const MOD: i64 = 1_000_000_007;
 
         // Initialize base cases
-        let (mut empty, mut up_blocked, mut down_blocked) = (1, 0, 0);
+        let (mut empty, mut half_blocked) = (1, 0);
         let mut empty_prev = 1;
-        let mut up_blocked_prev;
-        let mut down_blocked_prev;
+        let mut half_blocked_prev;
         let mut empty_prev2;
 
         // Iterate through columns
         for _ in 2..=n {
             // Move current values back
             empty_prev2 = empty_prev;
-            (empty_prev, up_blocked_prev, down_blocked_prev) = (empty, up_blocked, down_blocked);
+            (empty_prev, half_blocked_prev) = (empty, half_blocked);
 
             // Calculate new values
-            empty = (empty_prev + empty_prev2 + up_blocked_prev + down_blocked_prev) % MOD;
-            up_blocked = (down_blocked_prev + empty_prev2) % MOD;
-            down_blocked = (up_blocked_prev + empty_prev2) % MOD;
+            empty = (empty_prev + empty_prev2 + half_blocked_prev * 2) % MOD;
+            half_blocked = (half_blocked_prev + empty_prev2) % MOD;
         }
 
         empty as i32
