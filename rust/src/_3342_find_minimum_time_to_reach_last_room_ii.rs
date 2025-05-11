@@ -8,7 +8,7 @@ impl Solution {
         let row_count = move_time.len();
         let col_count = move_time[0].len();
         let mut heap = BinaryHeap::new();
-        heap.push(Reverse((0, 0, 0, false)));
+        heap.push(Reverse((0, 0, 0, true)));
         let mut visited = vec![vec![false; col_count]; row_count];
         while let Some(Reverse((time, row, col, was_two_sec_move))) = heap.pop() {
             if visited[row][col] {
@@ -112,6 +112,7 @@ mod tests {
     #[case(vec![vec![0,4],vec![4,4]], 7)]
     #[case(vec![vec![0,0,0,0],vec![0,0,0,0]], 6)]
     #[case(vec![vec![0,1],vec![1,2]], 4)]
+    #[case(vec![vec![0,58],vec![27,69]], 71)]
     fn case(#[case] move_time: Vec<Vec<i32>>, #[case] expected: i32) {
         let actual = Solution::min_time_to_reach(move_time);
         assert_eq!(actual, expected);
