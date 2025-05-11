@@ -1,29 +1,100 @@
 //! Solution for https://leetcode.com/problems/find-minimum-time-to-reach-last-room-ii
 //! 3342. Find Minimum Time to Reach Last Room II
 
-use std::collections::BinaryHeap;
+use std::{cmp::Reverse, collections::BinaryHeap};
 
 impl Solution {
-    /// Source: https://leetcode.com/problems/find-minimum-time-to-reach-last-room-ii/
-    pub fn min_time_to_reach(mut move_time: Vec<Vec<i32>>) -> i32 {
-        let (w, h) = (move_time[0].len() - 1, move_time.len() - 1);
-        let (d, mut q) = ([0, 1, 0, -1, 0], BinaryHeap::from([(0, 0, 0, 1)]));
-        while let Some((t, x, y, dt)) = q.pop() {
-            for i in 0..4 {
-                let y = (y as i32 + d[i]) as usize;
-                let x = (x as i32 + d[i + 1]) as usize;
-                if x > w || y > h || move_time[y][x] < 0 {
-                    continue;
-                }
-                let t = dt + (-t).max(move_time[y][x]);
-                if x == w && y == h {
-                    return t;
-                }
-                move_time[y][x] = -1;
-                q.push((-t, x, y, 3 - dt))
+    pub fn min_time_to_reach(move_time: Vec<Vec<i32>>) -> i32 {
+        let row_count = move_time.len();
+        let col_count = move_time[0].len();
+        let mut heap = BinaryHeap::new();
+        heap.push(Reverse((0, 0, 0, false)));
+        let mut visited = vec![vec![false; col_count]; row_count];
+        while let Some(Reverse((time, row, col, was_two_sec_move))) = heap.pop() {
+            if visited[row][col] {
+                // Already visited we found a faster way
+                continue;
+            }
+            if row == row_count - 1 && col == col_count - 1 {
+                // Target found
+                return time;
+            }
+            visited[row][col] = true;
+
+            // Check Up
+            if row > 0 {
+                add_room(
+                    &move_time,
+                    &mut heap,
+                    &visited,
+                    time,
+                    row - 1,
+                    col,
+                    was_two_sec_move,
+                );
+            }
+
+            // Check Down
+            if row < row_count - 1 {
+                add_room(
+                    &move_time,
+                    &mut heap,
+                    &visited,
+                    time,
+                    row + 1,
+                    col,
+                    was_two_sec_move,
+                );
+            }
+
+            // Check Left
+            if col > 0 {
+                add_room(
+                    &move_time,
+                    &mut heap,
+                    &visited,
+                    time,
+                    row,
+                    col - 1,
+                    was_two_sec_move,
+                );
+            }
+
+            // Check Right
+            if col < col_count - 1 {
+                add_room(
+                    &move_time,
+                    &mut heap,
+                    &visited,
+                    time,
+                    row,
+                    col + 1,
+                    was_two_sec_move,
+                );
             }
         }
-        0
+        unreachable!("we must always be able to get to the destination")
+    }
+}
+
+#[inline]
+fn add_room(
+    move_time: &[Vec<i32>],
+    heap: &mut BinaryHeap<Reverse<(i32, usize, usize, bool)>>,
+    visited: &[Vec<bool>],
+    time: i32,
+    row: usize,
+    col: usize,
+    was_two_sec_move: bool,
+) {
+    if !visited[row][col] {
+        let min_start_time = time.max(move_time[row][col]);
+        heap.push(Reverse((
+            min_start_time + if was_two_sec_move { 1 } else { 2 },
+            row,
+            col,
+            !was_two_sec_move,
+        )));
     }
 }
 
