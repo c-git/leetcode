@@ -1,32 +1,61 @@
 //! Solution for https://leetcode.com/problems/finding-3-digit-even-numbers
 //! 2094. Finding 3-Digit Even Numbers
 
-use std::collections::HashSet;
-
 impl Solution {
     /// From editorial
     pub fn find_even_numbers(digits: Vec<i32>) -> Vec<i32> {
-        let mut nums = HashSet::new();
-        let n = digits.len();
-        // Traverse the indices of three digits
-        for i in 0..n {
-            for j in 0..n {
-                for k in 0..n {
-                    // Determine whether it meets the condition of the target even number
-                    if i == j || j == k || i == k {
+        let mut result = vec![];
+        let freq_counts = digits.into_iter().fold([0; 10], |mut freq, num| {
+            freq[num as usize] += 1;
+            freq
+        });
+
+        for first_digit in 1..=9 {
+            if freq_counts[first_digit] == 0 {
+                continue;
+            }
+            for second_digit in 0..=9 {
+                if (second_digit == first_digit && freq_counts[second_digit] < 2)
+                    || freq_counts[second_digit] < 1
+                {
+                    continue;
+                }
+
+                for last_digit in (0..=8).step_by(2) {
+                    if freq_counts[last_digit] == 0 {
                         continue;
                     }
-                    let num = digits[i] * 100 + digits[j] * 10 + digits[k];
-                    if num >= 100 && num % 2 == 0 {
-                        nums.insert(num);
+                    let mut add_to_result = || {
+                        result.push((first_digit * 100 + second_digit * 10 + last_digit) as i32);
+                    };
+                    match (
+                        first_digit == second_digit,
+                        first_digit == last_digit,
+                        second_digit == last_digit,
+                    ) {
+                        (true, true, true) => {
+                            if freq_counts[first_digit] >= 3 {
+                                add_to_result();
+                            }
+                        }
+                        (true, false, false) => add_to_result(), // Already checked above
+                        (false, true, false) => {
+                            if freq_counts[first_digit] > 1 {
+                                add_to_result()
+                            }
+                        }
+                        (false, false, true) => {
+                            if freq_counts[last_digit] > 1 {
+                                add_to_result()
+                            }
+                        }
+                        (false, false, false) => add_to_result(),
+                        _ => unreachable!("This should be impossible but we got here with {first_digit} {second_digit} {last_digit}"),
                     }
                 }
             }
         }
-        // Converted to an array sorted in ascending order
-        let mut res: Vec<i32> = nums.into_iter().collect();
-        res.sort();
-        res
+        result
     }
 }
 
