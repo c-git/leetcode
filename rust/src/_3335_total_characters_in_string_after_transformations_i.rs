@@ -2,27 +2,24 @@
 //! 3335. Total Characters in String After Transformations I
 
 impl Solution {
-    /// From editorial
+    /// Based on editorial
     pub fn length_after_transformations(s: String, t: i32) -> i32 {
         const MOD: i32 = 1_000_000_007;
-        let mut cnt = [0; 26];
+        let mut char_count = [0; 26];
         for ch in s.chars() {
-            cnt[(ch as u8 - b'a') as usize] += 1;
+            char_count[(ch as u8 - b'a') as usize] += 1;
         }
+        let mut alt_count = [0; 26]; // To avoid reallocation
         for _ in 0..t {
-            let mut nxt = [0; 26];
-            nxt[0] = cnt[25];
-            nxt[1] = (cnt[25] + cnt[0]) % MOD;
-            for i in 2..26 {
-                nxt[i] = cnt[i - 1];
-            }
-            cnt = nxt;
+            alt_count[0] = char_count[25];
+            alt_count[1] = (char_count[25] + char_count[0]) % MOD;
+            alt_count[2..].clone_from_slice(&char_count[1..25]);
+            std::mem::swap(&mut char_count, &mut alt_count);
         }
-        let mut ans = 0;
-        for &num in cnt.iter() {
-            ans = (ans + num) % MOD;
-        }
-        ans
+
+        char_count
+            .into_iter()
+            .fold(0, |acc, count| (acc + count) % MOD)
     }
 }
 
