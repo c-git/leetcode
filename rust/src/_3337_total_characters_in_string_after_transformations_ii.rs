@@ -17,7 +17,7 @@ impl Solution {
             {
                 for shift in 1..=shift_count {
                     let new_idx = (char_idx + shift) % 26;
-                    alt_count[new_idx] += char_count[char_idx];
+                    alt_count[new_idx] = (alt_count[new_idx] + char_count[char_idx]) % MOD;
                 }
             }
             std::mem::swap(&mut char_count, &mut alt_count);
@@ -42,6 +42,7 @@ mod tests {
     #[rstest]
     #[case("abcyy", 2, vec![1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,2], 7)]
     #[case("azbk", 1, vec![2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2], 8)]
+    #[case("x", 16, vec![6,6,8,1,9,9,10,3,9,4,8,5,2,8,10,2,6,8,2,3,3,7,2,6,4,2], 417796858)]
     fn case(#[case] s: String, #[case] t: i32, #[case] nums: Vec<i32>, #[case] expected: i32) {
         let actual = Solution::length_after_transformations(s, t, nums);
         assert_eq!(actual, expected);
