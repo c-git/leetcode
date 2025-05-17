@@ -22,7 +22,7 @@ impl Solution {
             }
         }
         let mut result = Vec::new();
-        let mut prev_opt = dp[max_index].0;
+        let mut prev_opt = Some(max_index);
         while let Some(i) = prev_opt {
             result.push(words[i].clone());
             prev_opt = dp[i].0;
