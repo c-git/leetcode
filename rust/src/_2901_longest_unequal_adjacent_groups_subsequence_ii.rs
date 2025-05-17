@@ -2,36 +2,36 @@
 //! 2901. Longest Unequal Adjacent Groups Subsequence II
 
 impl Solution {
-    /// Copied from editorial
+    /// Based on editorial
     pub fn get_words_in_longest_subsequence(words: Vec<String>, groups: Vec<i32>) -> Vec<String> {
         let n = groups.len();
-
-        let mut dp = vec![1; n];
-        let mut prev = vec![-1; n];
+        // dp[i] = (Previous, Longest sequence ending at i)
+        let mut dp = vec![(None, 1); n];
         let mut max_index = 0;
         for i in 1..n {
-            for j in 0..i {
-                if Self::check(&words[i], &words[j]) && dp[j] + 1 > dp[i] && groups[i] != groups[j]
+            for prev in 0..i {
+                if Self::check(&words[i], &words[prev])
+                    && dp[prev].1 + 1 > dp[i].1
+                    && groups[i] != groups[prev]
                 {
-                    dp[i] = dp[j] + 1;
-                    prev[i] = j as i32;
+                    dp[i] = (Some(prev), dp[prev].1 + 1);
                 }
             }
-            if dp[i] > dp[max_index] {
+            if dp[i].1 > dp[max_index].1 {
                 max_index = i;
             }
         }
-        let mut ans = Vec::new();
-        let mut i = max_index as i32;
-        while i >= 0 {
-            ans.push(words[i as usize].clone());
-            i = prev[i as usize];
+        let mut result = Vec::new();
+        let mut prev_opt = dp[max_index].0;
+        while let Some(i) = prev_opt {
+            result.push(words[i].clone());
+            prev_opt = dp[i].0;
         }
-        ans.reverse();
-        ans
+        result.reverse();
+        result
     }
 
-    fn check(s1: &String, s2: &String) -> bool {
+    fn check(s1: &str, s2: &str) -> bool {
         if s1.len() != s2.len() {
             return false;
         }
