@@ -5,7 +5,7 @@ impl Solution {
     pub fn triangle_type(mut nums: Vec<i32>) -> String {
         nums.sort_unstable();
         match (nums[0], nums[1], nums[2]) {
-            (a, b, c) if a + b < c => "none",
+            (a, b, c) if a + b <= c => "none",
             (a, b, c) if a == b && b == c => "equilateral",
             (a, b, c) if a == b || b == c => "isosceles",
             _ => "scalene",
@@ -27,6 +27,7 @@ mod tests {
     #[rstest]
     #[case(vec![3,3,3], "equilateral")]
     #[case(vec![3,4,5], "scalene")]
+    #[case(vec![5,3,8], "none")]
     fn case(#[case] nums: Vec<i32>, #[case] expected: String) {
         let actual = Solution::triangle_type(nums);
         assert_eq!(actual, expected);
