@@ -2,45 +2,42 @@
 //! 87. Scramble String
 
 impl Solution {
+    #[expect(clippy::needless_range_loop)]
+    /// Based on Editorial
     pub fn is_scramble(s1: String, s2: String) -> bool {
-        Self::is_scramble_(s1.as_bytes(), s2.as_bytes())
-    }
-
-    pub fn is_scramble_(s1: &[u8], s2: &[u8]) -> bool {
-        debug_assert_eq!(s1.len(), s2.len());
-        if s1.is_empty() {
-            return true;
-        }
+        let s1 = s1.as_bytes();
+        let s2 = s2.as_bytes();
         let n = s1.len();
 
-        // Pick off ends if possible
-        if s1[0] == s2[0] {
-            return Self::is_scramble_(&s1[1..], &s2[1..]);
+        // For each given dp state, we need 3 variables: length, i, and j.
+        //
+        // Each state will focus on two substrings. The first one will be a substring of
+        // s1, starting at index i with length equal to length - let's call this
+        // substring s. The second one will be a substring of s2, starting at index j
+        // with length - let's call this substring t.
+        //
+        // Let dp[length][i][j] be a boolean representing whether t is a scrambled
+        // version of s.
+        let mut dp = vec![vec![vec![false; n]; n]; n + 1];
+        for i in 0..n {
+            for j in 0..n {
+                dp[1][i][j] = s1[i] == s2[j];
+            }
         }
-        if s1[n - 1] == s2[n - 1] {
-            return Self::is_scramble_(&s1[..n - 1], &s2[..n - 1]);
-        }
-        if s1[0] == s2[n - 1] {
-            return Self::is_scramble_(&s1[1..], &s2[..n - 1]);
-        }
-        if s1[n - 1] == s2[0] {
-            return Self::is_scramble_(&s1[..n - 1], &s2[1..]);
-        }
-
-        // Take span up to where characters are equal and split it out
-        let mut seen_s1 = [0; 26];
-        let mut seen_s2 = [0; 26];
-        for i in 0..n - 1 {
-            seen_s1[(s1[i] - b'a') as usize] += 1;
-            seen_s2[(s2[i] - b'a') as usize] += 1;
-            if seen_s1 == seen_s2 {
-                return Self::is_scramble_(&s1[..=i], &s2[..=i])
-                    && Self::is_scramble_(&s1[i + 1..], &s2[i + 1..]);
+        for length in 2..=n {
+            for i in 0..=(n - length) {
+                for j in 0..=(n - length) {
+                    for new_length in 1..length {
+                        let dp1 = dp[new_length][i].clone();
+                        let dp2 = dp[length - new_length][i + new_length].clone();
+                        dp[length][i][j] |= dp1[j] && dp2[j + new_length];
+                        dp[length][i][j] |= dp1[j + length - new_length] && dp2[j];
+                    }
+                }
             }
         }
 
-        // We only get here if we can't find the split which only happens if the split is not possible
-        false
+        dp[n][0][0]
     }
 }
 
@@ -59,6 +56,7 @@ mod tests {
     #[case("abcde", "caebd", false)]
     #[case("a", "a", true)]
     #[case("abcde", "cabed", true)]
+    #[case("abcdbdacbdac", "bdacabcdbdac", true)]
     fn case(#[case] s1: String, #[case] s2: String, #[case] expected: bool) {
         let actual = Solution::is_scramble(s1, s2);
         assert_eq!(actual, expected);
