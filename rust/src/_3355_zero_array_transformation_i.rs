@@ -11,16 +11,12 @@ impl Solution {
         // Stores the endpoints for ranges we are currently in
         let mut heap_query_ends = BinaryHeap::new();
 
-        // Stores the number or range we are in meaning number of values we can decrement
-        let mut decrement_range = 0;
-
         // Tracks the next query to begin
         let mut next_query_index = 0;
 
         for (i, num) in nums.into_iter().enumerate() {
             // Start any applicable ranges
             while next_query_index < queries.len() && queries[next_query_index][0] as usize <= i {
-                decrement_range += 1;
                 heap_query_ends.push(Reverse(queries[next_query_index][1] as usize));
                 next_query_index += 1;
             }
@@ -31,12 +27,11 @@ impl Solution {
                     // Not ready to be removed yet
                     break;
                 }
-                decrement_range -= 1;
                 heap_query_ends.pop();
             }
 
             // Confirm this number is able to be decremented to 0
-            if num > decrement_range {
+            if num > heap_query_ends.len() as i32 {
                 // Not possible to decrement this value to 0
                 return false;
             }
