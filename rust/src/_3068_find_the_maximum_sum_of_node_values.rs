@@ -7,27 +7,21 @@ impl Solution {
     /// nodes
     pub fn maximum_value_sum(nums: Vec<i32>, k: i32, _edges: Vec<Vec<i32>>) -> i64 {
         let mut result = 0;
-        let mut max_unchanged = i32::MIN;
-        let mut min_changed = i32::MAX;
+        let mut min_delta = (nums[0] ^ k) - nums[0];
         let mut is_even_changed = true;
         for num in nums {
-            if num ^ k > num {
-                result += (num ^ k) as i64;
-                min_changed = min_changed.min(num);
+            result += num as i64;
+            let delta = (num ^ k) - num;
+            if delta > 0 {
+                result += delta as i64;
                 is_even_changed = !is_even_changed;
-            } else {
-                result += num as i64;
-                max_unchanged = max_unchanged.max(num);
+            }
+            if delta.abs() < min_delta.abs() {
+                min_delta = delta;
             }
         }
         if !is_even_changed {
-            let delta_changed = (min_changed - (min_changed ^ k)).abs();
-            let delta_unchanged = (max_unchanged - (max_unchanged ^ k)).abs();
-            if delta_changed < delta_unchanged {
-                result -= delta_changed as i64;
-            } else {
-                result -= delta_unchanged as i64;
-            }
+            result += min_delta as i64;
         }
         result
     }
@@ -47,6 +41,7 @@ mod tests {
     #[case(vec![1,2,1], 3, vec![vec![0,1],vec![0,2]], 6)]
     #[case(vec![2,3], 7, vec![vec![0,1]], 9)]
     #[case(vec![7,7,7,7,7,7], 3, vec![vec![0,1],vec![0,2],vec![0,3],vec![0,4],vec![0,5]], 42)]
+    #[case(vec![24,78,1,97,44], 6, vec![], 260)] //edges not copied
     fn case(
         #[case] nums: Vec<i32>,
         #[case] k: i32,
