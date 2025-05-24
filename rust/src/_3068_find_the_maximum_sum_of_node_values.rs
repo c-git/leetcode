@@ -2,37 +2,28 @@
 //! 3068. Find the Maximum Sum of Node Values
 
 impl Solution {
-    /// Translated from editorial
+    /// Based on editorial
     pub fn maximum_value_sum(nums: Vec<i32>, k: i32, _edges: Vec<Vec<i32>>) -> i64 {
-        let mut sum_val = 0i64;
-        let mut count = 0;
-        let mut positive_minimum = i32::MAX;
-        let mut negative_maximum = i32::MIN;
-
-        for node_value in nums {
-            let operated_node_value = node_value ^ k;
-            sum_val += node_value as i64;
-            let net_change = operated_node_value - node_value;
-
-            if net_change > 0 {
-                positive_minimum = positive_minimum.min(net_change);
-                sum_val += net_change as i64;
-                count += 1;
-            } else {
-                negative_maximum = negative_maximum.max(net_change);
+        let mut result = 0;
+        let mut min_delta = (nums[0] ^ k) - nums[0];
+        let mut is_even_changed = true;
+        for num in nums {
+            result += num as i64;
+            let delta = (num ^ k) - num;
+            if delta > 0 {
+                result += delta as i64;
+                is_even_changed = !is_even_changed;
+            }
+            match delta.abs().cmp(&min_delta.abs()) {
+                std::cmp::Ordering::Less => min_delta = delta,
+                std::cmp::Ordering::Equal => min_delta = min_delta.min(delta),
+                std::cmp::Ordering::Greater => {}
             }
         }
-
-        // If the number of positive netChange values is even, return the sum.
-        if count % 2 == 0 {
-            sum_val
-        } else {
-            // Otherwise return the maximum of both discussed cases.
-            std::cmp::max(
-                sum_val - positive_minimum as i64,
-                sum_val + negative_maximum as i64,
-            )
+        if !is_even_changed {
+            result += min_delta as i64;
         }
+        result
     }
 }
 
