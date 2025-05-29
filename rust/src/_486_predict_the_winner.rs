@@ -3,7 +3,8 @@
 
 impl Solution {
     pub fn predict_the_winner(nums: Vec<i32>) -> bool {
-        Self::predict_the_winner_(&nums[..], true, 0, 0)
+        let sum: i32 = nums.iter().sum();
+        Self::predict_the_winner_(&nums[..], true, 0, 0, sum)
     }
 
     pub fn predict_the_winner_(
@@ -11,9 +12,13 @@ impl Solution {
         is_p1_turn: bool,
         p1_score: i32,
         p2_score: i32,
+        sum_left: i32,
     ) -> bool {
         if nums.is_empty() {
             return p1_score >= p2_score;
+        }
+        if p1_score > sum_left + p2_score {
+            return true;
         }
         if is_p1_turn {
             let front = {
@@ -23,6 +28,7 @@ impl Solution {
                     !is_p1_turn,
                     p1_score + front,
                     p2_score,
+                    sum_left - front,
                 )
             };
             let back = {
@@ -32,6 +38,7 @@ impl Solution {
                     !is_p1_turn,
                     p1_score + back,
                     p2_score,
+                    sum_left - back,
                 )
             };
             front || back
@@ -43,6 +50,7 @@ impl Solution {
                     !is_p1_turn,
                     p1_score,
                     p2_score + front,
+                    sum_left - front,
                 )
             };
             let back = {
@@ -52,6 +60,7 @@ impl Solution {
                     !is_p1_turn,
                     p1_score,
                     p2_score + back,
+                    sum_left - back,
                 )
             };
             front && back
