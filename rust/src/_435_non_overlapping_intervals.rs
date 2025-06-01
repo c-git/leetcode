@@ -11,7 +11,7 @@ impl Solution {
         dp[0] = 0; // We can always take the first one
 
         for (curr_idx, curr_interval) in intervals.iter().enumerate() {
-            for (prev_idx, (take_cost, prev_interval)) in intervals
+            for (take_cost, (prev_idx, prev_interval)) in intervals
                 .iter()
                 .enumerate()
                 .take(curr_idx)
@@ -54,6 +54,7 @@ mod tests {
     #[case(vec![vec![1,2],vec![2,3],vec![3,4],vec![1,3]], 1)]
     #[case(vec![vec![1,2],vec![1,2],vec![1,2]], 2)]
     #[case(vec![vec![1,2],vec![2,3]], 0)]
+    #[case(vec![vec![0,2],vec![1,3],vec![2,4],vec![3,5],vec![4,6]], 2)]
     fn case(#[case] intervals: Vec<Vec<i32>>, #[case] expected: i32) {
         let actual = Solution::erase_overlap_intervals(intervals);
         assert_eq!(actual, expected);
