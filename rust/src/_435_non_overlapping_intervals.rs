@@ -2,41 +2,21 @@
 //! 435. Non-overlapping Intervals
 
 impl Solution {
+    /// Solution based on https://www.youtube.com/watch?v=2LUQ6tBdGxo
     pub fn erase_overlap_intervals(mut intervals: Vec<Vec<i32>>) -> i32 {
-        intervals.sort_unstable();
+        let mut result = 0;
+        intervals.sort_unstable_by_key(|interval| interval[1]);
 
-        // Each position stores the minimum number of intervals that must be removed to
-        // include that element considering only the elements before it
-        let mut dp = vec![usize::MAX; intervals.len()];
-        dp[0] = 0; // We can always take the first one
-
-        for (curr_idx, curr_interval) in intervals.iter().enumerate() {
-            for (take_cost, (prev_idx, prev_interval)) in intervals
-                .iter()
-                .enumerate()
-                .take(curr_idx)
-                .rev()
-                .enumerate()
-            {
-                let new_cost = if prev_interval[1] <= curr_interval[0] {
-                    // Extendable so add the cost to extend using this index
-                    dp[prev_idx] + take_cost
-                } else {
-                    // Skip all previous if we only consider this value as we cannot extend
-                    curr_idx
-                };
-                dp[curr_idx] = dp[curr_idx].min(new_cost);
+        let mut last_end_time = intervals[0][1];
+        for interval in intervals.into_iter().skip(1) {
+            if interval[0] < last_end_time {
+                // Overlapping so we need to drop this one
+                result += 1;
+            } else {
+                last_end_time = interval[1];
             }
         }
-
-        // Answer is to take the lowest number from the right with a cost of +1 for each
-        // element we go left as those to the right would have to be removed
-        dp.into_iter()
-            .rev()
-            .enumerate()
-            .fold(usize::MAX, |best: usize, (extra_cost, pos_cost)| {
-                best.min(extra_cost + pos_cost)
-            }) as i32
+        result
     }
 }
 
