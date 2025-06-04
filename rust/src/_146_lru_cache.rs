@@ -82,12 +82,15 @@ impl LRUCache {
         } else if self.next_index.0 >= self.linked_list_nodes.capacity() {
             if self.linked_list_nodes.capacity() == 1 {
                 // Only takes exactly one so just update value
+                self.map.remove(&self.linked_list_nodes[0].key);
+                self.map.insert(key, NodeIndex(0));
                 self.linked_list_nodes[0].val = value;
+                self.linked_list_nodes[0].key = key;
             } else {
                 // Full, remove tail and put new value before head
                 let old_tail = self.tail.unwrap();
                 self.map.remove(&self.linked_list_nodes[old_tail.0].key);
-                let prev = dbg!(self.linked_list_nodes[dbg!(old_tail).0]).prev.unwrap();
+                let prev = self.linked_list_nodes[old_tail.0].prev.unwrap();
                 self.linked_list_nodes[prev.0].next = None;
                 self.tail = Some(prev);
                 self.linked_list_nodes[old_tail.0].key = key;
@@ -142,6 +145,16 @@ mod tests {
 
     #[test]
     fn case2() {
+        let mut lru_cache = LRUCache::new(1);
+        lru_cache.put(2, 1);
+        assert_eq!(lru_cache.get(2), 1);
+        lru_cache.put(3, 2);
+        assert_eq!(lru_cache.get(2), -1);
+        assert_eq!(lru_cache.get(3), 2);
+    }
+
+    #[test]
+    fn case3() {
         let mut obj = LRUCache::new(105);
         obj.put(33, 219);
         obj.get(39);
