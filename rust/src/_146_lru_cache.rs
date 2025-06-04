@@ -1,118 +1,27 @@
-// Patterned fix for weak links on https://github.com/timClicks/live-streams/blob/main/doubly_linked_list/src/weak_ref.rs
+//! Solution for https://leetcode.com/problems/lru-cache
+//! 146. LRU Cache
 
 use std::collections::HashMap;
-use std::rc::Weak;
-use std::{cell::RefCell, rc::Rc};
 
-type WrappedNode = Rc<RefCell<Node>>;
-type LinkFwd = Option<WrappedNode>; // Used only for forward links
-type LinkBack = Option<Weak<RefCell<Node>>>;
+#[derive(Debug, Default, Clone, Copy, PartialEq, Eq)]
+struct NodeIndex(usize);
 
+#[derive(Debug, Default, Clone, Copy)]
 struct Node {
-    key: i32, // Needs to store key to ensure they are unique
-    value: i32,
-    prev: LinkBack,
-    next: LinkFwd,
+    key: i32,
+    val: i32,
+    prev: Option<NodeIndex>,
+    next: Option<NodeIndex>,
 }
 
-impl Node {
-    fn new(key: i32, value: i32) -> Self {
-        Self {
-            key,
-            value,
-            prev: Default::default(),
-            next: Default::default(),
-        }
-    }
-
-    fn new_wrapped(key: i32, value: i32) -> WrappedNode {
-        Rc::new(RefCell::new(Self::new(key, value)))
-    }
-
-    fn prev_clone(&self) -> LinkBack {
-        self.prev
-            .as_ref()
-            .map(|x| Rc::downgrade(&x.upgrade().expect("Invalid link to node in a Some")))
-    }
-    fn next_clone(&self) -> LinkFwd {
-        self.next.as_ref().map(Rc::clone)
-    }
-}
-
-#[derive(Default)]
-struct LinkedList {
-    head: LinkFwd,
-    tail: LinkBack,
-}
-
-impl LinkedList {
-    fn insert(&mut self, node: WrappedNode) {
-        // Update head prev to new node
-        if let Some(head) = &self.head {
-            head.borrow_mut().prev = Some(Rc::downgrade(&node));
-        }
-
-        // Set new node next to current head
-        node.borrow_mut().next = self.head.as_ref().map(Rc::clone);
-
-        // Update head to new node
-        self.head = Some(Rc::clone(&node));
-
-        // If tail not set then this new node is the tail
-        if self.tail.is_none() {
-            self.tail = Some(Rc::downgrade(&node));
-        }
-
-        node.borrow_mut().prev = None; // In case this is a node being reused (this is the new head can't have prev)
-    }
-
-    fn remove(&mut self, node: WrappedNode) {
-        if let Some(head) = &self.head {
-            if head.borrow().key == node.borrow().key {
-                self.head = node.borrow().next.as_ref().map(Rc::clone);
-            }
-        }
-
-        if let Some(tail) = &self.tail {
-            if tail
-                .upgrade()
-                .expect("Tail is Some but not pointing to a valid node")
-                .borrow()
-                .key
-                == node.borrow().key
-            {
-                self.tail = node.borrow().prev_clone();
-            }
-        }
-
-        if let Some(prev_node) = &node.borrow().prev {
-            prev_node
-                .upgrade()
-                .expect("Prev is some but not pointing to a valid node")
-                .borrow_mut()
-                .next = node.borrow().next_clone();
-        }
-
-        if let Some(next_node) = &node.borrow().next {
-            next_node.borrow_mut().prev = node.borrow().prev_clone();
-        }
-    }
-
-    fn get_last(&self) -> WrappedNode {
-        debug_assert!(self.tail.is_some(), "get_last requires a last to exist");
-        self.tail
-            .as_ref()
-            .unwrap()
-            .upgrade()
-            .expect("Tail is some but doesn't point to a valid node")
-    }
-}
-
+#[derive(Debug, Default)]
 struct LRUCache {
-    capacity: usize,
-    size: usize, // Current number of items in the Cache
-    items_list: LinkedList,
-    items_map: HashMap<i32, WrappedNode>,
+    next_index: NodeIndex,
+    head: Option<NodeIndex>,
+    tail: Option<NodeIndex>,
+    /// Nodes refer to each other by index
+    linked_list_nodes: Vec<Node>,
+    map: HashMap<i32, NodeIndex>,
 }
 
 /**
@@ -120,91 +29,98 @@ struct LRUCache {
  * If you need a mutable reference, change it to `&mut self` instead.
  */
 impl LRUCache {
-    pub fn new(capacity: i32) -> Self {
-        // Constraints ensure that capacity is between 1 and 3000
-        debug_assert!(
-            capacity > 0,
-            "Assumptions made in insert do not hold if capacity is 0"
-        );
-        let capacity = capacity as usize;
+    fn new(capacity: i32) -> Self {
         Self {
-            capacity,
-            size: 0,
-            items_list: Default::default(),
-            items_map: Default::default(),
+            linked_list_nodes: Vec::with_capacity(
+                capacity.try_into().expect("expected values in 1..3000"),
+            ),
+            ..Default::default()
         }
     }
 
-    /// Removes the node from the cache if it exists and returns it
-    /// The item will no longer be in the hashmap nor the linked list
-    fn extract_node(&mut self, key: i32) -> Option<WrappedNode> {
-        let result = self.items_map.remove(&key)?;
+    fn get(&mut self, key: i32) -> i32 {
+        if let Some(target_index) = self.map.get(&key).copied() {
+            let node = self.linked_list_nodes[target_index.0];
+            let result = node.val; // Save value to return
 
-        self.items_list.remove(Rc::clone(&result));
-
-        Some(result)
-    }
-
-    fn get_helper(&mut self, key: i32) -> Option<i32> {
-        let node = self.extract_node(key)?;
-
-        // Get value to be returned
-        let result = node.borrow().value;
-
-        // Insert the item back into the cache to update use
-        self.insert_node(node);
-
-        Some(result)
-    }
-
-    pub fn get(&mut self, key: i32) -> i32 {
-        self.get_helper(key).unwrap_or(-1)
-    }
-
-    pub fn put(&mut self, key: i32, value: i32) {
-        // Create node
-        let node: WrappedNode = Node::new_wrapped(key, value);
-
-        // Remove any node that already exists with the key
-        let old_node = self.extract_node(key);
-        let is_replacing_value = old_node.is_some();
-
-        // Insert Node
-        self.insert_node(node);
-
-        // Increase size or kick out an element if not replacing a value
-        if !is_replacing_value {
-            let capacity = self.capacity;
-            match self.size {
-                val if val < capacity => {
-                    self.size += 1;
-                }
-                val if val == capacity => {
-                    self.remove_lru();
-                }
-                _ => unreachable!("Size should never exceed capacity"),
+            if Some(target_index) == self.head {
+                // Already head just return value
+                return result;
             }
+
+            if Some(target_index) == self.tail {
+                self.tail = node.prev;
+            }
+
+            if let Some(prev) = node.prev {
+                // Update previous
+                self.linked_list_nodes[prev.0].next = node.next;
+            } else {
+                unreachable!("if not head must have a previous");
+            }
+
+            if let Some(next) = node.next {
+                self.linked_list_nodes[next.0].prev = node.prev;
+            }
+
+            self.linked_list_nodes[self.head.unwrap().0].prev = Some(target_index);
+            self.linked_list_nodes[target_index.0].prev = None;
+            self.linked_list_nodes[target_index.0].next = self.head;
+            self.head = Some(target_index);
+
+            result
+        } else {
+            // Key not found
+            -1
         }
     }
 
-    fn insert_node(&mut self, node: WrappedNode) {
-        self.items_map.insert(node.borrow().key, Rc::clone(&node));
-        self.items_list.insert(node);
-    }
-
-    fn remove_lru(&mut self) {
-        debug_assert!(self.size > 0);
-        let last_node = self.items_list.get_last();
-        self.extract_node(last_node.borrow().key);
+    fn put(&mut self, key: i32, value: i32) {
+        if self.get(key) != -1 {
+            // Already in list and just moved to front so just set value
+            self.linked_list_nodes[self.head.unwrap().0].val = value;
+        } else if self.next_index.0 >= self.linked_list_nodes.capacity() {
+            if self.linked_list_nodes.capacity() == 1 {
+                // Only takes exactly one so just update value
+                self.linked_list_nodes[0].val = value;
+            } else {
+                // Full, remove tail and put new value before head
+                let old_tail = self.tail.unwrap();
+                self.map.remove(&self.linked_list_nodes[old_tail.0].key);
+                let prev = dbg!(self.linked_list_nodes[dbg!(old_tail).0]).prev.unwrap();
+                self.linked_list_nodes[prev.0].next = None;
+                self.tail = Some(prev);
+                self.linked_list_nodes[old_tail.0].key = key;
+                self.linked_list_nodes[old_tail.0].val = value;
+                self.linked_list_nodes[old_tail.0].prev = None;
+                self.linked_list_nodes[old_tail.0].next = self.head;
+                self.linked_list_nodes[self.head.unwrap().0].prev = Some(old_tail);
+                self.head = Some(old_tail);
+                self.map.insert(key, old_tail);
+            }
+        } else {
+            let next_index = NodeIndex(self.linked_list_nodes.len());
+            self.linked_list_nodes.push(Node {
+                key,
+                val: value,
+                prev: None,
+                next: self.head,
+            });
+            if let Some(head) = self.head {
+                self.linked_list_nodes[head.0].prev = Some(next_index);
+            }
+            self.head = Some(next_index);
+            if self.tail.is_none() {
+                // First node inserted
+                self.tail = self.head;
+            }
+            self.map.insert(key, next_index);
+            self.next_index = NodeIndex(next_index.0 + 1);
+        }
     }
 }
 
-/**
- * Your LRUCache object will be instantiated and called as such:
- * let obj = LRUCache::new(capacity);
- * let ret_1: i32 = obj.get(key);
- * obj.put(key, value);
- */
+// << ---------------- Code below here is only for local use ---------------- >>
 
 #[cfg(test)]
 mod tests {
