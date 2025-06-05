@@ -2,18 +2,21 @@
 //! 45. Jump Game II
 
 impl Solution {
-    pub fn jump(mut nums: Vec<i32>) -> i32 {
-        // Using i32::MAX as impossible value because max array length is less than i32::MAX
-        *nums.last_mut().unwrap() = 0;
-        for i in (0..nums.len() - 1).rev() {
-            let step_range = nums[i] as usize;
-            let mut best = i32::MAX - 1;
-            for &dst in nums.iter().skip(i + 1).take(step_range) {
-                best = best.min(dst);
-            }
-            nums[i] = best + 1;
+    pub fn jump(nums: Vec<i32>) -> i32 {
+        let n = nums.len();
+        let mut dp = vec![0; n];
+
+        for (i, range) in nums.into_iter().enumerate().rev().skip(1) {
+            dp[i] = dp
+                .iter()
+                .skip(i + 1)
+                .take(range as usize)
+                .min()
+                .copied()
+                .unwrap_or(i32::MAX - 1)
+                + 1;
         }
-        *nums.first().unwrap()
+        dp[0]
     }
 }
 
