@@ -35,11 +35,10 @@ impl Solution {
             if neighbours.is_empty() {
                 continue;
             }
-            let node_root = uf.find(node);
             let other_root = uf.find(neighbours[0] as usize);
             for neighbour in neighbours {
                 uf.merge(other_root, neighbour as usize);
-                if node_root == uf.find(other_root) {
+                if uf.find(node) == uf.find(other_root) {
                     return false;
                 }
             }
@@ -64,6 +63,7 @@ mod tests {
     #[case(vec![vec![1], vec![0, 3], vec![3], vec![1, 2]], true)]
     #[case(vec![vec![3], vec![2, 4], vec![1], vec![0, 4], vec![1, 3]], true)]
     #[case(vec![vec![3], vec![2, 4], vec![1], vec![0, 4], vec![1, 3]], true)]
+    #[case(vec![vec![3],vec![2,3],vec![1,3],vec![0,2,1]], false)]
     fn case(#[case] graph: Vec<Vec<i32>>, #[case] expected: bool) {
         let actual = Solution::is_bipartite(graph);
         assert_eq!(actual, expected);
