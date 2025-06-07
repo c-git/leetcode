@@ -1,55 +1,45 @@
-use std::mem::swap;
+//! Solution for https://leetcode.com/problems/is-graph-bipartite
+//! 785. Is Graph Bipartite?
 
 struct UnionFind {
-    components: Vec<usize>,
-    rank: Vec<usize>,
+    nodes: Vec<usize>,
 }
 
 impl UnionFind {
-    pub fn new(n: usize) -> Self {
+    fn new(size: usize) -> Self {
         Self {
-            components: (0..n).collect(),
-            rank: vec![1; n],
+            nodes: (0..size).collect(),
         }
     }
 
-    pub fn find(&mut self, x: usize) -> usize {
-        if x != self.components[x] {
-            self.components[x] = self.find(self.components[x]);
-        }
-        self.components[x]
-    }
-
-    pub fn union(&mut self, x: usize, y: usize) {
-        let mut root_x = self.find(x);
-        let mut root_y = self.find(y);
-        if root_x != root_y {
-            if self.rank[root_x] > self.rank[root_y] {
-                swap(&mut root_x, &mut root_y)
-            }
-            self.rank[root_y] += self.rank[root_x];
-            self.components[root_x] = root_y;
+    fn find(&mut self, x: usize) -> usize {
+        if self.nodes[x] == x {
+            x
+        } else {
+            let root = self.find(self.nodes[x]);
+            self.nodes[x] = root;
+            root
         }
     }
-
-    pub fn is_same_set(&mut self, a: usize, b: usize) -> bool {
-        self.find(a) == self.find(b)
+    fn merge(&mut self, x: usize, y: usize) {
+        let x_root = self.find(x);
+        let y_root = self.find(y);
+        self.nodes[y_root] = x_root;
     }
 }
 
 impl Solution {
     pub fn is_bipartite(graph: Vec<Vec<i32>>) -> bool {
         let mut uf = UnionFind::new(graph.len());
-
-        for (node, edges) in graph.iter().enumerate() {
-            // Ensure the node is not in the same set as any of it's edges and ensure it's edges are all in the same set
-            let mut iter = edges.iter();
-            if let Some(first_edge) = iter.next() {
-                let edge_set = uf.find(*first_edge as usize);
-                for edge in iter {
-                    uf.union(edge_set, *edge as usize);
-                }
-                if uf.is_same_set(node, edge_set) {
+        for (node, neighbours) in graph.into_iter().enumerate() {
+            if neighbours.is_empty() {
+                continue;
+            }
+            let node_root = uf.find(node);
+            let other_root = uf.find(neighbours[0] as usize);
+            for neighbour in neighbours {
+                uf.merge(other_root, neighbour as usize);
+                if node_root == uf.find(other_root) {
                     return false;
                 }
             }
@@ -58,40 +48,24 @@ impl Solution {
     }
 }
 
-struct Solution;
+// << ---------------- Code below here is only for local use ---------------- >>
 
-#[test]
-fn case1() {
-    let graph = vec![vec![1, 2, 3], vec![0, 2], vec![0, 1, 3], vec![0, 2]];
-    let expected = false;
+pub struct Solution;
 
-    let actual = Solution::is_bipartite(graph);
-    assert_eq!(actual, expected);
-}
+#[cfg(test)]
+mod tests {
+    use super::*;
 
-#[test]
-fn case2() {
-    let graph = vec![vec![1, 3], vec![0, 2], vec![1, 3], vec![0, 2]];
-    let expected = true;
+    use rstest::rstest;
 
-    let actual = Solution::is_bipartite(graph);
-    assert_eq!(actual, expected);
-}
-
-#[test]
-fn case3() {
-    let graph = vec![vec![1], vec![0, 3], vec![3], vec![1, 2]];
-    let expected = true;
-
-    let actual = Solution::is_bipartite(graph);
-    assert_eq!(actual, expected);
-}
-
-#[test]
-fn case4() {
-    let graph = vec![vec![3], vec![2, 4], vec![1], vec![0, 4], vec![1, 3]];
-    let expected = true;
-
-    let actual = Solution::is_bipartite(graph);
-    assert_eq!(actual, expected);
+    #[rstest]
+    #[case(vec![vec![1,2,3],vec![0,2],vec![0,1,3],vec![0,2]], false)]
+    #[case(vec![vec![1,3],vec![0,2],vec![1,3],vec![0,2]], true)]
+    #[case(vec![vec![1], vec![0, 3], vec![3], vec![1, 2]], true)]
+    #[case(vec![vec![3], vec![2, 4], vec![1], vec![0, 4], vec![1, 3]], true)]
+    #[case(vec![vec![3], vec![2, 4], vec![1], vec![0, 4], vec![1, 3]], true)]
+    fn case(#[case] graph: Vec<Vec<i32>>, #[case] expected: bool) {
+        let actual = Solution::is_bipartite(graph);
+        assert_eq!(actual, expected);
+    }
 }
