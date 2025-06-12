@@ -1,49 +1,44 @@
 //! Solution for https://leetcode.com/problems/course-schedule-ii
 //! 210. Course Schedule II
 
-use std::collections::HashMap;
-
 impl Solution {
     pub fn find_order(num_courses: i32, prerequisites: Vec<Vec<i32>>) -> Vec<i32> {
         let mut result = vec![];
         let mut block_count = vec![0u16; num_courses as usize];
-        let mut prerequisites_left = prerequisites.into_iter().fold(
-            HashMap::<i32, Vec<i32>>::new(),
-            |mut map, requirement| {
-                let blocked = requirement[0];
-                let pre_req = requirement[1];
-                map.entry(pre_req).or_default().push(blocked);
-                block_count[blocked as usize] += 1;
-                map
-            },
-        );
+        let mut prerequisites_left = vec![Vec::new(); num_courses as usize];
+        for requirement in prerequisites {
+            let blocked = requirement[0] as usize;
+            let pre_req = requirement[1] as usize;
+            prerequisites_left[pre_req].push(blocked);
+            block_count[blocked] += 1;
+        }
 
-        let mut unblocked: Vec<i32> = block_count
+        let mut unblocked: Vec<usize> = block_count
             .iter()
             .enumerate()
-            .filter_map(|(course, &count)| {
-                if count == 0 {
-                    Some(course as i32)
-                } else {
-                    None
-                }
-            })
+            .filter_map(
+                |(course, &count)| {
+                    if count == 0 {
+                        Some(course)
+                    } else {
+                        None
+                    }
+                },
+            )
             .collect();
 
         while let Some(course) = unblocked.pop() {
-            result.push(course);
-            if let Some(downstream_blocked) = prerequisites_left.remove(&course) {
-                for blocked_course in downstream_blocked {
-                    let count = &mut block_count[blocked_course as usize];
-                    *count -= 1;
-                    if *count == 0 {
-                        unblocked.push(blocked_course);
-                    }
+            result.push(course as i32);
+            for blocked_course in prerequisites_left[course].iter().copied() {
+                let count = &mut block_count[blocked_course];
+                *count -= 1;
+                if *count == 0 {
+                    unblocked.push(blocked_course);
                 }
             }
         }
 
-        if prerequisites_left.is_empty() {
+        if result.len() == num_courses as usize {
             result
         } else {
             Vec::new()
