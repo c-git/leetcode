@@ -10,9 +10,13 @@ impl Solution {
 
         // Create mapping of words to other words with one diff
         for (i, word1) in word_list.iter().enumerate() {
+            graph.insert(word1, Vec::new());
             for word2 in word_list.iter().skip(i + 1) {
                 if is_one_diff(word1, word2) {
-                    graph.entry(word1).or_default().push(word2);
+                    graph
+                        .get_mut(word1.as_str())
+                        .expect("just added above")
+                        .push(word2);
                     graph.entry(word2).or_default().push(word1);
                 }
             }
@@ -81,6 +85,7 @@ mod tests {
     #[rstest]
     #[case("hit", "cog", vec!["hot".into(),"dot".into(),"dog".into(),"lot".into(),"log".into(),"cog".into()], 5)]
     #[case("hit", "cog", vec!["hot".into(),"dot".into(),"dog".into(),"lot".into(),"log".into()], 0)]
+    #[case("hog", "cog", vec!["cog".into()], 2)]
     fn case(
         #[case] begin_word: String,
         #[case] end_word: String,
