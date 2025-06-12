@@ -10,7 +10,7 @@ impl Solution {
 
         // Create mapping of words to other words with one diff
         for (i, word1) in word_list.iter().enumerate() {
-            graph.insert(word1, Vec::new());
+            graph.entry(word1).or_default();
             for word2 in word_list.iter().skip(i + 1) {
                 if is_one_diff(word1, word2) {
                     graph
@@ -86,6 +86,7 @@ mod tests {
     #[case("hit", "cog", vec!["hot".into(),"dot".into(),"dog".into(),"lot".into(),"log".into(),"cog".into()], 5)]
     #[case("hit", "cog", vec!["hot".into(),"dot".into(),"dog".into(),"lot".into(),"log".into()], 0)]
     #[case("hog", "cog", vec!["cog".into()], 2)]
+    #[case("hot", "dog", vec!["hot".into(),"dog".into(),"dot".into()], 3)]
     fn case(
         #[case] begin_word: String,
         #[case] end_word: String,
