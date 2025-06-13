@@ -4,24 +4,25 @@
 impl Solution {
     /// Based on https://www.youtube.com/watch?v=5eIK3zUdYmE
     pub fn find_cheapest_price(n: i32, flights: Vec<Vec<i32>>, src: i32, dst: i32, k: i32) -> i32 {
-        let mut costs = vec![None; n as usize];
-        costs[src as usize] = Some(0);
-        let mut temp_costs = costs.clone();
+        let mut distances = vec![i32::MAX; n as usize];
+        distances[src as usize] = 0;
+        let mut temp_distances = distances.clone();
         for _ in 0..=k {
             for flight in flights.iter() {
-                let &[from, to, price] = flight.as_slice() else {
-                    unreachable!("guaranteed to be 3 long")
-                };
-                if let Some(from_cost) = costs[from as usize] {
-                    let new_possibility = from_cost + price;
-                    temp_costs[to as usize] = temp_costs[to as usize]
-                        .map(|x| x.min(new_possibility))
-                        .or(Some(new_possibility));
-                }
+                let from = flight[0] as usize;
+                let to = flight[1] as usize;
+                let cost = flight[2];
+                temp_distances[to] = temp_distances[to].min(distances[from].saturating_add(cost));
             }
-            costs = temp_costs.clone();
+            distances.clone_from(&temp_distances);
         }
-        costs[dst as usize].unwrap_or(-1)
+
+        if distances[dst as usize] < i32::MAX {
+            distances[dst as usize]
+        } else {
+            // Not found
+            -1
+        }
     }
 }
 
