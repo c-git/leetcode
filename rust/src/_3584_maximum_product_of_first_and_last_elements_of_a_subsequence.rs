@@ -3,14 +3,55 @@
 
 impl Solution {
     pub fn maximum_product(nums: Vec<i32>, m: i32) -> i64 {
+        let mut result = i64::MIN;
         let n = nums.len();
         let m = m as usize;
-        let nums: Vec<i64> = nums.into_iter().map(|x| x as i64).collect();
-        let mut result = i64::MIN;
-        for (first_idx, first) in nums.iter().enumerate().take(n - m + 1) {
-            for last in nums.iter().skip(first_idx + m - 1) {
-                result = result.max(first * last);
-            }
+        let mut temp = i64::MAX;
+        let min_prefix: Vec<i64> = nums
+            .iter()
+            .map(|x| {
+                temp = temp.min(*x as i64);
+                temp
+            })
+            .collect();
+        temp = i64::MIN;
+        let max_prefix: Vec<i64> = nums
+            .iter()
+            .map(|x| {
+                temp = temp.max(*x as i64);
+                temp
+            })
+            .collect();
+        let mut temp = i64::MAX;
+        let min_suffix: Vec<i64> = nums
+            .iter()
+            .rev()
+            .map(|x| {
+                temp = temp.min(*x as i64);
+                temp
+            })
+            .collect::<Vec<_>>()
+            .into_iter()
+            .rev()
+            .collect();
+        let mut temp = i64::MIN;
+        let max_suffix: Vec<i64> = nums
+            .iter()
+            .rev()
+            .map(|x| {
+                temp = temp.max(*x as i64);
+                temp
+            })
+            .collect::<Vec<_>>()
+            .into_iter()
+            .rev()
+            .collect();
+        for first in 0..n - m + 1 {
+            let last = first + m - 1;
+            result = result.max(min_prefix[first] * min_suffix[last]);
+            result = result.max(min_prefix[first] * max_suffix[last]);
+            result = result.max(max_prefix[first] * min_suffix[last]);
+            result = result.max(max_prefix[first] * max_suffix[last]);
         }
         result
     }
