@@ -22,36 +22,10 @@ impl Solution {
                 temp
             })
             .collect();
-        let mut temp = i64::MAX;
-        let min_suffix: Vec<i64> = nums
-            .iter()
-            .rev()
-            .map(|x| {
-                temp = temp.min(*x as i64);
-                temp
-            })
-            .collect::<Vec<_>>()
-            .into_iter()
-            .rev()
-            .collect();
-        let mut temp = i64::MIN;
-        let max_suffix: Vec<i64> = nums
-            .iter()
-            .rev()
-            .map(|x| {
-                temp = temp.max(*x as i64);
-                temp
-            })
-            .collect::<Vec<_>>()
-            .into_iter()
-            .rev()
-            .collect();
         for first in 0..n - m + 1 {
             let last = first + m - 1;
-            result = result.max(min_prefix[first] * min_suffix[last]);
-            result = result.max(min_prefix[first] * max_suffix[last]);
-            result = result.max(max_prefix[first] * min_suffix[last]);
-            result = result.max(max_prefix[first] * max_suffix[last]);
+            result = result.max(min_prefix[first] * nums[last] as i64);
+            result = result.max(max_prefix[first] * nums[last] as i64);
         }
         result
     }
