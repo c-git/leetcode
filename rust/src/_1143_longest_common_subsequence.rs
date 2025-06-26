@@ -3,89 +3,34 @@
 
 impl Solution {
     pub fn longest_common_subsequence(text1: String, text2: String) -> i32 {
-        // Taken from https://leetcode.com/problems/longest-common-subsequence/solutions/2394254/rust-dp-with-comments/
-
-        // Sort string by longer and shorter to reduce the memory usage
-        let (shorter, longer) = if text1.len() < text2.len() {
-            (text1, text2)
+        let (text1, text2) = if text1.len() <= text2.len() {
+            (text1.as_bytes(), text2.as_bytes())
         } else {
-            (text2, text1)
+            (text2.as_bytes(), text1.as_bytes())
         };
+        // Store longest common subsequence up to each index for a row
+        let mut last_row = vec![0; text1.len()];
+        let mut curr_row = last_row.clone();
 
-        // Input is ASCII => chars are bytes
-        let (longer, shorter) = (longer.as_bytes(), shorter.as_bytes());
-
-        // Initialize previous DP row. All zeros represent taking no characters from text1
-        let mut dp_prev = vec![0; shorter.len()];
-        let mut dp_curr = dp_prev.clone();
-
-        // Iterate in over the text strings, keeping track of the LCS considering the
-        // corresponding prefixes
-        #[allow(clippy::needless_range_loop)]
-        for idx_longer in 0..longer.len() {
-            for idx_shorter in 0..shorter.len() {
-                // Take the best path - either skipping the current character in shorter, or
-                // skipping the current character in longer, or using the characters if they match.
-                let (last_curr_value, last_prev_value) = if idx_shorter == 0 {
-                    (0, 0)
+        for c2 in text2.iter() {
+            curr_row[0] = if &text1[0] == c2 {
+                last_row[0].max(1)
+            } else {
+                last_row[0]
+            };
+            for (idx1, c1) in text1.iter().enumerate().skip(1) {
+                let best_previous = curr_row[idx1 - 1].max(last_row[idx1]);
+                curr_row[idx1] = if c1 == c2 {
+                    best_previous.max(last_row[idx1 - 1] + 1)
                 } else {
-                    (dp_curr[idx_shorter - 1], dp_prev[idx_shorter - 1])
+                    best_previous
                 };
-                dp_curr[idx_shorter] = dp_prev[idx_shorter].max(last_curr_value).max(
-                    last_prev_value + increment_for_match(longer, idx_longer, shorter, idx_shorter),
-                );
-                #[cfg(debug_assertions)]
-                print_debug_info(
-                    idx_shorter,
-                    idx_longer,
-                    &dp_prev,
-                    &dp_curr,
-                    &shorter,
-                    &longer,
-                );
             }
-
-            // Swap the rows to reuse dp_prev, which is now stale
-            #[cfg(debug_assertions)]
-            println!("Swapping arrays now................................\n");
-            std::mem::swap(&mut dp_prev, &mut dp_curr);
+            std::mem::swap(&mut last_row, &mut curr_row);
         }
 
-        *dp_prev.last().unwrap()
+        *last_row.last().unwrap()
     }
-}
-
-#[inline]
-fn increment_for_match(
-    longer: &[u8],
-    idx_longer: usize,
-    shorter: &[u8],
-    idx_shorter: usize,
-) -> i32 {
-    if longer[idx_longer] == shorter[idx_shorter] {
-        1
-    } else {
-        0
-    }
-}
-
-#[cfg(debug_assertions)]
-fn print_debug_info(
-    idx_shorter: usize,
-    idx_longer: usize,
-    dp_prev: &[i32],
-    dp_curr: &[i32],
-    shorter: &&[u8],
-    longer: &&[u8],
-) {
-    println!(
-        "({idx_longer}, {idx_shorter}) - ({}, {})",
-        char::from_u32(longer[idx_longer] as _).unwrap(),
-        char::from_u32(shorter[idx_shorter] as _).unwrap()
-    );
-    println!("prev: {dp_prev:?}");
-    println!("curr: {dp_curr:?}");
-    println!();
 }
 
 // << ---------------- Code below here is only for local use ---------------- >>
@@ -99,13 +44,13 @@ mod tests {
     use rstest::rstest;
 
     #[rstest]
-    // #[case("abcde", "ace", 3)]
-    // #[case("abcde", "cce", 2)]
-    // #[case("abcde", "ce", 2)]
-    // #[case("abc", "abc", 3)]
-    // #[case("abc", "def", 0)]
-    // #[case("abcba", "abcbcba", 5)]
-    // #[case("pmjghexybyrgzczy", "hafcdqbgncrcbihkd", 4)]
+    #[case("abcde", "ace", 3)]
+    #[case("abcde", "cce", 2)]
+    #[case("abcde", "ce", 2)]
+    #[case("abc", "abc", 3)]
+    #[case("abc", "def", 0)]
+    #[case("abcba", "abcbcba", 5)]
+    #[case("pmjghexybyrgzczy", "hafcdqbgncrcbihkd", 4)]
     #[case("jghbrgc", "hcbgcrcbhk", 4)]
     fn case(#[case] text1: String, #[case] text2: String, #[case] expected: i32) {
         let actual = Solution::longest_common_subsequence(text1, text2);
