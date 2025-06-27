@@ -53,7 +53,7 @@ impl Solution {
                     break;
                 };
             }
-            if !is_fail {
+            if !is_fail && node.is_end_of_word {
                 // Reached to end without failing all characters are part of a word
                 return true;
             }
@@ -79,6 +79,7 @@ mod tests {
     #[case("applepenapple", vec!["apple".into(),"pen".into()], true)]
     #[case("catsandog", vec!["cats".into(),"dog".into(),"sand".into(),"and".into(),"cat".into()], false)]
     #[case("applespenapple", vec!["apple".into(),"pen".into(),"apples".into()], true)]
+    #[case("aaaaaaa", vec!["aaaa".into(),"aa".into()], false)]
     fn case(#[case] s: String, #[case] word_dict: Vec<String>, #[case] expected: bool) {
         let actual = Solution::word_break(s, word_dict);
         assert_eq!(actual, expected);
