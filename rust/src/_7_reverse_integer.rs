@@ -4,25 +4,26 @@
 impl Solution {
     pub fn reverse(mut x: i32) -> i32 {
         if x == i32::MIN {
-            // Unable to get absolute value so exit early (Reversed value is too big anyway)
             return 0;
         }
-        let sign = if x < 0 { -1 } else { 1 };
-        let mut result = 0i32;
+
+        let is_negative = x.is_negative();
         x = x.abs();
-        while x != 0 {
-            let last_digit = x % 10;
-            x /= 10;
+        let mut result = 0i32;
+        while x > 0 {
             result = match result.checked_mul(10) {
-                Some(val) => val,
-                None => return 0,
+                Some(next) => next,
+                None => return 0, // Invalid value
             };
-            result = match result.checked_add(last_digit) {
-                Some(val) => val,
-                None => return 0,
-            };
+            result += x % 10; // only top digit can cause overflow but it's a 2 which cannot
+            x /= 10;
         }
-        sign * result
+
+        if is_negative {
+            -result
+        } else {
+            result
+        }
     }
 }
 
