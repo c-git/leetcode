@@ -3,23 +3,21 @@
 
 impl Solution {
     pub fn product_except_self(nums: Vec<i32>) -> Vec<i32> {
-        let mut result = Vec::with_capacity(nums.len());
-
-        // Fill result with prefix products
-        for num in nums.iter().copied() {
-            let next_prod = num * result.last().copied().unwrap_or(1);
-            result.push(next_prod);
+        // Populate result with suffix products
+        let mut result = vec![0; nums.len()];
+        let mut suffix_product = 1;
+        for (i, num) in nums.iter().enumerate().rev() {
+            suffix_product *= num;
+            result[i] = suffix_product;
         }
-
-        // Calculate a running suffix and use that to set correct final values
-        let mut suffix = nums.last().copied().expect("guaranteed at least 2 values");
-        *result.last_mut().unwrap() = result[result.len() - 2];
-        for i in (1..nums.len() - 1).rev() {
-            result[i] = result[i - 1] * suffix;
-            suffix *= nums[i];
+        result[0] = result[1];
+        let mut prefix_product = nums[0];
+        for (i, num) in nums.iter().enumerate().take(nums.len() - 1).skip(1) {
+            result[i] = prefix_product * result[i + 1];
+            prefix_product *= num;
         }
-        result[0] = suffix;
-
+        let n = result.len();
+        result[n - 1] = prefix_product;
         result
     }
 }
