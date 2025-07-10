@@ -8,28 +8,19 @@ impl Solution {
         } else {
             (text2.as_bytes(), text1.as_bytes())
         };
-        // Store longest common subsequence up to each index for a row
-        let mut last_row = vec![0; text1.len()];
-        let mut curr_row = last_row.clone();
 
+        let mut prev_row = vec![0; text1.len()];
+        let mut curr_row = prev_row.clone();
         for c2 in text2.iter() {
-            curr_row[0] = if &text1[0] == c2 {
-                last_row[0].max(1)
-            } else {
-                last_row[0]
-            };
-            for (idx1, c1) in text1.iter().enumerate().skip(1) {
-                let best_previous = curr_row[idx1 - 1].max(last_row[idx1]);
-                curr_row[idx1] = if c1 == c2 {
-                    best_previous.max(last_row[idx1 - 1] + 1)
-                } else {
-                    best_previous
-                };
+            curr_row[0] = if text1[0] == *c2 { 1 } else { prev_row[0] };
+            for (i, c1) in text1.iter().enumerate().skip(1) {
+                curr_row[i] = prev_row[i]
+                    .max(curr_row[i - 1])
+                    .max(prev_row[i - 1] + if c1 == c2 { 1 } else { 0 });
             }
-            std::mem::swap(&mut last_row, &mut curr_row);
+            std::mem::swap(&mut prev_row, &mut curr_row);
         }
-
-        *last_row.last().unwrap()
+        *prev_row.last().unwrap()
     }
 }
 
