@@ -3,101 +3,94 @@
 
 use std::collections::VecDeque;
 
-const EMPTY: i32 = 0;
 const FRESH: i32 = 1;
 const ROTTEN: i32 = 2;
 
 impl Solution {
     pub fn oranges_rotting(mut grid: Vec<Vec<i32>>) -> i32 {
-        let mut result = 0;
-        let mut fresh_count = 0;
-        let mut rotten_queue = VecDeque::new();
+        let mut max_seconds = 0;
+
+        // Collect the starting rotten oranges
+        let mut rotten_list = VecDeque::new();
         for (row_idx, row) in grid.iter().enumerate() {
-            for (col_idx, &cell) in row.iter().enumerate() {
-                match cell {
-                    EMPTY => {}
-                    FRESH => fresh_count += 1,
-                    ROTTEN => rotten_queue.push_back((row_idx, col_idx, 0)),
-                    _ => unreachable!("by problem constraints"),
+            for (col_idx, cell) in row.iter().enumerate() {
+                if cell == &ROTTEN {
+                    rotten_list.push_back((row_idx, col_idx, 0));
                 }
             }
         }
 
-        while let Some((row, col, time)) = rotten_queue.pop_front() {
-            result = result.max(time);
-
-            // Up
+        // Use BFS to change adjacent oranges to rotten
+        while let Some((row, col, seconds)) = rotten_list.pop_front() {
             if row > 0 {
-                rot_cell(
+                check_cell(
                     row - 1,
                     col,
-                    time,
-                    &mut fresh_count,
+                    seconds,
                     &mut grid,
-                    &mut rotten_queue,
+                    &mut rotten_list,
+                    &mut max_seconds,
                 );
             }
-
-            // Down
-            if row < grid.len() - 1 {
-                rot_cell(
-                    row + 1,
-                    col,
-                    time,
-                    &mut fresh_count,
-                    &mut grid,
-                    &mut rotten_queue,
-                );
-            }
-
-            // Left
             if col > 0 {
-                rot_cell(
+                check_cell(
                     row,
                     col - 1,
-                    time,
-                    &mut fresh_count,
+                    seconds,
                     &mut grid,
-                    &mut rotten_queue,
+                    &mut rotten_list,
+                    &mut max_seconds,
                 );
             }
-
-            // Right
+            if row < grid.len() - 1 {
+                check_cell(
+                    row + 1,
+                    col,
+                    seconds,
+                    &mut grid,
+                    &mut rotten_list,
+                    &mut max_seconds,
+                );
+            }
             if col < grid[0].len() - 1 {
-                rot_cell(
+                check_cell(
                     row,
                     col + 1,
-                    time,
-                    &mut fresh_count,
+                    seconds,
                     &mut grid,
-                    &mut rotten_queue,
+                    &mut rotten_list,
+                    &mut max_seconds,
                 );
             }
         }
 
-        if fresh_count == 0 {
-            result
-        } else {
-            -1
+        // Check for any remaining fresh oranges
+        for row in grid.iter() {
+            for cell in row {
+                if cell == &FRESH {
+                    // Found an orange this is still fresh
+                    return -1;
+                }
+            }
         }
+        max_seconds
     }
 }
 
-#[inline]
-fn rot_cell(
+fn check_cell(
     row: usize,
     col: usize,
-    time: i32,
-    fresh_count: &mut u32,
+    seconds: i32,
     grid: &mut [Vec<i32>],
-    rotten_queue: &mut VecDeque<(usize, usize, i32)>,
+    rotten_list: &mut VecDeque<(usize, usize, i32)>,
+    max_seconds: &mut i32,
 ) {
     if grid[row][col] != FRESH {
         return;
     }
     grid[row][col] = ROTTEN;
-    *fresh_count -= 1;
-    rotten_queue.push_back((row, col, time + 1));
+    rotten_list.push_back((row, col, seconds + 1));
+    *max_seconds = (*max_seconds).max(seconds + 1);
 }
 
 // << ---------------- Code below here is only for local use ---------------- >>
