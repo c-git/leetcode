@@ -3,25 +3,27 @@
 
 impl Solution {
     pub fn min_eating_speed(piles: Vec<i32>, h: i32) -> i32 {
-        let mut low = 1;
-        let mut high = *piles.iter().max().unwrap();
+        let low = 1;
+        let high = *piles.iter().max().unwrap();
         if test_eating(&piles, low, h) {
             return low;
         }
         if !test_eating(&piles, high, h) {
             unreachable!("should never have more piles than hours")
         }
-        while low < high {
-            let mid = (high + low) / 2;
-            if test_eating(&piles, mid, h) {
-                high = mid;
-            } else if low == mid {
-                low += 1;
+        let mut base = low;
+        let mut size = high - low;
+        while size > 1 {
+            let half = size / 2;
+            let mid = base + half;
+            base = if !test_eating(&piles, mid, h) {
+                mid
             } else {
-                low = mid;
-            }
+                base
+            };
+            size -= half;
         }
-        high
+        base + 1
     }
 }
 
