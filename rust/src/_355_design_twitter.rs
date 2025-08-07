@@ -1,7 +1,7 @@
 //! Solution for https://leetcode.com/problems/design-twitter
 //! 355. Design Twitter
 
-use std::collections::{BinaryHeap, HashMap, HashSet};
+use std::collections::{BinaryHeap, HashMap, HashSet, VecDeque};
 
 type UserId = i32;
 type TweetID = i32;
@@ -10,7 +10,7 @@ type TimeStamp = u32;
 #[derive(Default)]
 struct Twitter {
     current_time: TimeStamp,
-    tweets: HashMap<UserId, Vec<(TimeStamp, TweetID)>>,
+    tweets: HashMap<UserId, VecDeque<(TimeStamp, TweetID)>>,
     follow_list: HashMap<UserId, HashSet<UserId>>,
 }
 
@@ -26,25 +26,26 @@ impl Twitter {
     }
 
     fn post_tweet(&mut self, user_id: i32, tweet_id: i32) {
-        self.tweets
-            .entry(user_id)
-            .or_default()
-            .push((self.current_time, tweet_id));
+        let list_of_tweets = self.tweets.entry(user_id).or_default();
+        list_of_tweets.push_back((self.current_time, tweet_id));
         self.current_time += 1;
+        if list_of_tweets.len() > Self::MAX_FEED {
+            list_of_tweets.pop_front();
+        }
     }
 
     fn get_news_feed(&self, user_id: i32) -> Vec<i32> {
         let mut result = Vec::with_capacity(Self::MAX_FEED);
         let mut heap = BinaryHeap::new();
         if let Some(own_tweets) = self.tweets.get(&user_id) {
-            for tweet in own_tweets.iter().rev().take(Self::MAX_FEED) {
+            for tweet in own_tweets {
                 heap.push(tweet);
             }
         }
         if let Some(followees) = self.follow_list.get(&user_id) {
             for followee in followees {
                 if let Some(followed_tweets) = self.tweets.get(followee) {
-                    for tweet in followed_tweets.iter().rev().take(Self::MAX_FEED) {
+                    for tweet in followed_tweets {
                         heap.push(tweet);
                     }
                 }
