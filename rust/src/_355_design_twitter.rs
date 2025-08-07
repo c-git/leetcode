@@ -1,13 +1,15 @@
+//! Solution for https://leetcode.com/problems/design-twitter
+//! 355. Design Twitter
+
 use std::collections::{HashMap, HashSet};
 
-struct Tweet {
-    tweet_id: i32,
-    posted_by_user_id: i32,
-}
+type UserId = i32;
+type TweetID = i32;
 
+#[derive(Default)]
 struct Twitter {
-    tweets: Vec<Tweet>,
-    users: HashMap<i32, HashSet<i32>>, // User to users they follow
+    tweets: Vec<(UserId, TweetID)>,
+    follow_list: HashMap<UserId, HashSet<UserId>>,
 }
 
 /**
@@ -15,48 +17,52 @@ struct Twitter {
  * If you need a mutable reference, change it to `&mut self` instead.
  */
 impl Twitter {
+    const MAX_FEED: usize = 10;
+
     fn new() -> Self {
-        Self {
-            tweets: Default::default(),
-            users: Default::default(),
-        }
+        Self::default()
     }
 
     fn post_tweet(&mut self, user_id: i32, tweet_id: i32) {
-        self.tweets.push(Tweet {
-            tweet_id,
-            posted_by_user_id: user_id,
-        })
+        self.tweets.push((user_id, tweet_id));
     }
 
     fn get_news_feed(&self, user_id: i32) -> Vec<i32> {
-        let max_tweets = 10;
-        let mut result = Vec::with_capacity(max_tweets);
-        let followees = self.users.get(&user_id);
-        for tweet in self.tweets.iter().rev() {
-            if tweet.posted_by_user_id == user_id
-                || (followees.is_some() && followees.unwrap().contains(&tweet.posted_by_user_id))
-            {
-                result.push(tweet.tweet_id);
-                if result.len() >= max_tweets {
-                    break;
-                }
+        let mut result = vec![];
+        for (_tweet_user_id, tweet_id) in
+            self.tweets
+                .iter()
+                .copied()
+                .rev()
+                .filter(|(tweet_user_id, _)| {
+                    tweet_user_id == &user_id
+                        || self
+                            .follow_list
+                            .get(&user_id)
+                            .is_some_and(|followee| followee.contains(tweet_user_id))
+                })
+        {
+            result.push(tweet_id);
+            if result.len() > Self::MAX_FEED {
+                // Result at max length
+                break;
             }
         }
         result
     }
 
     fn follow(&mut self, follower_id: i32, followee_id: i32) {
-        self.users
+        self.follow_list
             .entry(follower_id)
-            .or_insert(HashSet::new())
+            .or_default()
             .insert(followee_id);
     }
 
     fn unfollow(&mut self, follower_id: i32, followee_id: i32) {
-        self.users.entry(follower_id).and_modify(|x| {
-            x.remove(&followee_id);
-        });
+        self.follow_list
+            .entry(follower_id)
+            .or_default()
+            .remove(&followee_id);
     }
 }
 
@@ -68,6 +74,9 @@ impl Twitter {
  * obj.follow(followerId, followeeId);
  * obj.unfollow(followerId, followeeId);
  */
+
+// << ---------------- Code below here is only for local use ---------------- >>
+
 #[cfg(test)]
 mod tests {
     use super::*;
