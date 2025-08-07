@@ -26,7 +26,10 @@ impl Twitter {
     }
 
     fn post_tweet(&mut self, user_id: i32, tweet_id: i32) {
-        let list_of_tweets = self.tweets.entry(user_id).or_default();
+        let list_of_tweets = self
+            .tweets
+            .entry(user_id)
+            .or_insert_with(|| VecDeque::with_capacity(Self::MAX_FEED + 1));
         list_of_tweets.push_back((self.current_time, tweet_id));
         self.current_time += 1;
         if list_of_tweets.len() > Self::MAX_FEED {
