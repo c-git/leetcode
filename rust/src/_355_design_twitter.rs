@@ -28,7 +28,7 @@ impl Twitter {
     }
 
     fn get_news_feed(&self, user_id: i32) -> Vec<i32> {
-        let mut result = vec![];
+        let mut result = Vec::with_capacity(Self::MAX_FEED);
         for (_tweet_user_id, tweet_id) in
             self.tweets
                 .iter()
