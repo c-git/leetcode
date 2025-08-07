@@ -43,7 +43,7 @@ impl Twitter {
                 })
         {
             result.push(tweet_id);
-            if result.len() > Self::MAX_FEED {
+            if result.len() >= Self::MAX_FEED {
                 // Result at max length
                 break;
             }
