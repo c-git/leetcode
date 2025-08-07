@@ -29,20 +29,14 @@ impl Twitter {
 
     fn get_news_feed(&self, user_id: i32) -> Vec<i32> {
         let mut result = Vec::with_capacity(Self::MAX_FEED);
-        for (_tweet_user_id, tweet_id) in
-            self.tweets
-                .iter()
-                .copied()
-                .rev()
-                .filter(|(tweet_user_id, _)| {
-                    tweet_user_id == &user_id
-                        || self
-                            .follow_list
-                            .get(&user_id)
-                            .is_some_and(|followee| followee.contains(tweet_user_id))
-                })
-        {
-            result.push(tweet_id);
+        for (_tweet_user_id, tweet_id) in self.tweets.iter().rev().filter(|(tweet_user_id, _)| {
+            tweet_user_id == &user_id
+                || self
+                    .follow_list
+                    .get(&user_id)
+                    .is_some_and(|followee| followee.contains(tweet_user_id))
+        }) {
+            result.push(*tweet_id);
             if result.len() >= Self::MAX_FEED {
                 // Result at max length
                 break;
