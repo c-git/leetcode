@@ -37,14 +37,14 @@ impl Twitter {
         let mut result = Vec::with_capacity(Self::MAX_FEED);
         let mut heap = BinaryHeap::new();
         if let Some(own_tweets) = self.tweets.get(&user_id) {
-            for tweet in own_tweets {
+            for tweet in own_tweets.iter().rev().take(Self::MAX_FEED) {
                 heap.push(tweet);
             }
         }
         if let Some(followees) = self.follow_list.get(&user_id) {
             for followee in followees {
                 if let Some(followed_tweets) = self.tweets.get(followee) {
-                    for tweet in followed_tweets {
+                    for tweet in followed_tweets.iter().rev().take(Self::MAX_FEED) {
                         heap.push(tweet);
                     }
                 }
