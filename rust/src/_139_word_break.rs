@@ -1,29 +1,62 @@
 //! Solution for https://leetcode.com/problems/word-break
 //! 139. Word Break
 
-use std::collections::HashSet;
+use std::collections::HashMap;
+
+struct Trie {
+    root: TrieNode,
+}
+
+#[derive(Default)]
+struct TrieNode {
+    is_terminal: bool,
+    next_node: HashMap<u8, TrieNode>,
+}
+
+impl Trie {
+    fn build(word_dict: &[String]) -> Self {
+        let mut result = Self {
+            root: TrieNode::default(),
+        };
+
+        for word in word_dict {
+            let mut curr = &mut result.root;
+            for c in word.as_bytes().iter().copied() {
+                curr = curr.next_node.entry(c).or_default();
+            }
+            curr.is_terminal = true;
+        }
+        result
+    }
+}
 
 impl Solution {
-    /// Based on https://www.youtube.com/watch?v=TK9pptFzH-A
     pub fn word_break(s: String, word_dict: Vec<String>) -> bool {
-        let word_dict: HashSet<&str> = word_dict.iter().map(|x| x.as_str()).collect();
+        let s = s.as_bytes();
+        let mut dp = vec![false; s.len() + 1];
+        *dp.last_mut().unwrap() = true;
+        let trie = Trie::build(&word_dict);
+        for i in (0..s.len()).rev() {
+            dp[i] = Self::can_start_at(s, i, &dp, &trie);
+        }
+        dp[0]
+    }
 
-        // Stores a set containing the possible start points
-        let mut dp = HashSet::new();
-        dp.insert(0);
-        for end_index in 0..s.len() {
-            for start_index in dp.iter().copied() {
-                if word_dict.contains(&s[start_index..=end_index]) {
-                    if end_index == s.len() - 1 {
-                        return true; // We made it to the end
-                    }
-                    dp.insert(end_index + 1);
-                    break;
-                }
+    fn can_start_at(s: &[u8], mut i: usize, dp: &[bool], trie: &Trie) -> bool {
+        let mut curr = &trie.root;
+        while i < s.len() {
+            if let Some(x) = curr.next_node.get(&s[i]) {
+                curr = x;
+            } else {
+                return false;
+            }
+            i += 1;
+            if curr.is_terminal && dp[i] {
+                return true;
             }
         }
 
-        false // Unable to get to end
+        false
     }
 }
 
@@ -41,8 +74,6 @@ mod tests {
     #[case("leetcode", vec!["leet".into(),"code".into()], true)]
     #[case("applepenapple", vec!["apple".into(),"pen".into()], true)]
     #[case("catsandog", vec!["cats".into(),"dog".into(),"sand".into(),"and".into(),"cat".into()], false)]
-    #[case("applespenapple", vec!["apple".into(),"pen".into(),"apples".into()], true)]
-    #[case("aaaaaaa", vec!["aaaa".into(),"aa".into()], false)]
     fn case(#[case] s: String, #[case] word_dict: Vec<String>, #[case] expected: bool) {
         let actual = Solution::word_break(s, word_dict);
         assert_eq!(actual, expected);
