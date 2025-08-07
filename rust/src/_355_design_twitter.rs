@@ -1,14 +1,16 @@
 //! Solution for https://leetcode.com/problems/design-twitter
 //! 355. Design Twitter
 
-use std::collections::{HashMap, HashSet};
+use std::collections::{BinaryHeap, HashMap, HashSet};
 
 type UserId = i32;
 type TweetID = i32;
+type TimeStamp = u32;
 
 #[derive(Default)]
 struct Twitter {
-    tweets: Vec<(UserId, TweetID)>,
+    current_time: TimeStamp,
+    tweets: HashMap<UserId, Vec<(TimeStamp, TweetID)>>,
     follow_list: HashMap<UserId, HashSet<UserId>>,
 }
 
@@ -24,21 +26,33 @@ impl Twitter {
     }
 
     fn post_tweet(&mut self, user_id: i32, tweet_id: i32) {
-        self.tweets.push((user_id, tweet_id));
+        self.tweets
+            .entry(user_id)
+            .or_default()
+            .push((self.current_time, tweet_id));
+        self.current_time += 1;
     }
 
     fn get_news_feed(&self, user_id: i32) -> Vec<i32> {
         let mut result = Vec::with_capacity(Self::MAX_FEED);
-        for (_tweet_user_id, tweet_id) in self.tweets.iter().rev().filter(|(tweet_user_id, _)| {
-            tweet_user_id == &user_id
-                || self
-                    .follow_list
-                    .get(&user_id)
-                    .is_some_and(|followee| followee.contains(tweet_user_id))
-        }) {
+        let mut heap = BinaryHeap::new();
+        if let Some(own_tweets) = self.tweets.get(&user_id) {
+            for tweet in own_tweets {
+                heap.push(tweet);
+            }
+        }
+        if let Some(followees) = self.follow_list.get(&user_id) {
+            for followee in followees {
+                if let Some(followed_tweets) = self.tweets.get(followee) {
+                    for tweet in followed_tweets {
+                        heap.push(tweet);
+                    }
+                }
+            }
+        }
+        while let Some((_time_stamp, tweet_id)) = heap.pop() {
             result.push(*tweet_id);
             if result.len() >= Self::MAX_FEED {
-                // Result at max length
                 break;
             }
         }
