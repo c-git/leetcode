@@ -53,8 +53,12 @@ mod tests {
     #[case(vec![0,1,1], vec![])]
     #[case(vec![0,0,0], vec![vec![0,0,0]])]
     #[case(vec![0,0,0,0], vec![vec![0,0,0]])]
-    fn case(#[case] nums: Vec<i32>, #[case] expected: Vec<Vec<i32>>) {
-        let actual = Solution::three_sum(nums);
+    fn case(#[case] nums: Vec<i32>, #[case] mut expected: Vec<Vec<i32>>) {
+        let mut actual = Solution::three_sum(nums);
+        actual.iter_mut().for_each(|x| x.sort_unstable());
+        actual.sort_unstable();
+        expected.iter_mut().for_each(|x| x.sort_unstable());
+        expected.sort_unstable();
         assert_eq!(actual, expected);
     }
 }
