@@ -1,12 +1,13 @@
 [package]
 name = "rust"
 version = "0.1.0"
-edition = "2021"
+edition = "2024"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
 cargo-leet = "0.2.0"
+itertools = "0.14"
 pretty_assertions = "1.4.1"
 rand = "0.8"
 regex = "1"
