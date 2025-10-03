@@ -3,40 +3,6 @@
 
 use std::collections::HashMap;
 
-impl Solution {
-    pub fn word_break(s: String, word_dict: Vec<String>) -> bool {
-        let s = s.as_bytes();
-        let mut trie = Trie {
-            root: Default::default(),
-        };
-        for word in word_dict.iter() {
-            trie.add_word(word);
-        }
-
-        let mut continuation_points = vec![0];
-        while let Some(start) = continuation_points.pop() {
-            let mut curr = &trie.root;
-            for i in start..s.len() {
-                if let Some(next) = curr.next.get(&s[i]) {
-                    if next.is_terminal {
-                        if i + 1 == s.len() {
-                            return true;
-                        }
-                        continuation_points.push(i + 1);
-                    }
-                    curr = next;
-                } else {
-                    // Unable to match a word anymore
-                    break;
-                }
-            }
-        }
-
-        // Out of continuation points unable to match
-        false
-    }
-}
-
 struct Trie {
     root: TrieNode,
 }
@@ -44,16 +10,52 @@ struct Trie {
 #[derive(Default)]
 struct TrieNode {
     is_terminal: bool,
-    next: HashMap<u8, TrieNode>,
+    next_node: HashMap<u8, TrieNode>,
 }
 
 impl Trie {
-    fn add_word(&mut self, word: &str) {
-        let mut curr = &mut self.root;
-        for c in word.as_bytes() {
-            curr = curr.next.entry(*c).or_default();
+    fn build(word_dict: &[String]) -> Self {
+        let mut result = Self {
+            root: TrieNode::default(),
+        };
+
+        for word in word_dict {
+            let mut curr = &mut result.root;
+            for c in word.as_bytes().iter().copied() {
+                curr = curr.next_node.entry(c).or_default();
+            }
+            curr.is_terminal = true;
         }
-        curr.is_terminal = true;
+        result
+    }
+}
+
+impl Solution {
+    pub fn word_break(s: String, word_dict: Vec<String>) -> bool {
+        let s = s.as_bytes();
+        let mut dp = vec![false; s.len() + 1];
+        *dp.last_mut().unwrap() = true;
+        let trie = Trie::build(&word_dict);
+        for i in (0..s.len()).rev() {
+            dp[i] = Self::can_start_at(s, i, &dp, &trie);
+        }
+        dp[0]
+    }
+
+    fn can_start_at(s: &[u8], start: usize, dp: &[bool], trie: &Trie) -> bool {
+        let mut curr = &trie.root;
+        for i in start..s.len() {
+            if let Some(x) = curr.next_node.get(&s[i]) {
+                curr = x;
+            } else {
+                return false;
+            }
+            if curr.is_terminal && dp[i + 1] {
+                return true;
+            }
+        }
+
+        false
     }
 }
 
