@@ -2,13 +2,15 @@
 //! 11. Container With Most Water
 
 impl Solution {
-    pub fn max_area(height: Vec<i32>) -> i32 {
+    pub fn max_area(heights: Vec<i32>) -> i32 {
         let mut result = 0;
         let mut left = 0;
-        let mut right = height.len() - 1;
+        let mut right = heights.len() - 1;
         while left < right {
-            result = result.max(height[left].min(height[right]) * (right - left) as i32);
-            if height[left] < height[right] {
+            let height = heights[left].min(heights[right]);
+            let width = (right - left) as i32;
+            result = result.max(height * width);
+            if heights[left] < heights[right] {
                 left += 1;
             } else {
                 right -= 1;
