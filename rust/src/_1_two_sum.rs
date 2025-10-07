@@ -6,14 +6,13 @@ use std::collections::HashMap;
 impl Solution {
     pub fn two_sum(nums: Vec<i32>, target: i32) -> Vec<i32> {
         let mut diffs: HashMap<i32, usize> = HashMap::new();
-        for (i, num) in nums.iter().enumerate() {
-            if let Some(other_idx) = diffs.get(num) {
-                return vec![*other_idx as i32, i as i32];
-            } else {
-                diffs.insert(target - num, i);
+        for (i, num) in nums.into_iter().enumerate() {
+            if let Some(other) = diffs.get(&num) {
+                return vec![*other as i32, i as i32];
             }
+            diffs.insert(target - num, i);
         }
-        unreachable!("Constraints say that a valid solution exists")
+        unreachable!("...one valid answer exists")
     }
 }
 
