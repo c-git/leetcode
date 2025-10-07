@@ -1,27 +1,35 @@
 //! Solution for https://leetcode.com/problems/daily-temperatures
 //! 739. Daily Temperatures
 
-use std::collections::BTreeMap;
-
 impl Solution {
     pub fn daily_temperatures(temperatures: Vec<i32>) -> Vec<i32> {
-        let mut result: Vec<Option<usize>> = vec![None; temperatures.len()];
-        let mut last_seen: BTreeMap<i32, usize> = BTreeMap::new();
-        for i in (0..temperatures.len()).rev() {
-            let today_temperature = temperatures[i];
-            for (_key, prev_index) in last_seen.range((today_temperature + 1)..) {
-                let this_diff = prev_index - i;
-                result[i] = match result[i] {
-                    Some(curr) => Some(curr.min(this_diff)),
-                    None => Some(this_diff),
-                };
+        let mut result = vec![0; temperatures.len()];
+        // Stores a monotonically decreasing stack of temperatures and their indices
+        let mut high_temps = vec![(
+            *temperatures.last().expect("min expected length is 1"),
+            temperatures.len() - 1,
+        )];
+
+        for (i, current_temperature) in temperatures
+            .iter()
+            .take(temperatures.len() - 1)
+            .enumerate()
+            .rev()
+        {
+            while let Some((top_value, top_idx)) = high_temps.last() {
+                if top_value > current_temperature {
+                    result[i] = (top_idx - i) as i32;
+                    break;
+                } else {
+                    // We can no longer use this temp so remove it from the stack
+                    high_temps.pop();
+                }
             }
-            last_seen.insert(today_temperature, i);
+            // If result[i] was not updated then it should stay as 0 because there is nothing higher later on
+            // Then always add on the current as it will always be lower than the top or the stack is empty
+            high_temps.push((*current_temperature, i));
         }
         result
-            .into_iter()
-            .map(|x| x.unwrap_or_default() as i32)
-            .collect()
     }
 }
 
