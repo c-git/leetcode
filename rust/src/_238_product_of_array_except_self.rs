@@ -3,30 +3,28 @@
 
 impl Solution {
     pub fn product_except_self(nums: Vec<i32>) -> Vec<i32> {
-        let mut result = Vec::with_capacity(nums.len());
-        let mut prefix_prod = Vec::with_capacity(nums.len());
-        let mut temp_prod = 1;
-        for num in nums.iter() {
-            temp_prod *= num;
-            prefix_prod.push(temp_prod);
-        }
-        let mut suffix_prod = vec![1; nums.len()];
-        temp_prod = 1;
-        for (i, num) in nums.iter().enumerate().rev() {
-            temp_prod *= num;
-            suffix_prod[i] = temp_prod;
-        }
-        // For test case 1
-        // nums:   [1,  2,   3,  4]
-        // prefix: [1,  2,   6, 24]
-        // suffix: [24, 24, 12,  4]
-        // result: [24, 12,  8,  6]
+        let mut result = vec![0; nums.len()];
+        let mut partial_product = 1;
+        let prefix_prods: Vec<i32> = nums
+            .iter()
+            .map(|x| {
+                partial_product *= x;
+                partial_product
+            })
+            .collect();
 
-        result.push(suffix_prod[1]);
-        for i in 1..nums.len() - 1 {
-            result.push(prefix_prod[i - 1] * suffix_prod[i + 1]);
+        // Set end value
+        result[nums.len() - 1] = prefix_prods[prefix_prods.len() - 2];
+
+        // Set middle values (skip both ends)
+        partial_product = nums[nums.len() - 1];
+
+        for (i, result_num) in result.iter_mut().enumerate().skip(1).rev().skip(1) {
+            *result_num = prefix_prods[i - 1] * partial_product;
+            partial_product *= nums[i];
         }
-        result.push(prefix_prod[nums.len() - 2]);
+        result[0] = partial_product; // Store product of everything but first
+
         result
     }
 }
