@@ -19,7 +19,7 @@ impl Solution {
                 let left_char_idx = (s[left] - b'A') as usize;
                 freq[left_char_idx] -= 1;
                 left += 1;
-                max = *freq.iter().max().expect("freq is always 26 long");
+                // max = *freq.iter().max().expect("freq is always 26 long"); // Removed as per video
             }
             result = result.max(right - left + 1);
         }
