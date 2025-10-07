@@ -2,25 +2,28 @@
 //! 424. Longest Repeating Character Replacement
 
 impl Solution {
+    /// Based on https://www.youtube.com/watch?v=gqXU1UyA8pk
+    /// Allowed me to realize I was on the right path and changed the code only remove one character at a time
     pub fn character_replacement(s: String, k: i32) -> i32 {
         let s = s.as_bytes();
+        let k = k as usize;
         let mut result = 0;
-        for curr_char in b'A'..=b'Z' {
-            let mut left = 0;
-            let mut replacements_left = k;
-            for right in 0..s.len() {
-                if s[right] != curr_char {
-                    replacements_left -= 1;
-                }
-                while replacements_left < 0 {
-                    if s[left] != curr_char {
-                        replacements_left += 1;
-                    }
-                    left += 1;
-                }
-                result = result.max(right - left + 1);
+        let mut left = 0;
+        let mut freq = [0; 26];
+        let mut max = 0;
+        for (right, c) in s.iter().enumerate() {
+            let right_char_idx = (c - b'A') as usize;
+            freq[right_char_idx] += 1;
+            max = max.max(freq[right_char_idx]);
+            while (right - left + 1) - max > k {
+                let left_char_idx = (s[left] - b'A') as usize;
+                freq[left_char_idx] -= 1;
+                left += 1;
+                max = *freq.iter().max().expect("freq is always 26 long");
             }
+            result = result.max(right - left + 1);
         }
+
         result as i32
     }
 }
