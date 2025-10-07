@@ -2,39 +2,33 @@
 //! 15. 3Sum
 
 impl Solution {
-    // Based on https://www.youtube.com/watch?v=wCe-MeqXgMc and previous solution
     pub fn three_sum(mut nums: Vec<i32>) -> Vec<Vec<i32>> {
         let mut result = vec![];
         nums.sort_unstable();
-        for (left_idx, left) in nums.iter().enumerate() {
-            if left_idx > 0 && left == &nums[left_idx - 1] {
+        for left in 0..nums.len() {
+            if left > 0 && nums[left] == nums[left - 1] {
                 // Skip duplicates
                 continue;
             }
-            let mut mid_idx = left_idx + 1;
-            let mut right_idx = nums.len() - 1;
-            while mid_idx < right_idx {
-                let total = left + nums[mid_idx] + nums[right_idx];
-                match total.cmp(&0) {
-                    std::cmp::Ordering::Less => {
-                        // Increase size as total is too small
-                        mid_idx += 1;
-                    }
+            let mut middle = left + 1;
+            let mut right = nums.len() - 1;
+            while middle < right {
+                let sum = nums[left] + nums[middle] + nums[right];
+                match sum.cmp(&0) {
+                    std::cmp::Ordering::Less => middle += 1,
                     std::cmp::Ordering::Equal => {
-                        result.push(vec![*left, nums[mid_idx], nums[right_idx]]);
-                        mid_idx += 1;
-                        while mid_idx < right_idx && nums[mid_idx - 1] == nums[mid_idx] {
+                        result.push(vec![nums[left], nums[middle], nums[right]]);
+                        middle += 1;
+                        while middle < right && nums[middle] == nums[middle - 1] {
                             // Skip duplicates
-                            mid_idx += 1;
+                            middle += 1;
                         }
                     }
-                    std::cmp::Ordering::Greater => {
-                        // Decrease size too big
-                        right_idx -= 1;
-                    }
+                    std::cmp::Ordering::Greater => right -= 1,
                 }
             }
         }
+
         result
     }
 }
