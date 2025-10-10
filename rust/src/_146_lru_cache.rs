@@ -1,27 +1,16 @@
 //! Solution for https://leetcode.com/problems/lru-cache
 //! 146. LRU Cache
+#![allow(unused)]
+use std::{
+    cell::RefCell,
+    collections::{HashMap, hash_map::Entry},
+    rc::{Rc, Weak},
+};
 
-use std::collections::HashMap;
-
-#[derive(Debug, Default, Clone, Copy, PartialEq, Eq)]
-struct NodeIndex(usize);
-
-#[derive(Debug, Default, Clone, Copy)]
-struct Node {
-    key: i32,
-    val: i32,
-    prev: Option<NodeIndex>,
-    next: Option<NodeIndex>,
-}
-
-#[derive(Debug, Default)]
 struct LRUCache {
-    next_index: NodeIndex,
-    head: Option<NodeIndex>,
-    tail: Option<NodeIndex>,
-    /// Nodes refer to each other by index
-    linked_list_nodes: Vec<Node>,
-    map: HashMap<i32, NodeIndex>,
+    map: HashMap<i32, CacheValue>,
+    values_list: ValuesList,
+    capacity: usize,
 }
 
 /**
@@ -31,95 +20,164 @@ struct LRUCache {
 impl LRUCache {
     fn new(capacity: i32) -> Self {
         Self {
-            linked_list_nodes: Vec::with_capacity(
-                capacity.try_into().expect("expected values in 1..3000"),
-            ),
-            ..Default::default()
+            map: Default::default(),
+            values_list: Default::default(),
+            capacity: capacity as usize,
         }
     }
 
     fn get(&mut self, key: i32) -> i32 {
-        if let Some(target_index) = self.map.get(&key).copied() {
-            let node = self.linked_list_nodes[target_index.0];
-            let result = node.val; // Save value to return
-
-            if Some(target_index) == self.head {
-                // Already head just return value
-                return result;
-            }
-
-            if Some(target_index) == self.tail {
-                self.tail = node.prev;
-            }
-
-            if let Some(prev) = node.prev {
-                // Update previous
-                self.linked_list_nodes[prev.0].next = node.next;
-            } else {
-                unreachable!("if not head must have a previous");
-            }
-
-            if let Some(next) = node.next {
-                self.linked_list_nodes[next.0].prev = node.prev;
-            }
-
-            self.linked_list_nodes[self.head.unwrap().0].prev = Some(target_index);
-            self.linked_list_nodes[target_index.0].prev = None;
-            self.linked_list_nodes[target_index.0].next = self.head;
-            self.head = Some(target_index);
-
-            result
-        } else {
-            // Key not found
-            -1
-        }
+        let Some(value) = self.map.get(&key) else {
+            return -1;
+        };
+        self.values_list.move_to_front(value);
+        value.borrow().value
     }
 
     fn put(&mut self, key: i32, value: i32) {
-        if self.get(key) != -1 {
-            // Already in list and just moved to front so just set value
-            self.linked_list_nodes[self.head.unwrap().0].val = value;
-        } else if self.next_index.0 >= self.linked_list_nodes.capacity() {
-            if self.linked_list_nodes.capacity() == 1 {
-                // Only takes exactly one so just update value
-                self.map.remove(&self.linked_list_nodes[0].key);
-                self.map.insert(key, NodeIndex(0));
-                self.linked_list_nodes[0].val = value;
-                self.linked_list_nodes[0].key = key;
-            } else {
-                // Full, remove tail and put new value before head
-                let old_tail = self.tail.unwrap();
-                self.map.remove(&self.linked_list_nodes[old_tail.0].key);
-                let prev = self.linked_list_nodes[old_tail.0].prev.unwrap();
-                self.linked_list_nodes[prev.0].next = None;
-                self.tail = Some(prev);
-                self.linked_list_nodes[old_tail.0].key = key;
-                self.linked_list_nodes[old_tail.0].val = value;
-                self.linked_list_nodes[old_tail.0].prev = None;
-                self.linked_list_nodes[old_tail.0].next = self.head;
-                self.linked_list_nodes[self.head.unwrap().0].prev = Some(old_tail);
-                self.head = Some(old_tail);
-                self.map.insert(key, old_tail);
+        match self.map.entry(key) {
+            Entry::Occupied(occupied_entry) => {
+                self.values_list.move_to_front(occupied_entry.get());
+                occupied_entry.get().borrow_mut().value = value;
             }
-        } else {
-            let next_index = NodeIndex(self.linked_list_nodes.len());
-            self.linked_list_nodes.push(Node {
-                key,
-                val: value,
-                prev: None,
-                next: self.head,
-            });
-            if let Some(head) = self.head {
-                self.linked_list_nodes[head.0].prev = Some(next_index);
+            Entry::Vacant(vacant_entry) => {
+                vacant_entry.insert(self.values_list.insert_new(key, value));
+                if self.capacity < self.len() {
+                    let last = self.values_list.pop_last();
+                    self.map.remove(&last.borrow().key);
+                }
+                debug_assert!(self.capacity >= self.len());
             }
-            self.head = Some(next_index);
-            if self.tail.is_none() {
-                // First node inserted
-                self.tail = self.head;
-            }
-            self.map.insert(key, next_index);
-            self.next_index = NodeIndex(next_index.0 + 1);
         }
+    }
+
+    fn len(&self) -> usize {
+        self.map.len()
+    }
+}
+
+type CacheValue = Rc<RefCell<CacheValueData>>;
+
+/// Equality is only based on the key
+struct CacheValueData {
+    key: i32,
+    value: i32,
+    next: Option<CacheValue>,
+    prev: Option<Weak<RefCell<CacheValueData>>>,
+}
+
+impl PartialEq for CacheValueData {
+    fn eq(&self, other: &Self) -> bool {
+        self.key == other.key
+    }
+}
+
+#[derive(Default)]
+struct ValuesList {
+    head: Option<CacheValue>,
+    tail: Option<CacheValue>,
+}
+
+impl ValuesList {
+    /// Assumes that at least one value exists or panics. Fine if the value is
+    /// the only value but there must be at least one. Since we only create
+    /// values using the list there will always be at least one
+    fn move_to_front(&mut self, value: &CacheValue) {
+        if Some(value) == self.head.as_ref() {
+            // Early exit, value is already the head no work needed
+            return;
+        }
+
+        // Remove from the list
+        if value
+            == self
+                .tail
+                .as_ref()
+                .expect("must have at least one value so must have tail")
+        {
+            // Remove using already defined function. We already have a copy of the return value so no need to capture
+            let last = self.pop_last();
+            debug_assert!(&last == value);
+        } else {
+            // `value` is in the middle of the list somewhere
+            let next = value
+                .borrow_mut()
+                .next
+                .take()
+                .expect("in middle so next must exist");
+            let prev = value
+                .borrow_mut()
+                .prev
+                .take()
+                .expect("in middle so next must exist");
+
+            // Connect next and previous
+            prev.upgrade()
+                .expect("upgrade must succeed but cause value is in middle")
+                .borrow_mut()
+                .next = Some(Rc::clone(&next));
+            next.borrow_mut().prev = Some(prev);
+        }
+
+        // Insert at the front of the list
+        self.insert_node(Rc::clone(value));
+    }
+
+    /// Assumes that at least one value exists or panics
+    fn pop_last(&mut self) -> CacheValue {
+        let tail = self
+            .tail
+            .take()
+            .expect("Precondition violated. List is empty");
+        if &tail
+            == self
+                .head
+                .as_ref()
+                .expect("Tail existed so head must also exist")
+        {
+            // List is now empty
+            self.head = None;
+        } else {
+            // There is at least one other value in the list
+            let prev = tail
+                .borrow_mut()
+                .prev
+                .take()
+                .expect("must exist if tail is not the head")
+                .upgrade()
+                .expect("we only pull from the tail so upgrades must succeed");
+            prev.borrow_mut().next = None;
+            self.tail = Some(prev);
+        }
+        tail
+    }
+
+    fn insert_new(&mut self, key: i32, value: i32) -> Rc<RefCell<CacheValueData>> {
+        // Create new node
+        let new_node = Rc::new(RefCell::new(CacheValueData {
+            key,
+            value,
+            next: None,
+            prev: None,
+        }));
+
+        self.insert_node(Rc::clone(&new_node));
+
+        new_node
+    }
+
+    /// Node must not already be in the list
+    fn insert_node(&mut self, new_node: CacheValue) -> Rc<RefCell<CacheValueData>> {
+        if let Some(head) = self.head.take() {
+            // Do updates to current head for new head
+            new_node.borrow_mut().next = Some(Rc::clone(&head));
+            head.borrow_mut().prev = Some(Rc::downgrade(&new_node));
+        } else {
+            self.tail = Some(Rc::clone(&new_node));
+        }
+        self.head = Some(Rc::clone(&new_node)); // Replace head
+
+        new_node
     }
 }
 
