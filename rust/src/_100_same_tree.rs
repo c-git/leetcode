@@ -29,10 +29,13 @@ impl Solution {
         match (p, q) {
             (None, None) => true,
             (None, Some(_)) | (Some(_), None) => false,
-            (Some(x), Some(y)) => {
-                x.borrow().val == y.borrow().val
-                    && Self::is_same_tree(x.borrow().left.clone(), y.borrow().left.clone())
-                    && Self::is_same_tree(x.borrow().right.clone(), y.borrow().right.clone())
+            (Some(p), Some(q)) => {
+                if p.borrow().val == q.borrow().val {
+                    Self::is_same_tree(p.borrow().left.clone(), q.borrow().left.clone())
+                        && Self::is_same_tree(p.borrow().right.clone(), q.borrow().right.clone())
+                } else {
+                    false
+                }
             }
         }
     }
