@@ -29,71 +29,119 @@ struct Codec;
  */
 impl Codec {
     fn new() -> Self {
-        Self
+        Self {}
     }
 
     fn serialize(&self, root: Option<Rc<RefCell<TreeNode>>>) -> String {
-        let Some(root) = root else {
-            return "()".into();
-        };
-        let left = root.borrow_mut().left.clone();
-        let right = root.borrow_mut().right.clone();
-        format!(
-            "({},{},{})",
-            root.borrow().val,
-            Self.serialize(left),
-            Self.serialize(right)
-        )
+        if let Some(root) = root {
+            format!(
+                "({},{},{})",
+                root.borrow().val,
+                self.serialize(root.borrow().left.clone()),
+                self.serialize(root.borrow().right.clone())
+            )
+        } else {
+            "()".to_string()
+        }
     }
 
     fn deserialize(&self, data: String) -> Option<Rc<RefCell<TreeNode>>> {
-        Self::deserialize_(data.as_str())
+        Self::deserialize_str(&data)
     }
-    fn deserialize_(data: &str) -> Option<Rc<RefCell<TreeNode>>> {
-        assert_eq!(data.as_bytes()[0], b'(');
-        assert_eq!(data.as_bytes().last(), Some(&b')'));
-        assert!(data.len() >= 2);
+    fn deserialize_str(data: &str) -> Option<Rc<RefCell<TreeNode>>> {
+        debug_assert!(data.len() >= 2);
+
         if data.len() == 2 {
-            return None;
-        }
-
-        let comma_idx = data
-            .char_indices()
-            .find_map(|(idx, c)| if c == ',' { Some(idx) } else { None })
-            .unwrap();
-        let val = &data[1..comma_idx];
-        let val: i32 = val.parse().unwrap();
-        let mut open_count: u16 = 0;
-        let second_comma = data
-            .char_indices()
-            .skip(comma_idx + 1)
-            .find_map(|(idx, c)| {
-                // Find a comma that is not nested
-                match c {
-                    '(' => open_count += 1,
-                    ')' => open_count -= 1,
-                    ',' if open_count == 0 => return Some(idx),
-                    _ => {}
+            debug_assert_eq!(data, "()");
+            None
+        } else {
+            let mut state = LookingFor::Value;
+            let mut start = 1;
+            let mut open_bracket_count = 0;
+            for (i, c) in data.char_indices() {
+                match &state {
+                    LookingFor::Value => {
+                        if c == ',' {
+                            let val = data[start..i].parse().expect("should be a number");
+                            state = LookingFor::Left { val };
+                            start = i + 1;
+                        }
+                    }
+                    LookingFor::Left { val } => {
+                        if start == i {
+                            debug_assert_eq!(c, '(');
+                            open_bracket_count = 1;
+                            continue;
+                        }
+                        match c {
+                            '(' => open_bracket_count += 1,
+                            ')' => open_bracket_count -= 1,
+                            _ => {}
+                        }
+                        if open_bracket_count == 0 {
+                            let left = Self::deserialize_str(&data[start..=i]);
+                            state = LookingFor::Right { val: *val, left };
+                            start = i + 2;
+                        }
+                    }
+                    LookingFor::Right { val, left } => {
+                        if start > i {
+                            debug_assert_eq!(c, ',');
+                            continue;
+                        }
+                        if start == i {
+                            debug_assert_eq!(c, '(');
+                            open_bracket_count = 1;
+                            continue;
+                        }
+                        match c {
+                            '(' => open_bracket_count += 1,
+                            ')' => open_bracket_count -= 1,
+                            _ => {}
+                        }
+                        if open_bracket_count == 0 {
+                            debug_assert_eq!(i, data.len() - 2,);
+                            let right = Self::deserialize_str(&data[start..=i]);
+                            state = LookingFor::Complete {
+                                val: *val,
+                                left: left.clone(),
+                                right,
+                            };
+                            start = i + 1;
+                        }
+                    }
+                    LookingFor::Complete { .. } => {
+                        debug_assert_eq!(c, ')');
+                    }
                 }
-                None
-            })
-            .unwrap();
-        let left = &data[comma_idx + 1..second_comma];
-        let right = &data[second_comma + 1..data.len() - 1];
-
-        let mut result = TreeNode::new(val);
-        result.left = Self::deserialize_(left);
-        result.right = Self::deserialize_(right);
-        Some(Rc::new(RefCell::new(result)))
+            }
+            debug_assert!(matches!(state, LookingFor::Complete { .. }));
+            if let LookingFor::Complete { val, left, right } = state {
+                Some(Rc::new(RefCell::new(TreeNode { val, left, right })))
+            } else {
+                unreachable!("failed to find all data to deserialize")
+            }
+        }
     }
 }
 
-/**
- * Your Codec object will be instantiated and called as such:
- * let obj = Codec::new();
- * let data: String = obj.serialize(strs);
- * let ans: Option<Rc<RefCell<TreeNode>>> = obj.deserialize(data);
- */
+/// Stores state of previously collected info
+enum LookingFor {
+    Value,
+    Left {
+        val: i32,
+    },
+    Right {
+        val: i32,
+        left: Option<Rc<RefCell<TreeNode>>>,
+    },
+    Complete {
+        val: i32,
+        left: Option<Rc<RefCell<TreeNode>>>,
+        right: Option<Rc<RefCell<TreeNode>>>,
+    },
+}
+
 // << ---------------- Code below here is only for local use ---------------- >>
 use cargo_leet::TreeNode;
 
