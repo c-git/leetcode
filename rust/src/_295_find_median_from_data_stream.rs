@@ -3,12 +3,9 @@
 
 use std::{cmp::Reverse, collections::BinaryHeap};
 
-#[derive(Debug, Default)]
+#[derive(Default)]
 struct MedianFinder {
-    /// Values smaller than or equal to median
     smaller: BinaryHeap<i32>,
-
-    /// Values larger than or equal to the median
     larger: BinaryHeap<Reverse<i32>>,
 }
 
@@ -18,46 +15,45 @@ struct MedianFinder {
  */
 impl MedianFinder {
     fn new() -> Self {
-        Self::default()
+        Default::default()
     }
 
     fn add_num(&mut self, num: i32) {
         self.smaller.push(num);
-
-        // Balance if 'smaller' is more than one larger than 'larger' and if max of
-        // smaller is more than min of larger then swap values
-        loop {
-            if let (Some(max), Some(Reverse(min))) = (self.smaller.peek(), self.larger.peek()) {
-                if max > min {
-                    // Swap values
-                    let max = self.smaller.pop().unwrap();
-                    let Reverse(min) = self.larger.pop().unwrap();
-                    self.smaller.push(min);
-                    self.larger.push(Reverse(max));
-                    continue;
-                }
-            }
-            if self.smaller.len() > self.larger.len() + 1 {
-                // Move values over until balanced
-                let value = self.smaller.pop().unwrap();
-                self.larger.push(Reverse(value));
-                continue;
-            }
-
-            // Balanced Size and well ordered (all smaller are smaller)
-            break;
+        while let (Some(smaller), Some(Reverse(larger))) = (self.smaller.peek(), self.larger.peek())
+            && smaller > larger
+        {
+            let old_smaller = self.smaller.pop().expect("condition checks for non-empty");
+            let Reverse(old_larger) = self.larger.pop().expect("condition checks for non-empty");
+            self.smaller.push(old_larger);
+            self.larger.push(Reverse(old_smaller));
+        }
+        while self.smaller.len() - 1 > self.larger.len() {
+            let value = self
+                .smaller
+                .pop()
+                .expect("would have errored with underflow on subtraction if empty already");
+            self.larger.push(Reverse(value));
         }
     }
 
     fn find_median(&self) -> f64 {
-        if (self.smaller.len() + self.larger.len()) % 2 == 0 {
-            // Even use value from both
-            let max = self.smaller.peek().unwrap();
-            let Reverse(min) = self.larger.peek().unwrap();
-            (min + max) as f64 / 2.0
+        debug_assert!(self.smaller.len() >= self.larger.len());
+        if self.smaller.len() == self.larger.len() {
+            let smaller = self
+                .smaller
+                .peek()
+                .expect("should never be called if on empty object");
+            let larger = self
+                .larger
+                .peek()
+                .expect("should never be called if on empty object");
+            (smaller + larger.0) as f64 / 2.0
         } else {
-            // Odd use only smaller
-            *self.smaller.peek().unwrap() as f64
+            *self
+                .smaller
+                .peek()
+                .expect("should never be called if on empty object") as f64
         }
     }
 }
