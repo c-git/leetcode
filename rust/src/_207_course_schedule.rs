@@ -1,50 +1,40 @@
 //! Solution for https://leetcode.com/problems/course-schedule
 //! 207. Course Schedule
 
-#[derive(Clone, PartialEq, Eq)]
-enum Status {
-    NotVisited,
-    VisitInProgress,
-    VisitCompleted,
-}
-
 impl Solution {
     pub fn can_finish(num_courses: i32, prerequisites: Vec<Vec<i32>>) -> bool {
-        // Source: "Faster Solutions" Modified for readability
-        let mut graph = vec![Vec::new(); num_courses as usize];
-        let mut visited = vec![Status::NotVisited; num_courses as usize];
+        let mut courses_prerequisites_left: Vec<Vec<usize>> =
+            vec![Vec::new(); num_courses as usize];
+        let mut dependent_courses: Vec<Vec<usize>> = vec![Vec::new(); num_courses as usize];
+        let mut courses_able_to_be_done: Vec<usize> = vec![];
 
-        // Build graph
-        for item in prerequisites {
-            graph[item[0] as usize].push(item[1]);
+        // Load prerequisite info
+        for prerequisite in prerequisites {
+            let dependent_course_idx = prerequisite[0] as usize;
+            let prerequisite_idx = prerequisite[1] as usize;
+            courses_prerequisites_left[dependent_course_idx].push(prerequisite_idx);
+            dependent_courses[prerequisite_idx].push(dependent_course_idx);
         }
 
-        // Check if there are any cycles
-        for i in 0..num_courses {
-            if Solution::contains_cycle(&graph, &mut visited, i as usize) {
-                return false;
+        // Update the list of those already able to be done
+        for (i, course) in courses_prerequisites_left.iter().enumerate() {
+            if course.is_empty() {
+                courses_able_to_be_done.push(i);
             }
         }
 
-        true
-    }
-
-    fn contains_cycle(graph: &Vec<Vec<i32>>, visited: &mut Vec<Status>, course: usize) -> bool {
-        if visited[course] == Status::VisitInProgress {
-            return true;
-        } else if visited[course] == Status::VisitCompleted {
-            return false;
-        }
-
-        visited[course] = Status::VisitInProgress;
-        for &prerequisite in &graph[course] {
-            if Solution::contains_cycle(graph, visited, prerequisite as usize) {
-                return true;
+        // Keep doing courses until there are no more courses we can do
+        while let Some(course_to_do_idx) = courses_able_to_be_done.pop() {
+            for dependent_course_idx in dependent_courses[course_to_do_idx].iter() {
+                courses_prerequisites_left[*dependent_course_idx]
+                    .retain(|i| i != &course_to_do_idx);
+                if courses_prerequisites_left[*dependent_course_idx].is_empty() {
+                    courses_able_to_be_done.push(*dependent_course_idx);
+                }
             }
         }
 
-        visited[course] = Status::VisitCompleted;
-        false
+        courses_prerequisites_left.iter().all(|x| x.is_empty())
     }
 }
 
