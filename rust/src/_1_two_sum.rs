@@ -5,14 +5,14 @@ use std::collections::HashMap;
 
 impl Solution {
     pub fn two_sum(nums: Vec<i32>, target: i32) -> Vec<i32> {
-        let mut diffs: HashMap<i32, usize> = HashMap::new();
+        let mut missing_diff: HashMap<i32, i32> = HashMap::new();
         for (i, num) in nums.into_iter().enumerate() {
-            if let Some(other) = diffs.get(&num) {
-                return vec![*other as i32, i as i32];
+            if let Some(other_idx) = missing_diff.get(&(target - num)) {
+                return vec![*other_idx, i as i32];
             }
-            diffs.insert(target - num, i);
+            missing_diff.insert(num, i as i32);
         }
-        unreachable!("...one valid answer exists")
+        unreachable!("solution existence is guaranteed by LC")
     }
 }
 
