@@ -3,24 +3,29 @@
 
 impl Solution {
     pub fn longest_common_subsequence(text1: String, text2: String) -> i32 {
-        let (text1, text2) = if text1.len() <= text2.len() {
-            (text1.as_bytes(), text2.as_bytes())
-        } else {
-            (text2.as_bytes(), text1.as_bytes())
-        };
-
+        let text1 = text1.as_bytes();
+        let text2 = text2.as_bytes();
         let mut prev_row = vec![0; text1.len()];
-        let mut curr_row = prev_row.clone();
+        let mut curr_row = vec![0; text1.len()];
+
         for c2 in text2.iter() {
-            curr_row[0] = if text1[0] == *c2 { 1 } else { prev_row[0] };
-            for (i, c1) in text1.iter().enumerate().skip(1) {
-                curr_row[i] = prev_row[i]
-                    .max(curr_row[i - 1])
-                    .max(prev_row[i - 1] + if c1 == c2 { 1 } else { 0 });
+            for (i, c1) in text1.iter().enumerate() {
+                curr_row[i] = prev_row[i];
+                if i > 0 {
+                    curr_row[i] = curr_row[i].max(curr_row[i - 1]);
+                }
+                if c1 == c2 {
+                    let extend_on = if i > 0 { prev_row[i - 1] } else { 0 };
+                    curr_row[i] = curr_row[i].max(extend_on + 1);
+                }
             }
             std::mem::swap(&mut prev_row, &mut curr_row);
         }
-        *prev_row.last().unwrap()
+        prev_row
+            .iter()
+            .max()
+            .copied()
+            .expect("should have at least one char")
     }
 }
 
