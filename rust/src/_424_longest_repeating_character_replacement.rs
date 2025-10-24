@@ -3,29 +3,29 @@
 
 impl Solution {
     /// Based on https://www.youtube.com/watch?v=gqXU1UyA8pk
-    /// Allowed me to realize I was on the right path and changed the code only remove one character at a time
     pub fn character_replacement(s: String, k: i32) -> i32 {
         let s = s.as_bytes();
         let k = k as usize;
         let mut result = 0;
-        let mut left = 0;
-        let mut freq = [0; 26];
-        let mut max = 0;
-        for (right, c) in s.iter().enumerate() {
-            let right_char_idx = (c - b'A') as usize;
-            freq[right_char_idx] += 1;
-            max = max.max(freq[right_char_idx]);
-            while (right - left + 1) - max > k {
-                let left_char_idx = (s[left] - b'A') as usize;
-                freq[left_char_idx] -= 1;
-                left += 1;
-                // max = *freq.iter().max().expect("freq is always 26 long"); // Removed as per video
+        let mut freqs = [0; 26];
+        let mut max_freq = 0;
+        let mut left_char_idx = 0;
+        for (right_char_idx, right_val) in s.iter().enumerate() {
+            let right_freq_idx = char_to_idx(right_val);
+            freqs[right_freq_idx] += 1;
+            max_freq = max_freq.max(freqs[right_freq_idx]);
+            while right_char_idx - left_char_idx + 1 - max_freq > k {
+                freqs[char_to_idx(&s[left_char_idx])] -= 1;
+                left_char_idx += 1;
             }
-            result = result.max(right - left + 1);
+            result = result.max(right_char_idx - left_char_idx + 1);
         }
-
         result as i32
     }
+}
+
+fn char_to_idx(char: &u8) -> usize {
+    (char - b'A') as usize
 }
 
 // << ---------------- Code below here is only for local use ---------------- >>
