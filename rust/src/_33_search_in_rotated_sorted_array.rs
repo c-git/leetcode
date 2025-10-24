@@ -3,17 +3,16 @@
 
 impl Solution {
     pub fn search(nums: Vec<i32>, target: i32) -> i32 {
-        let first = nums.first().unwrap();
-        let pivot = nums.partition_point(|x| x >= first);
-        if &target >= first {
-            nums[..pivot]
+        let partition_idx = nums.partition_point(|x| x >= &nums[0]);
+        if target < nums[0] {
+            nums[partition_idx..]
                 .binary_search(&target)
-                .map(|x| x as i32)
+                .map(|x| (x + partition_idx) as i32)
                 .unwrap_or(-1)
         } else {
-            nums[pivot..]
+            nums[..partition_idx]
                 .binary_search(&target)
-                .map(|x| (x + pivot) as i32)
+                .map(|x| x as i32)
                 .unwrap_or(-1)
         }
     }
