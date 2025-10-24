@@ -2,34 +2,26 @@
 //! 739. Daily Temperatures
 
 impl Solution {
-    pub fn daily_temperatures(temperatures: Vec<i32>) -> Vec<i32> {
-        let mut result = vec![0; temperatures.len()];
-        // Stores a monotonically decreasing stack of temperatures and their indices
-        let mut high_temps = vec![(
-            *temperatures.last().expect("min expected length is 1"),
-            temperatures.len() - 1,
-        )];
-
-        for (i, current_temperature) in temperatures
-            .iter()
-            .take(temperatures.len() - 1)
-            .enumerate()
-            .rev()
-        {
-            while let Some((top_value, top_idx)) = high_temps.last() {
-                if top_value > current_temperature {
-                    result[i] = (top_idx - i) as i32;
-                    break;
+    pub fn daily_temperatures(mut temperatures: Vec<i32>) -> Vec<i32> {
+        let mut stack: Vec<(i32, usize)> = vec![];
+        for (i, temperature) in temperatures.iter_mut().enumerate().rev() {
+            // Remove all smaller or equal temps from the stack
+            while let Some((later_temp, _later_idx)) = stack.last() {
+                if later_temp <= temperature {
+                    stack.pop();
                 } else {
-                    // We can no longer use this temp so remove it from the stack
-                    high_temps.pop();
+                    break;
                 }
             }
-            // If result[i] was not updated then it should stay as 0 because there is nothing higher later on
-            // Then always add on the current as it will always be lower than the top or the stack is empty
-            high_temps.push((*current_temperature, i));
+
+            let days_until_warmer = stack.last().map(|(_, later_idx)| *later_idx).unwrap_or(i) - i;
+
+            stack.push((*temperature, i));
+
+            // Set the number of days for this value
+            *temperature = days_until_warmer as _;
         }
-        result
+        temperatures
     }
 }
 
