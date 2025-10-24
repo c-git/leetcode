@@ -5,30 +5,29 @@ impl Solution {
     pub fn three_sum(mut nums: Vec<i32>) -> Vec<Vec<i32>> {
         let mut result = vec![];
         nums.sort_unstable();
-        for left in 0..nums.len() {
-            if left > 0 && nums[left] == nums[left - 1] {
-                // Skip duplicates
+
+        for (left_idx, left_val) in nums.iter().enumerate() {
+            if left_idx > 0 && left_val == &nums[left_idx - 1] {
+                // Skip duplicate
                 continue;
             }
-            let mut middle = left + 1;
-            let mut right = nums.len() - 1;
-            while middle < right {
-                let sum = nums[left] + nums[middle] + nums[right];
-                match sum.cmp(&0) {
-                    std::cmp::Ordering::Less => middle += 1,
+            let mut mid_idx = left_idx + 1;
+            let mut right_idx = nums.len() - 1;
+            while mid_idx < right_idx {
+                match 0.cmp(&(left_val + nums[mid_idx] + nums[right_idx])) {
+                    std::cmp::Ordering::Less => right_idx -= 1,
                     std::cmp::Ordering::Equal => {
-                        result.push(vec![nums[left], nums[middle], nums[right]]);
-                        middle += 1;
-                        while middle < right && nums[middle] == nums[middle - 1] {
+                        result.push(vec![*left_val, nums[mid_idx], nums[right_idx]]);
+                        mid_idx += 1;
+                        while mid_idx < right_idx && nums[mid_idx] == nums[mid_idx - 1] {
                             // Skip duplicates
-                            middle += 1;
+                            mid_idx += 1;
                         }
                     }
-                    std::cmp::Ordering::Greater => right -= 1,
+                    std::cmp::Ordering::Greater => mid_idx += 1,
                 }
             }
         }
-
         result
     }
 }
