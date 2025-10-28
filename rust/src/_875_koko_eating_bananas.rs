@@ -3,39 +3,33 @@
 
 impl Solution {
     pub fn min_eating_speed(piles: Vec<i32>, h: i32) -> i32 {
-        let mut size = *piles.iter().max().unwrap();
-        debug_assert!(test_can_eat_all(size, &piles, h), "{size}");
-        let mut base = 1;
-        while size > 1 {
-            let half = size / 2;
-            let mid = base + half;
-            base = if !test_can_eat_all(half + base, &piles, h) {
-                mid
+        let mut low = 1;
+        let mut high = *piles.iter().max().unwrap();
+        debug_assert!(test_can_eat_all(&piles, h, high));
+        while low < high {
+            let mid = (low + high) / 2;
+            if test_can_eat_all(&piles, h, mid) {
+                high = mid;
             } else {
-                base
-            };
-            size -= half;
+                low = mid + 1;
+            }
         }
-        if !test_can_eat_all(base, &piles, h) {
-            base + 1
-        } else {
-            base
-        }
+        high
     }
 }
 
-fn test_can_eat_all(test_value: i32, piles: &[i32], h: i32) -> bool {
-    let mut hours_sum = 0;
+fn test_can_eat_all(piles: &[i32], h: i32, rate: i32) -> bool {
+    let mut hours_taken = 0;
     for pile in piles {
-        hours_sum += pile / test_value;
-        if pile % test_value > 0 {
-            hours_sum += 1;
+        hours_taken += pile / rate;
+        if pile % rate > 0 {
+            hours_taken += 1;
         }
-        if hours_sum > h {
+        if hours_taken > h {
             return false;
         }
     }
-    true
+    hours_taken <= h
 }
 
 // << ---------------- Code below here is only for local use ---------------- >>
