@@ -10,7 +10,20 @@ use std::{
 pub struct LRUCache {
     capacity: usize,
     map: HashMap<i32, Rc<RefCell<Node>>>,
-    list: LinkedList,
+    list: List,
+}
+
+struct Node {
+    key: i32,
+    value: i32,
+    prev: Option<rc::Weak<RefCell<Node>>>,
+    next: Option<Rc<RefCell<Node>>>,
+}
+
+#[derive(Default)]
+struct List {
+    head: Option<Rc<RefCell<Node>>>,
+    tail: Option<rc::Weak<RefCell<Node>>>,
 }
 
 /**
@@ -30,33 +43,27 @@ impl LRUCache {
         let Some(node) = self.map.get(&key) else {
             return -1;
         };
-
         self.list.move_to_front(node);
-
         node.borrow().value
     }
 
     pub fn put(&mut self, key: i32, value: i32) {
-        match self.map.get(&key) {
-            Some(node) => {
-                node.borrow_mut().value = value;
-                self.list.move_to_front(node);
+        if let Some(existing_node) = self.map.get(&key) {
+            existing_node.borrow_mut().value = value;
+            self.list.move_to_front(existing_node);
+        } else {
+            if self.len() >= self.capacity {
+                let last = self.list.remove_last();
+                self.map.remove(&last.borrow().key);
             }
-            None => {
-                if self.capacity <= self.len() {
-                    // Currently full remove last to make space
-                    let last = self.list.remove_last();
-                    self.map.remove(&last.borrow().key);
-                }
-                let new_node = Rc::new(RefCell::new(Node {
-                    key,
-                    value,
-                    next: None,
-                    prev: None,
-                }));
-                self.map.insert(key, Rc::clone(&new_node));
-                self.list.add_node(new_node);
-            }
+            let new_node = Rc::new(RefCell::new(Node {
+                key,
+                value,
+                prev: None,
+                next: None,
+            }));
+            self.map.insert(key, Rc::clone(&new_node));
+            self.list.add_new(new_node);
         }
     }
 
@@ -65,81 +72,52 @@ impl LRUCache {
     }
 }
 
-struct Node {
-    key: i32,
-    value: i32,
-    next: Option<Rc<RefCell<Node>>>,
-    prev: Option<rc::Weak<RefCell<Node>>>,
-}
-
-#[derive(Default)]
-struct LinkedList {
-    head: Option<Rc<RefCell<Node>>>,
-    tail: Option<Rc<RefCell<Node>>>,
-}
-
-impl LinkedList {
-    /// Moves an existing node in the list to the front
+impl List {
     fn move_to_front(&mut self, node: &Rc<RefCell<Node>>) {
-        self.remove_node(node);
-        self.add_node(Rc::clone(node));
+        self.remove(node);
+        self.add_new(Rc::clone(node));
     }
 
-    /// Adds a node to the head of the list that did not exist in the list before
-    fn add_node(&mut self, node: Rc<RefCell<Node>>) {
-        let old_head = self.head.take();
-        if let Some(old_head) = old_head.as_ref() {
-            old_head.borrow_mut().prev = Some(Rc::downgrade(&node));
-        }
-        node.borrow_mut().next = old_head;
+    fn remove_last(&mut self) -> Rc<RefCell<Node>> {
+        let last = self.tail.as_ref().unwrap().upgrade().unwrap();
+        self.remove(&last);
+        last
+    }
+
+    fn add_new(&mut self, new_node: Rc<RefCell<Node>>) {
         if self.tail.is_none() {
-            self.tail = Some(Rc::clone(&node));
+            self.tail = Some(Rc::downgrade(&new_node));
         }
-        self.head = Some(node);
+        if let Some(head) = self.head.as_ref() {
+            head.borrow_mut().prev = Some(Rc::downgrade(&new_node));
+        }
+        new_node.borrow_mut().next = self.head.take();
+        self.head = Some(new_node);
     }
 
-    /// Removes an existing node from the list
-    fn remove_node(&mut self, node: &Rc<RefCell<Node>>) {
-        // Update head if needed
+    fn remove(&mut self, node: &Rc<RefCell<Node>>) {
+        let prev = node.borrow_mut().prev.take();
+        let next = node.borrow_mut().next.take();
         if self
             .head
             .as_ref()
             .is_some_and(|head| head.borrow().key == node.borrow().key)
         {
-            self.head = node.borrow().next.clone();
+            self.head = next.clone();
         }
-
-        // Update tail if needed
         if self
             .tail
             .as_ref()
-            .is_some_and(|tail| tail.borrow().key == node.borrow().key)
+            .is_some_and(|tail| tail.upgrade().unwrap().borrow().key == node.borrow().key)
         {
-            self.tail = node
-                .borrow()
-                .prev
-                .as_ref()
-                .map(|prev| prev.upgrade().unwrap());
+            self.tail = prev.clone();
         }
-
-        let prev = node.borrow_mut().prev.take();
-        let next = node.borrow_mut().next.take();
+        if let Some(next) = next.as_ref() {
+            next.borrow_mut().prev = prev.clone();
+        }
         if let Some(prev) = prev.as_ref() {
-            prev.upgrade().unwrap().borrow_mut().next = next.clone();
+            prev.upgrade().unwrap().borrow_mut().next = next;
         }
-        if let Some(next) = next {
-            next.borrow_mut().prev = prev;
-        }
-    }
-
-    /// Removes and returns the last node in the list
-    fn remove_last(&mut self) -> Rc<RefCell<Node>> {
-        let last = self
-            .tail
-            .clone()
-            .expect("should only be called if list is non-empty");
-        self.remove_node(&last);
-        last
     }
 }
 
