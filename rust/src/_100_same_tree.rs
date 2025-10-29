@@ -30,12 +30,9 @@ impl Solution {
             (None, None) => true,
             (None, Some(_)) | (Some(_), None) => false,
             (Some(p), Some(q)) => {
-                if p.borrow().val == q.borrow().val {
-                    Self::is_same_tree(p.borrow().left.clone(), q.borrow().left.clone())
-                        && Self::is_same_tree(p.borrow().right.clone(), q.borrow().right.clone())
-                } else {
-                    false
-                }
+                p.borrow().val == q.borrow().val
+                    && Self::is_same_tree(p.borrow_mut().left.take(), q.borrow_mut().left.take())
+                    && Self::is_same_tree(p.borrow_mut().right.take(), q.borrow_mut().right.take())
             }
         }
     }
