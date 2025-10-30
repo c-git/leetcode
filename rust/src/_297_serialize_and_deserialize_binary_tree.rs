@@ -152,13 +152,14 @@ mod tests {
     use rstest::rstest;
 
     #[rstest]
-    #[case(TreeRoot::from("[1,2,3,null,null,4,5]").into())]
-    #[case(TreeRoot::from("[]").into())]
-    #[case(TreeRoot::from("[1,2,3,null,null,-584,5]").into())]
-    #[case(TreeRoot::from("[1,2,1000,null,null,-999,-1000]").into())]
-    fn case(#[case] root: Option<Rc<RefCell<TreeNode>>>) {
+    #[case("[1,2,3,null,null,4,5]")]
+    #[case("[]")]
+    #[case("[1,2,3,null,null,-584,5]")]
+    #[case("[1,2,1000,null,null,-999,-1000]")]
+    fn case(#[case] tree_as_str: &str) {
         let codec = Codec::new();
-        let expected = root.clone();
+        let root: Option<Rc<RefCell<TreeNode>>> = TreeRoot::from(tree_as_str).into();
+        let expected: Option<Rc<RefCell<TreeNode>>> = TreeRoot::from(tree_as_str).into();
         let str_repr = codec.serialize(root);
         let actual = codec.deserialize(str_repr);
         assert_eq!(actual, expected);
