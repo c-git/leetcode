@@ -21,125 +21,74 @@
 // }
 use std::cell::RefCell;
 use std::rc::Rc;
-struct Codec;
+pub struct Codec {}
 
 /**
  * `&self` means the method takes an immutable reference.
  * If you need a mutable reference, change it to `&mut self` instead.
  */
 impl Codec {
-    fn new() -> Self {
+    #[expect(clippy::new_without_default)]
+    pub fn new() -> Self {
         Self {}
     }
 
-    fn serialize(&self, root: Option<Rc<RefCell<TreeNode>>>) -> String {
-        if let Some(root) = root {
-            format!(
-                "({},{},{})",
-                root.borrow().val,
-                self.serialize(root.borrow().left.clone()),
-                self.serialize(root.borrow().right.clone())
-            )
-        } else {
-            "()".to_string()
+    #[expect(clippy::only_used_in_recursion)]
+    pub fn serialize(&self, root: Option<Rc<RefCell<TreeNode>>>) -> String {
+        match root {
+            Some(root) => {
+                let mut root = root.borrow_mut();
+                let value = root.val;
+                let left = self.serialize(root.left.take());
+                let right = self.serialize(root.right.take());
+                format!("({value},{left},{right})")
+            }
+            None => "()".to_string(),
         }
     }
 
-    fn deserialize(&self, data: String) -> Option<Rc<RefCell<TreeNode>>> {
-        Self::deserialize_str(&data)
+    pub fn deserialize(&self, data: String) -> Option<Rc<RefCell<TreeNode>>> {
+        Self::deserialize_(&data)
     }
-    fn deserialize_str(data: &str) -> Option<Rc<RefCell<TreeNode>>> {
-        debug_assert!(data.len() >= 2);
 
-        if data.len() == 2 {
-            debug_assert_eq!(data, "()");
-            None
-        } else {
-            let mut state = LookingFor::Value;
-            let mut start = 1;
-            let mut open_bracket_count = 0;
-            for (i, c) in data.char_indices() {
-                match &state {
-                    LookingFor::Value => {
-                        if c == ',' {
-                            let val = data[start..i].parse().expect("should be a number");
-                            state = LookingFor::Left { val };
-                            start = i + 1;
-                        }
-                    }
-                    LookingFor::Left { val } => {
-                        if start == i {
-                            debug_assert_eq!(c, '(');
-                            open_bracket_count = 1;
-                            continue;
-                        }
-                        match c {
-                            '(' => open_bracket_count += 1,
-                            ')' => open_bracket_count -= 1,
-                            _ => {}
-                        }
-                        if open_bracket_count == 0 {
-                            let left = Self::deserialize_str(&data[start..=i]);
-                            state = LookingFor::Right { val: *val, left };
-                            start = i + 2;
-                        }
-                    }
-                    LookingFor::Right { val, left } => {
-                        if start > i {
-                            debug_assert_eq!(c, ',');
-                            continue;
-                        }
-                        if start == i {
-                            debug_assert_eq!(c, '(');
-                            open_bracket_count = 1;
-                            continue;
-                        }
-                        match c {
-                            '(' => open_bracket_count += 1,
-                            ')' => open_bracket_count -= 1,
-                            _ => {}
-                        }
-                        if open_bracket_count == 0 {
-                            debug_assert_eq!(i, data.len() - 2,);
-                            let right = Self::deserialize_str(&data[start..=i]);
-                            state = LookingFor::Complete {
-                                val: *val,
-                                left: left.clone(),
-                                right,
-                            };
-                            start = i + 1;
-                        }
-                    }
-                    LookingFor::Complete { .. } => {
-                        debug_assert_eq!(c, ')');
-                    }
-                }
-            }
-            debug_assert!(matches!(state, LookingFor::Complete { .. }));
-            if let LookingFor::Complete { val, left, right } = state {
-                Some(Rc::new(RefCell::new(TreeNode { val, left, right })))
-            } else {
-                unreachable!("failed to find all data to deserialize")
-            }
+    pub fn deserialize_(data: &str) -> Option<Rc<RefCell<TreeNode>>> {
+        debug_assert_eq!(data.chars().next(), Some('('));
+        debug_assert_eq!(data.chars().last(), Some(')'));
+
+        // Pop off brackets
+        let data = &data[1..data.len() - 1];
+
+        if data.is_empty() {
+            return None;
         }
-    }
-}
 
-/// Stores state of previously collected info
-enum LookingFor {
-    Value,
-    Left {
-        val: i32,
-    },
-    Right {
-        val: i32,
-        left: Option<Rc<RefCell<TreeNode>>>,
-    },
-    Complete {
-        val: i32,
-        left: Option<Rc<RefCell<TreeNode>>>,
-        right: Option<Rc<RefCell<TreeNode>>>,
-    },
+        // Find value
+        let first_comma_idx = data.find(',').unwrap();
+        let val: i32 = data[..first_comma_idx].parse().unwrap();
+
+        // Get left
+        debug_assert_eq!(&data[first_comma_idx..first_comma_idx + 2], ",(");
+        let mut second_comma_idx = first_comma_idx + 2; // Starts after the first open bracket
+        let mut bracket_count = 1;
+        while bracket_count > 0 {
+            match &data[second_comma_idx..second_comma_idx + 1] {
+                "(" => bracket_count += 1,
+                ")" => bracket_count -= 1,
+                _ => {}
+            }
+            second_comma_idx += 1;
+        }
+        let left = Self::deserialize_(&data[first_comma_idx + 1..second_comma_idx]);
+
+        // Get right
+        let right = Self::deserialize_(&data[second_comma_idx + 1..]);
+
+        // Construct and return result
+        let mut result = TreeNode::new(val);
+        result.left = left;
+        result.right = right;
+        Some(Rc::new(RefCell::new(result)))
+    }
 }
 
 // << ---------------- Code below here is only for local use ---------------- >>
