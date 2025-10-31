@@ -2,12 +2,11 @@
 //! 39. Combination Sum
 
 impl Solution {
-    /// After watching https://www.youtube.com/watch?v=GBKI9VSKdGg
     pub fn combination_sum(mut candidates: Vec<i32>, target: i32) -> Vec<Vec<i32>> {
-        let mut result = vec![];
         candidates.sort_unstable();
+        let mut result = vec![];
         let mut partial = vec![];
-        Self::combination_sum_(&candidates, target, &mut partial, 0, &mut result);
+        Self::combination_sum_(&candidates, target, &mut partial, &mut result);
         result
     }
 
@@ -15,28 +14,26 @@ impl Solution {
         candidates: &[i32],
         target: i32,
         partial: &mut Vec<i32>,
-        partial_sum: i32,
         result: &mut Vec<Vec<i32>>,
     ) {
-        if partial_sum == target {
+        if target == 0 {
             result.push(partial.clone());
-        } else if partial_sum < target && !candidates.is_empty() {
-            // Normal case we can add more so take the first or leave it
-
-            // Try skipping it the first item
-            Self::combination_sum_(&candidates[1..], target, partial, partial_sum, result);
-
-            // Try including the first item
-            partial.push(candidates[0]);
-            Self::combination_sum_(
-                candidates,
-                target,
-                partial,
-                partial_sum + candidates[0],
-                result,
-            );
-            partial.pop();
+            return;
         }
+        if candidates.is_empty() {
+            return;
+        }
+        if target < candidates[0] {
+            return;
+        }
+
+        // Try another of the same
+        partial.push(candidates[0]);
+        Self::combination_sum_(candidates, target - candidates[0], partial, result);
+        partial.pop();
+
+        // Try without first
+        Self::combination_sum_(&candidates[1..], target, partial, result);
     }
 }
 
