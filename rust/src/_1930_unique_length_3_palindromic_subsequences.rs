@@ -11,7 +11,7 @@ impl Solution {
         let mut middles: Vec<HashSet<u8>> = vec![HashSet::new(); 26];
         for (i, c) in s.iter().enumerate() {
             let char_index = (c - b'a') as usize;
-            freq[char_index] += 1;
+            freq[char_index] = freq[char_index].saturating_add(1);
             if let Some(this_prev) = last_instance[char_index] {
                 for other_prev in last_instance.iter().filter_map(|&x| x) {
                     if other_prev > this_prev {
