@@ -1,25 +1,23 @@
 //! Solution for https://leetcode.com/problems/smallest-integer-divisible-by-k
 //! 1015. Smallest Integer Divisible by K
 
-use std::collections::BTreeSet;
-
 impl Solution {
     pub fn smallest_repunit_div_by_k(k: i32) -> i32 {
         let mut result = 1;
-        let mut seen = BTreeSet::new();
+        let mut seen = vec![false; k as usize];
         let mut remainder = 1;
         remainder %= k;
-        seen.insert(remainder);
+        seen[remainder as usize] = true;
         while remainder != 0 {
             result += 1;
             remainder *= 10;
             remainder += 1;
             remainder %= k;
-            let already_existed = !seen.insert(remainder);
-            if already_existed {
+            if seen[remainder as usize] {
                 // We've hit a loop and it's not possible to ever find a solution
                 return -1;
             }
+            seen[remainder as usize] = true;
         }
         result
     }
