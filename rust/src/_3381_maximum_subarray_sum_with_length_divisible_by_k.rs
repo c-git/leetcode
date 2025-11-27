@@ -2,31 +2,21 @@
 //! 3381. Maximum Subarray Sum With Length Divisible by K
 
 impl Solution {
+    /// Based on https://www.youtube.com/watch?v=8rwW3iKqP34
     pub fn max_subarray_sum(nums: Vec<i32>, k: i32) -> i64 {
         let k = k as usize;
         let mut result = i64::MIN;
-
-        // Brute force, try all sizes that are multiples of k
-        for multiple in 1.. {
-            let size = k * multiple;
-            if size > nums.len() {
-                // No longer fits
-                break;
-            }
-            result = result.max(Self::max_subarray_sum_of_size(&nums, size));
+        let mut min_prefix_of_len = vec![i64::MAX; k];
+        min_prefix_of_len[0] = 0;
+        let mut total = 0;
+        for (i, &num) in nums.iter().enumerate() {
+            total += num as i64;
+            let length = i + 1;
+            let prefix_length = length % k;
+            result = result.max(total.saturating_sub(min_prefix_of_len[prefix_length]));
+            min_prefix_of_len[prefix_length] = min_prefix_of_len[prefix_length].min(total);
         }
-        result
-    }
 
-    fn max_subarray_sum_of_size(nums: &[i32], size: usize) -> i64 {
-        let mut current: i64 = nums.iter().map(|&x| x as i64).take(size).sum();
-        let mut result = current;
-        for right in size..nums.len() {
-            let left = right - size;
-            current -= nums[left] as i64;
-            current += nums[right] as i64;
-            result = result.max(current);
-        }
         result
     }
 }
