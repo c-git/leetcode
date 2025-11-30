@@ -43,7 +43,7 @@ impl Solution {
                         take2 = 0;
                     }
                 }
-                '3'..'9' => {
+                '3'..='9' => {
                     // Only option is to take 1
                     take2 = 0;
                 }
@@ -79,6 +79,7 @@ mod tests {
     #[case("11", 2)]
     #[case("110", 1)]
     #[case("10", 1)]
+    #[case("99", 1)]
     fn case(#[case] s: String, #[case] expected: i32) {
         let actual = Solution::num_decodings(s);
         assert_eq!(actual, expected);
