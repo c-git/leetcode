@@ -8,6 +8,10 @@ impl Solution {
             // Can never decode strings that start with 0
             return 0;
         }
+        if s.len() == 1 {
+            // Only one way to decode a string of length 1
+            return 1;
+        }
 
         let mut take1 = 1;
         let mut take2 = 0;
@@ -61,6 +65,7 @@ mod tests {
     #[case("12", 2)]
     #[case("226", 3)]
     #[case("06", 0)]
+    #[case("1", 1)]
     fn case(#[case] s: String, #[case] expected: i32) {
         let actual = Solution::num_decodings(s);
         assert_eq!(actual, expected);
