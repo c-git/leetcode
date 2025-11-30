@@ -2,62 +2,39 @@
 //! 91. Decode Ways
 
 impl Solution {
+    /// Used https://www.youtube.com/watch?v=6aEyTjOwlJU to debug
     pub fn num_decodings(s: String) -> i32 {
         // Solve by keeping track of if we take one or two per how many ways we can continue then return the sum of both at the end
-        if s.starts_with('0') {
-            // Can never decode strings that start with 0
-            return 0;
-        }
-        if s.len() == 1 {
-            // Only one way to decode a string of length 1
-            return 1;
-        }
-
-        let mut take1 = 1;
-        let mut take2 = 0;
+        let mut continue_at_next = 1; // Number of ways to decode starting at next digit
+        let mut skip_next = 0; // Number of ways to decode if we skip the next digit
         let mut prev_char = None;
         for c in s.chars().rev() {
-            match c {
+            (continue_at_next, skip_next) = match c {
                 '0' => {
-                    take2 = take1;
-                    take1 = 0;
+                    // Keep skip as an option but 0 options starting from here
+                    (0, continue_at_next)
                 }
                 '1' => {
-                    if Some('0') == prev_char {
-                        // Take 1 & 2 already correct
-                    } else {
-                        // Able to do both 1 or 2
-                        let temp = take1 + take2;
-                        take2 = take1;
-                        take1 = temp;
-                    }
+                    // We can do both take an skip
+                    (continue_at_next + skip_next, continue_at_next)
                 }
                 '2' => {
                     if let Some(prev) = prev_char
-                        && ('1'..='6').contains(&prev)
+                        && ('0'..='6').contains(&prev)
                     {
-                        let temp = take1 + take2;
-                        take2 = take1;
-                        take1 = temp;
+                        (continue_at_next + skip_next, continue_at_next)
                     } else {
-                        take2 = 0;
+                        (continue_at_next, continue_at_next)
                     }
                 }
-                '3'..='9' => {
-                    // Only option is to take 1
-                    take2 = 0;
-                }
+                '3'..='9' => (continue_at_next, continue_at_next),
                 _ => unreachable!("Problem guarantees only digits"),
-            }
-            if ('1'..='2').contains(&c) && prev_char.is_none() {
-                // Take two from here already incorporated in take1 and take2 is not valid by itself anymore
-                take2 = 0;
-            }
+            };
 
             prev_char = Some(c);
         }
 
-        take1 + take2
+        continue_at_next
     }
 }
 
@@ -80,6 +57,7 @@ mod tests {
     #[case("110", 1)]
     #[case("10", 1)]
     #[case("99", 1)]
+    #[case("1201234", 3)]
     fn case(#[case] s: String, #[case] expected: i32) {
         let actual = Solution::num_decodings(s);
         assert_eq!(actual, expected);
