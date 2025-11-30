@@ -23,13 +23,18 @@ impl Solution {
                     take1 = 0;
                 }
                 '1' => {
-                    let temp = take1 + take2;
-                    take2 = take1;
-                    take1 = temp;
+                    if Some('0') == prev_char {
+                        // Take 1 & 2 already correct
+                    } else {
+                        // Able to do both 1 or 2
+                        let temp = take1 + take2;
+                        take2 = take1;
+                        take1 = temp;
+                    }
                 }
                 '2' => {
                     if let Some(prev) = prev_char
-                        && ('0'..='6').contains(&prev)
+                        && ('1'..='6').contains(&prev)
                     {
                         let temp = take1 + take2;
                         take2 = take1;
@@ -44,6 +49,11 @@ impl Solution {
                 }
                 _ => unreachable!("Problem guarantees only digits"),
             }
+            if ('1'..='2').contains(&c) && prev_char.is_none() {
+                // Take two from here already incorporated in take1 and take2 is not valid by itself anymore
+                take2 = 0;
+            }
+
             prev_char = Some(c);
         }
 
@@ -66,6 +76,9 @@ mod tests {
     #[case("226", 3)]
     #[case("06", 0)]
     #[case("1", 1)]
+    #[case("11", 2)]
+    #[case("110", 1)]
+    #[case("10", 1)]
     fn case(#[case] s: String, #[case] expected: i32) {
         let actual = Solution::num_decodings(s);
         assert_eq!(actual, expected);
