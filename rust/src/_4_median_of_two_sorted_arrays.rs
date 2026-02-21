@@ -11,13 +11,18 @@ impl Solution {
     /// halves match we adjust until we get the right amount from that list
     /// then the rest must come from the other (may end up being all or none
     /// from the list we start with)
-    pub fn find_median_sorted_arrays(nums1: Vec<i32>, nums2: Vec<i32>) -> f64 {
+    pub fn find_median_sorted_arrays(mut nums1: Vec<i32>, mut nums2: Vec<i32>) -> f64 {
+        // Must put shorter as num1 to handle the edge case of an empty num2
+        if nums1.len() > nums2.len() {
+            std::mem::swap(&mut nums1, &mut nums2)
+        }
+
         let total_count = (nums1.len() + nums2.len()) as i32;
         let half_count = total_count / 2;
 
         // Set the bounds for the search space to partition nums1
         let mut search_lower_limit = 0;
-        let mut search_upper_limit = (nums1.len() - 1) as i32;
+        let mut search_upper_limit = nums1.len() as i32 - 1;
         while !partitioned_correctly(
             &nums1,
             &nums2,
@@ -148,6 +153,7 @@ mod tests {
     #[case(vec![1,3], vec![2], 2.00000)]
     #[case(vec![1,2], vec![3,4], 2.50000)]
     #[case(vec![1,5,7], vec![2,4,8], 4.5)]
+    #[case(vec![2], vec![], 2.0)]
     fn case(#[case] nums1: Vec<i32>, #[case] nums2: Vec<i32>, #[case] expected: f64) {
         let actual = Solution::find_median_sorted_arrays(nums1, nums2);
         assert!(
