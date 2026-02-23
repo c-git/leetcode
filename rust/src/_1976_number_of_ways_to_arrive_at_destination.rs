@@ -60,7 +60,6 @@ impl Solution {
         heap.push(0, 0);
 
         while let Some((time, src_intersection)) = heap.pop() {
-            println!("{time} {src_intersection}");
             if time > shortest_time[src_intersection] {
                 // Skip slow routes to known intersections
                 continue;
@@ -81,7 +80,6 @@ impl Solution {
                     std::cmp::Ordering::Greater => {} // Slower ignore
                 }
             }
-            println!("{shortest_time:?} {path_count:?}");
         }
 
         (*path_count.last().unwrap()) as i32
