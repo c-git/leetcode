@@ -18,27 +18,64 @@
 //   }
 // }
 impl Solution {
-    pub fn sort_list(mut head: Option<Box<ListNode>>) -> Option<Box<ListNode>> {
-        // Wanted to test out a bubble sort idea but couldn't figure out how to
-        // mutate the later parts of the list while holding onto a reference to the start
-        // and decided didn't add value so split up the nodes and sorted them and rejoined them
+    /// Did merge sort at the suggestion of algomaster.io from pattern column
+    pub fn sort_list(head: Option<Box<ListNode>>) -> Option<Box<ListNode>> {
+        // Count list length to know how to split
+        let mut length = 0;
+        let mut curr = &head;
+        while let Some(next) = curr.as_ref() {
+            length += 1;
+            curr = &next.next;
+        }
+        Self::sort_list_(head, length)
+    }
 
-        // Split list into nodes
-        let mut nodes = vec![];
-        while let Some(mut node) = head {
-            head = node.as_mut().next.take();
-            nodes.push(node);
+    fn sort_list_(mut head: Option<Box<ListNode>>, length: usize) -> Option<Box<ListNode>> {
+        if length <= 1 {
+            return head;
         }
 
-        // Short split list (using selection sort)
-        nodes.sort_unstable_by_key(|x| x.val);
+        let left_len = length / 2;
+        let right_len = length - left_len;
 
-        // Rejoin list
+        // Find left tail
+        let mut left_tail = head.as_mut().unwrap();
+        for _ in 0..left_len - 1 {
+            left_tail = left_tail.next.as_mut().unwrap();
+        }
+        let right_head = left_tail.next.take();
+
+        let mut left_sorted = Self::sort_list_(head, left_len);
+        let mut right_sorted = Self::sort_list_(right_head, right_len);
+
+        // Merge sorted halves
         let mut result = None;
-        for mut node in nodes.into_iter().rev() {
-            node.next = result;
-            result = Some(node);
+        let mut curr_tail = &mut result;
+        while let (Some(left), Some(right)) = (left_sorted.as_ref(), right_sorted.as_ref()) {
+            if left.val < right.val {
+                *curr_tail = left_sorted;
+                left_sorted = curr_tail.as_mut().unwrap().next.take();
+            } else {
+                // Take from right side
+                *curr_tail = right_sorted;
+                right_sorted = curr_tail.as_mut().unwrap().next.take();
+            }
+            curr_tail = &mut curr_tail.as_mut().unwrap().next;
         }
+
+        // Append unmerged remainder
+        debug_assert!(
+            left_sorted.is_some() ^ right_sorted.is_some(),
+            "Both CANNOT finish at the same time so one must be empty and the other not empty"
+        );
+        if left_sorted.is_some() {
+            *curr_tail = left_sorted;
+        } else {
+            // Right is the one that's not empty
+            debug_assert!(right_sorted.is_some());
+            *curr_tail = right_sorted;
+        }
+
         result
     }
 }
