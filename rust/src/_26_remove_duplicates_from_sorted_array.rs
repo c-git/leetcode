@@ -1,20 +1,20 @@
 impl Solution {
-    pub fn remove_duplicates(nums: &mut Vec<i32>) -> i32 {
-        let mut sorted_len = 1;
-        let n = nums.len();
-        let mut i = 1;
-        while i < n {
-            if nums[i] != nums[sorted_len - 1] {
-                nums.swap(i, sorted_len);
-                sorted_len += 1;
-            }
-            i += 1;
+    pub fn remove_duplicates(nums: &mut [i32]) -> i32 {
+        if nums.is_empty() {
+            return 0;
         }
-        sorted_len as i32
+        let mut last_pos = 0;
+        for i in 1..nums.len() {
+            if nums[last_pos] != nums[i] {
+                last_pos += 1;
+                nums[last_pos] = nums[i];
+            }
+        }
+        last_pos as i32 + 1
     }
 }
 
-struct Solution;
+pub struct Solution;
 #[cfg(test)]
 mod tests {
     use super::*;
