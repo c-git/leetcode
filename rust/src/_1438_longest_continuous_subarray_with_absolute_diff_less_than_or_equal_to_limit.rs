@@ -4,8 +4,10 @@
 use std::{cmp::Reverse, collections::VecDeque, fmt::Debug};
 
 impl Solution {
+    /// Ended up looking it up on https://www.youtube.com/watch?v=V-ecDfY5xEw and turns out I missed only moving the left pointer when the limit is violated
     pub fn longest_subarray(nums: Vec<i32>, limit: i32) -> i32 {
         let mut result = 0;
+        let mut left = 0;
         let mut min_queue: MonotonicQueue<Reverse<i32>> = Default::default();
         let mut max_queue: MonotonicQueue<i32> = Default::default();
         for (index, num) in nums.into_iter().enumerate() {
@@ -17,10 +19,11 @@ impl Solution {
             while Self::diff(&min_queue, &max_queue) > limit {
                 // Last should always be the current so that diff should be 0 so this should never empty either queue
                 Self::pop_older(&mut min_queue, &mut max_queue);
+                let index_of_min = min_queue.peek_front().unwrap().index;
+                let index_of_max = max_queue.peek_front().unwrap().index;
+                left = index_of_max.min(index_of_min);
             }
-            let index_of_min = min_queue.peek_front().unwrap().index;
-            let index_of_max = max_queue.peek_front().unwrap().index;
-            let length = index - index_of_max.min(index_of_min) + 1;
+            let length = index - left + 1;
             result = result.max(length);
         }
         result as i32
@@ -116,6 +119,7 @@ mod tests {
     #[case(vec![8,2,4,7], 4, 2)]
     #[case(vec![10,1,2,4,7,2], 5, 4)]
     #[case(vec![4,2,2,2,4,4,2,2], 0, 3)]
+    #[case(vec![4,10,2,6,1], 10, 5)]
     fn case(#[case] nums: Vec<i32>, #[case] limit: i32, #[case] expected: i32) {
         let actual = Solution::longest_subarray(nums, limit);
         assert_eq!(actual, expected);
