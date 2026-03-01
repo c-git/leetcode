@@ -4,29 +4,53 @@
 use std::{cmp::Reverse, collections::VecDeque, fmt::Debug};
 
 impl Solution {
-    /// Ended up looking it up on https://www.youtube.com/watch?v=V-ecDfY5xEw and turns out I missed only moving the left pointer when the limit is violated
+    /// Comparing my not working solution with https://www.youtube.com/watch?v=V-ecDfY5xEw
     pub fn longest_subarray(nums: Vec<i32>, limit: i32) -> i32 {
-        let mut result = 0;
-        let mut left = 0;
-        let mut min_queue: MonotonicQueue<Reverse<i32>> = Default::default();
-        let mut max_queue: MonotonicQueue<i32> = Default::default();
-        for (index, num) in nums.into_iter().enumerate() {
-            min_queue.append(QueueElement {
-                value: Reverse(num),
-                index,
-            });
-            max_queue.append(QueueElement { value: num, index });
-            while Self::diff(&min_queue, &max_queue) > limit {
-                // Last should always be the current so that diff should be 0 so this should never empty either queue
-                Self::pop_older(&mut min_queue, &mut max_queue);
-                let index_of_min = min_queue.peek_front().unwrap().index;
-                let index_of_max = max_queue.peek_front().unwrap().index;
-                left = index_of_max.min(index_of_min);
-            }
-            let length = index - left + 1;
-            result = result.max(length);
+        let mut my_solution = SolutionState::default();
+        for new_right in 0..nums.len() {
+            my_solution = Self::my_solution(new_right, my_solution, &nums, limit);
         }
-        result as i32
+        my_solution.result as i32
+    }
+
+    fn my_solution(
+        new_right: usize,
+        solution_state: SolutionState<i32>,
+        nums: &[i32],
+        limit: i32,
+    ) -> SolutionState<i32> {
+        let SolutionState {
+            mut left,
+            min_queue,
+            max_queue,
+            mut result,
+        } = solution_state;
+        let num = nums[new_right];
+        let mut min_queue: MonotonicQueue<Reverse<i32>> = min_queue.into();
+        let mut max_queue: MonotonicQueue<i32> = max_queue.into();
+        min_queue.append(QueueElement {
+            value: Reverse(num),
+            index: new_right,
+        });
+        max_queue.append(QueueElement {
+            value: num,
+            index: new_right,
+        });
+        while Self::diff(&min_queue, &max_queue) > limit {
+            // Last should always be the current so that diff should be 0 so this should never empty either queue
+            Self::pop_older(&mut min_queue, &mut max_queue);
+            let index_of_min = min_queue.peek_front().unwrap().index;
+            let index_of_max = max_queue.peek_front().unwrap().index;
+            left = index_of_max.min(index_of_min);
+        }
+        let length = new_right - left + 1;
+        result = result.max(length);
+        SolutionState {
+            left,
+            min_queue: min_queue.queue,
+            max_queue: max_queue.queue,
+            result,
+        }
     }
 
     /// Assumes input queues are not empty
@@ -49,6 +73,14 @@ impl Solution {
             max_queue.pop_front();
         }
     }
+}
+
+#[derive(Debug, Default)]
+struct SolutionState<T> {
+    left: usize,
+    min_queue: VecDeque<QueueElement<Reverse<T>>>,
+    max_queue: VecDeque<QueueElement<T>>,
+    result: usize,
 }
 
 #[derive(Default)]
@@ -95,13 +127,15 @@ impl<T> MonotonicQueue<T> {
     }
 }
 
-impl<T: Debug> Debug for MonotonicQueue<T> {
+impl<T> From<VecDeque<QueueElement<T>>> for MonotonicQueue<T> {
+    fn from(value: VecDeque<QueueElement<T>>) -> Self {
+        Self { queue: value }
+    }
+}
+
+impl<T: Debug> Debug for QueueElement<T> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let mut queue_values = String::new();
-        for element in self.queue.iter() {
-            queue_values.push_str(&format!("({}, {:?}), ", element.index, element.value));
-        }
-        write!(f, "{queue_values}")
+        write!(f, "({}, {:?})", self.index, self.value)
     }
 }
 
