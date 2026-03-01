@@ -7,8 +7,11 @@ impl Solution {
     /// Comparing my not working solution with https://www.youtube.com/watch?v=V-ecDfY5xEw
     pub fn longest_subarray(nums: Vec<i32>, limit: i32) -> i32 {
         let mut my_solution = SolutionState::default();
+        let mut neetcode_solution = SolutionState::default();
         for new_right in 0..nums.len() {
             my_solution = Self::my_solution(new_right, my_solution, &nums, limit);
+            neetcode_solution = Self::neetcode_solution(new_right, neetcode_solution, &nums, limit);
+            debug_assert_eq!(format!("{my_solution:?}"), format!("{neetcode_solution:?}"));
         }
         my_solution.result as i32
     }
@@ -49,6 +52,61 @@ impl Solution {
             left,
             min_queue: min_queue.queue,
             max_queue: max_queue.queue,
+            result,
+        }
+    }
+
+    fn neetcode_solution(
+        new_right: usize,
+        solution_state: SolutionState<i32>,
+        nums: &[i32],
+        limit: i32,
+    ) -> SolutionState<i32> {
+        let SolutionState {
+            mut left,
+            mut min_queue,
+            mut max_queue,
+            mut result,
+        } = solution_state;
+        let num = nums[new_right];
+        while let Some(last) = min_queue.back() {
+            if num < last.value.0 {
+                min_queue.pop_back();
+            } else {
+                break;
+            }
+        }
+        while let Some(last) = max_queue.back() {
+            if num > last.value {
+                max_queue.pop_back();
+            } else {
+                break;
+            }
+        }
+        min_queue.push_back(QueueElement {
+            value: Reverse(num),
+            index: new_right,
+        });
+        max_queue.push_back(QueueElement {
+            value: num,
+            index: new_right,
+        });
+        while max_queue.front().unwrap().value - min_queue.front().unwrap().value.0 > limit {
+            if nums[left] == max_queue.front().unwrap().value {
+                debug_assert_eq!(max_queue.front().unwrap().index, left);
+                max_queue.pop_front();
+            }
+            if nums[left] == min_queue.front().unwrap().value.0 {
+                debug_assert_eq!(min_queue.front().unwrap().index, left);
+                min_queue.pop_front();
+            }
+            left += 1;
+        }
+        result = result.max(new_right - left + 1);
+        SolutionState {
+            left,
+            min_queue,
+            max_queue,
             result,
         }
     }
