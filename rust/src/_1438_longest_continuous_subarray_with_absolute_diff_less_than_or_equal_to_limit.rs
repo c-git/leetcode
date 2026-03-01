@@ -166,12 +166,6 @@ impl<T> MonotonicQueue<T> {
                 break;
             }
         }
-        if let Some(last) = self.queue.back()
-            && last.value == new_element.value
-        {
-            // Don't add keep oldest equal value
-            return;
-        }
 
         self.queue.push_back(new_element);
     }
