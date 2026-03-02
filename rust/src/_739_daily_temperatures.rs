@@ -2,26 +2,34 @@
 //! 739. Daily Temperatures
 
 impl Solution {
-    pub fn daily_temperatures(mut temperatures: Vec<i32>) -> Vec<i32> {
-        let mut stack: Vec<(i32, usize)> = vec![];
-        for (i, temperature) in temperatures.iter_mut().enumerate().rev() {
-            // Remove all smaller or equal temps from the stack
-            while let Some((later_temp, _later_idx)) = stack.last() {
-                if later_temp <= temperature {
-                    stack.pop();
+    /// Noticed the pattern suggested while getting the problem to do on https://algomaster.io/practice/dsa-patterns
+    pub fn daily_temperatures(temperatures: Vec<i32>) -> Vec<i32> {
+        let mut result = vec![-1; temperatures.len()];
+        let mut highs_seen: Vec<(usize, i32)> = vec![];
+        for (i, temperature) in temperatures.into_iter().enumerate().rev() {
+            // Clear out smaller temperatures
+            while let Some((_last_pos, last_temp)) = highs_seen.last() {
+                if last_temp <= &temperature {
+                    highs_seen.pop();
                 } else {
                     break;
                 }
             }
+            // Get distance
+            result[i] = if let Some((last_pos, last_temp)) = highs_seen.last() {
+                debug_assert!(
+                    *last_temp > temperature,
+                    "We removed those equal or lower so this should always be true"
+                );
+                last_pos - i
+            } else {
+                0
+            } as i32;
 
-            let days_until_warmer = stack.last().map(|(_, later_idx)| *later_idx).unwrap_or(i) - i;
-
-            stack.push((*temperature, i));
-
-            // Set the number of days for this value
-            *temperature = days_until_warmer as _;
+            // Save current if as smallest high seen
+            highs_seen.push((i, temperature));
         }
-        temperatures
+        result
     }
 }
 
