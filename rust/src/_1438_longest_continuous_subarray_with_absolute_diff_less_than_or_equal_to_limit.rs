@@ -7,11 +7,11 @@ impl Solution {
     /// Comparing my not working solution with https://www.youtube.com/watch?v=V-ecDfY5xEw
     pub fn longest_subarray(nums: Vec<i32>, limit: i32) -> i32 {
         let mut my_solution = SolutionState::default();
-        let mut neetcode_solution = SolutionState::default();
+        // let mut neetcode_solution = SolutionState::default();
         for new_right in 0..nums.len() {
             my_solution = Self::my_solution(new_right, my_solution, &nums, limit);
-            neetcode_solution = Self::neetcode_solution(new_right, neetcode_solution, &nums, limit);
-            debug_assert_eq!(format!("{my_solution:?}"), format!("{neetcode_solution:?}"));
+            // neetcode_solution = Self::neetcode_solution(new_right, neetcode_solution, &nums, limit);
+            // debug_assert_eq!(format!("{my_solution:?}"), format!("{neetcode_solution:?}"));
         }
         my_solution.result as i32
     }
@@ -41,10 +41,13 @@ impl Solution {
         });
         while Self::diff(&min_queue, &max_queue) > limit {
             // Last should always be the current so that diff should be 0 so this should never empty either queue
-            Self::pop_older(&mut min_queue, &mut max_queue);
-            let index_of_min = min_queue.peek_front().unwrap().index;
-            let index_of_max = max_queue.peek_front().unwrap().index;
-            left = index_of_max.min(index_of_min);
+            left += 1;
+            if min_queue.peek_front().unwrap().index < left {
+                min_queue.pop_front();
+            }
+            if max_queue.peek_front().unwrap().index < left {
+                max_queue.pop_front();
+            }
         }
         let length = new_right - left + 1;
         result = result.max(length);
@@ -117,19 +120,6 @@ impl Solution {
             max_queue.peek_front().unwrap().value - min_queue.peek_front().unwrap().value.0;
         debug_assert!(result >= 0);
         result
-    }
-
-    fn pop_older(
-        min_queue: &mut MonotonicQueue<Reverse<i32>>,
-        max_queue: &mut MonotonicQueue<i32>,
-    ) {
-        let min_index = min_queue.peek_front().unwrap().index;
-        let max_index = max_queue.peek_front().unwrap().index;
-        if min_index < max_index {
-            min_queue.pop_front();
-        } else {
-            max_queue.pop_front();
-        }
     }
 }
 
