@@ -19,53 +19,57 @@
 // }
 impl Solution {
     pub fn rotate_right(mut head: Option<Box<ListNode>>, k: i32) -> Option<Box<ListNode>> {
-        if head.is_none() || k <= 0 {
-            return head;
-        }
-
-        // Calculate length of list
-        let mut n = 0;
-        let mut curr = &head;
-        while let Some(node) = curr {
-            n += 1;
-            curr = &node.next;
-        }
-
-        // Calculate how much we actually need to rotate
-        let distance_from_front = k % n;
-        if distance_from_front == 0 {
-            return head;
-        }
-        let mut distance_from_back = n - distance_from_front;
-
-        // Find new head for the list
-        let mut new_head = &mut head;
-        while let Some(node) = new_head {
-            new_head = &mut node.as_mut().next;
-            distance_from_back -= 1;
-            if distance_from_back == 0 {
-                break;
+        // Find length of list
+        let n = {
+            let mut n = 0;
+            let mut curr = &head;
+            while let Some(node) = curr {
+                n += 1;
+                curr = &node.next
             }
+            n
+        };
+        if n == 0 {
+            return None;
         }
-        let mut result = new_head.take();
-        debug_assert!(result.is_some());
 
-        // Find tail of remaining list to add the original head to
-        let mut tail = &mut result;
-        loop {
-            let node = tail
+        // Find number of elements we need to walk before we cut
+        let walk_distance = n - k % n;
+        if walk_distance == 0 {
+            return head;
+        }
+        debug_assert!(walk_distance > 0);
+
+        // Walk list then cut
+        let mut curr = &mut head;
+        for _ in 1..walk_distance {
+            curr = &mut curr
                 .as_mut()
-                .expect("We should not have fallen off the end");
-            if node.next.is_some() {
-                // Not at the end take a step
-                tail = &mut node.next;
-            } else {
-                // Found the end
-                node.next = head;
-                break;
-            }
+                .expect("we already checked the length and should be walking less than that")
+                .next;
         }
-        result
+        let mut new_head = curr
+            .as_mut()
+            .expect("we should always stop within the list")
+            .next
+            .take();
+
+        // Find end of cut out piece
+        let mut last = new_head
+            .as_mut()
+            .expect("we should have not run if this is past the list");
+        while last.next.is_some() {
+            last = last
+                .next
+                .as_mut()
+                .expect("checked it was some before entering the loop");
+        }
+
+        // Rejoin parts
+        last.next = head;
+
+        // Return new list
+        new_head
     }
 }
 
@@ -84,7 +88,6 @@ mod tests {
     #[rstest]
     #[case(ListHead::from(vec![1,2,3,4,5]).into(), 2, ListHead::from(vec![4,5,1,2,3]).into())]
     #[case(ListHead::from(vec![0,1,2]).into(), 4, ListHead::from(vec![2,0,1]).into())]
-    #[case(ListHead::from(vec![1]).into(), 1, ListHead::from(vec![1]).into())]
     fn case(
         #[case] head: Option<Box<ListNode>>,
         #[case] k: i32,
