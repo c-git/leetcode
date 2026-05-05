@@ -35,7 +35,7 @@ impl Solution {
 
         // Find number of elements we need to walk before we cut
         let walk_distance = n - k % n;
-        if walk_distance == 0 {
+        if walk_distance == n {
             return head;
         }
         debug_assert!(walk_distance > 0);
@@ -88,6 +88,7 @@ mod tests {
     #[rstest]
     #[case(ListHead::from(vec![1,2,3,4,5]).into(), 2, ListHead::from(vec![4,5,1,2,3]).into())]
     #[case(ListHead::from(vec![0,1,2]).into(), 4, ListHead::from(vec![2,0,1]).into())]
+    #[case(ListHead::from(vec![1]).into(), 0, ListHead::from(vec![1]).into())]
     fn case(
         #[case] head: Option<Box<ListNode>>,
         #[case] k: i32,
