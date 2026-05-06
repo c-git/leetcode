@@ -1,8 +1,6 @@
 //! Solution for https://leetcode.com/problems/maximum-path-score-in-a-grid
 //! 3742. Maximum Path Score in a Grid
 
-use std::collections::VecDeque;
-
 impl Solution {
     /// Use Brute force as k is limited to 1000
     pub fn max_path_score(grid: Vec<Vec<i32>>, k: i32) -> i32 {
@@ -11,9 +9,9 @@ impl Solution {
         let k = k as u16;
         let mut result = -1;
 
-        let mut queue: VecDeque<(usize, usize, i32, u16)> = Default::default();
-        queue.push_back((0, 0, 0, 0));
-        while let Some((row, col, score, cost)) = queue.pop_front() {
+        let mut stack: Vec<(usize, usize, i32, u16)> = Default::default();
+        stack.push((0, 0, 0, 0));
+        while let Some((row, col, score, cost)) = stack.pop() {
             let cost = cost + 1.min(grid[row][col] as u16);
             if cost > k {
                 continue;
@@ -24,10 +22,10 @@ impl Solution {
                 continue;
             }
             if row < row_count - 1 {
-                queue.push_back((row + 1, col, score, cost));
+                stack.push((row + 1, col, score, cost));
             }
             if col < col_count - 1 {
-                queue.push_back((row, col + 1, score, cost));
+                stack.push((row, col + 1, score, cost));
             }
         }
         result
