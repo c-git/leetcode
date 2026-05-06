@@ -2,33 +2,47 @@
 //! 3742. Maximum Path Score in a Grid
 
 impl Solution {
-    /// Use Brute force as k is limited to 1000
+    /// Didn't figure out we needed a 3rd dimension on DP. So looked it up in https://www.youtube.com/watch?v=ptB843R2pMI
     pub fn max_path_score(grid: Vec<Vec<i32>>, k: i32) -> i32 {
         let row_count = grid.len();
         let col_count = grid[0].len();
-        let k = k as u16;
-        let mut result = -1;
+        let k = k as usize;
+        let mut dp = vec![vec![vec![None; k + 1]; col_count]; row_count];
+        dp[0][0][0] = Some(0);
 
-        let mut stack: Vec<(usize, usize, i32, u16)> = Default::default();
-        stack.push((0, 0, 0, 0));
-        while let Some((row, col, score, cost)) = stack.pop() {
-            let cost = cost + 1.min(grid[row][col] as u16);
-            if cost > k {
-                continue;
-            }
-            let score = score + grid[row][col];
-            if row == row_count - 1 && col == col_count - 1 {
-                result = result.max(score);
-                continue;
-            }
-            if row < row_count - 1 {
-                stack.push((row + 1, col, score, cost));
-            }
-            if col < col_count - 1 {
-                stack.push((row, col + 1, score, cost));
+        for row in 0..row_count {
+            for col in 0..col_count {
+                for cost in 0..=k {
+                    if dp[row][col][cost].is_none() {
+                        continue;
+                    }
+
+                    if row + 1 < row_count {
+                        let val = grid[row + 1][col];
+                        let this_cost = if val == 0 { 0 } else { 1 };
+                        if cost + this_cost <= k {
+                            dp[row + 1][col][cost + this_cost] = dp[row + 1][col][cost + this_cost]
+                                .max(Some(dp[row][col][cost].unwrap() + val));
+                        }
+                    }
+
+                    if col + 1 < col_count {
+                        let val = grid[row][col + 1];
+                        let this_cost = if val == 0 { 0 } else { 1 };
+                        if cost + this_cost <= k {
+                            dp[row][col + 1][cost + this_cost] = dp[row][col + 1][cost + this_cost]
+                                .max(Some(dp[row][col][cost].unwrap() + val));
+                        }
+                    }
+                }
             }
         }
-        result
+
+        (0..=k)
+            .map(|cost| dp[row_count - 1][col_count - 1][cost])
+            .max()
+            .expect("the max should be over at least one value")
+            .unwrap_or(-1)
     }
 }
 
